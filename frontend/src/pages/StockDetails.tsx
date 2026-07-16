@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { Download, ArrowUp, ArrowDown, Plus, Star } from 'lucide-react'
-import {
-  stockService, StockQuote, IndicatorsResponse,
-} from '@/services/stockService'
-import { newsService, NewsArticle } from '@/services/newsService'
+import type { StockQuote, IndicatorsResponse } from '@/services/stockService'
+import type { NewsArticle } from '@/services/newsService'
 import { portfolioService } from '@/services/portfolioService'
 import TradingViewWidget from '@/components/charts/TradingViewWidget'
 import PredictionCard from '@/components/Prediction/PredictionCard'
@@ -16,7 +14,8 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import { API_URL } from '@/services/api'
 import { formatPrice, formatMarketCap, guessCurrency, getCurrencySymbol } from '@/utils/currency'
 import watchlistService from '@/services/watchlistService'
-import signalService, { ConsensusResult } from '@/services/signalService'
+import type { ConsensusResult } from '@/services/signalService'
+import { useStockCache, useQuote, useIndicators, useNews, useConsensus } from '@/store/stockCache'
 import toast from 'react-hot-toast'
 
 export default function StockDetailsPage() {
@@ -35,9 +34,18 @@ function StockDetailsContent() {
   // would fail for (NIFTY/SENSEX indices, some less common tickers).
   const [searchParams] = useSearchParams()
   const TV_SYMBOL = searchParams.get('tv') || undefined
-  const [quote, setQuote] = useState<StockQuote | null>(null)
-  const [indicators, setIndicators] = useState<IndicatorsResponse | null>(null)
-  const [news, setNews] = useState<NewsArticle[] | null>(null)
+
+  // Cache-backed data — shows instantly if cached, fetches in background if stale.
+  const quoteEntry = useQuote(SYMBOL)
+  const indicatorsEntry = useIndicators(SYMBOL)
+  const newsEntry = useNews(SYMBOL)
+  const consensusEntry = useConsensus(SYMBOL)
+
+  const quote = quoteEntry.data?.symbol ? quoteEntry.data : null
+  const indicators = indicatorsEntry.data?.symbol ? indicatorsEntry.data : null
+  const news = newsEntry.data ?? null
+  const consensus = consensusEntry.data?.symbol ? consensusEntry.data : null
+
   const [err, setErr] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
   const [addForm, setAddForm] = useState({ quantity: '', purchase_price: '' })
@@ -45,8 +53,6 @@ function StockDetailsContent() {
     entry: number; sl: number; tp: number; strategy: string; side: 'BUY' | 'SELL'
   } | null>(null)
   const [inWatchlist, setInWatchlist] = useState(false)
-  const [consensus, setConsensus] = useState<ConsensusResult | null>(null)
-  const [consensusLoading, setConsensusLoading] = useState(false)
 
   // Derive currency from quote (most accurate — from yfinance info) or guess from symbol suffix
   const currency = quote?.currency || guessCurrency(SYMBOL)
@@ -69,44 +75,33 @@ function StockDetailsContent() {
   const spotAdjusted = SPOT_ADJUSTED[SYMBOL]
   const futuresNote = FUTURES_ONLY[SYMBOL]
 
+  const cache = useStockCache.getState
   useEffect(() => {
     // Cancellation guard — when SYMBOL changes mid-fetch, ignore results from
     // the old SYMBOL so stale data doesn't overwrite the new stock's data.
     let cancelled = false
     let liveId: ReturnType<typeof setInterval> | null = null
 
-    setQuote(null)
-    setIndicators(null)
-    setNews(null)
     setErr(null)
     setInWatchlist(false)
-    setConsensus(null)
-    setConsensusLoading(true)
 
-    stockService.getQuote(SYMBOL)
-      .then((q) => { if (!cancelled) setQuote(q) })
-      .catch((e) => { if (!cancelled) setErr(e.response?.data?.detail || e.message) })
-    stockService.getIndicators(SYMBOL, '6mo')
-      .then((i) => { if (!cancelled) setIndicators(i) })
-      .catch(() => {})
-    newsService.getStockNews(SYMBOL, 6)
-      .then((n) => { if (!cancelled) setNews(n) })
-      .catch(() => {})
+    // Kick off background fetches. Cache hooks already show cached data instantly.
+    const fetchAll = () => {
+      cache().getQuote(SYMBOL).catch((e) => { if (!cancelled) !quote && setErr(e.response?.data?.detail || e.message) })
+      cache().getIndicators(SYMBOL, '6mo').catch(() => {})
+      cache().getNews(SYMBOL, 6).catch(() => {})
+      cache().getConsensus(SYMBOL).catch(() => {})
+    }
+
+    fetchAll()
+
     watchlistService.get()
       .then((items) => { if (!cancelled) setInWatchlist(items.some((i) => i.symbol === SYMBOL)) })
       .catch(() => {})
 
-    // Consensus signal (5-min TTL on backend — fetch once per symbol load)
-    signalService.getConsensus(SYMBOL)
-      .then((c) => { if (!cancelled) setConsensus(c) })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setConsensusLoading(false) })
-
-    // Live price refresh every 6 seconds
+    // Live price refresh every 6 seconds (uses cache to dedupe)
     liveId = setInterval(() => {
-      stockService.getQuote(SYMBOL)
-        .then((q) => { if (!cancelled) setQuote(q) })
-        .catch(() => {})
+      cache().prefetchQuote(SYMBOL).catch(() => {})
     }, 6000)
 
     return () => {
@@ -307,13 +302,9 @@ function StockDetailsContent() {
       {/* Signal Consensus + Term Signals */}
       <SignalConsensus
         result={consensus}
-        loading={consensusLoading}
+        loading={consensusEntry.loading}
         onRefresh={() => {
-          setConsensusLoading(true)
-          signalService.getConsensus(SYMBOL)
-            .then(setConsensus)
-            .catch(() => {})
-            .finally(() => setConsensusLoading(false))
+          useStockCache.getState().refreshConsensus(SYMBOL).catch(() => {})
         }}
       />
       <StockTermSignals symbol={SYMBOL} masterSignal={consensus?.master_signal} />
