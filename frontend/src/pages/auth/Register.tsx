@@ -40,7 +40,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <form onSubmit={onSubmit} className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-4">
+        <form onSubmit={onSubmit} className="glass-card p-6 space-y-4">
           <div>
             <label className="block text-xs text-gray-400 mb-1">Username</label>
             <div className="relative">

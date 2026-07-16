@@ -78,10 +78,10 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
     : 'bg-gray-700/50 border-gray-600'
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+    <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2 font-display">
             <Shield size={18} className="text-emerald-400" /> ICT/SMC Live Signals
           </h2>
           <p className="text-xs text-gray-400 mt-0.5">

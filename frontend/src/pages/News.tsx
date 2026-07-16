@@ -15,7 +15,7 @@ export default function NewsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-white">Financial News</h1>
+        <h1 className="text-3xl font-bold text-white font-display">Financial News</h1>
         <div className="flex gap-2">
           {(['ALL', 'POSITIVE', 'NEGATIVE', 'NEUTRAL'] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
@@ -32,10 +32,10 @@ export default function NewsPage() {
       {list && list.length === 0 && <div className="text-gray-500 text-center py-8">No news matches filter</div>}
 
       {list && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-spring-up stagger-1">
           {list.map((a, i) => (
             <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-               className="bg-gray-800 border border-gray-700 rounded-2xl p-5 hover:border-blue-500/40 transition flex flex-col">
+               className="glass-card p-5 hover:border-blue-500/40 transition flex flex-col">
               {a.thumbnail && <img src={a.thumbnail} alt="" className="w-full h-32 object-cover rounded-lg mb-3" />}
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-white font-bold flex-1">{a.title}</h3>

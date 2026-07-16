@@ -202,7 +202,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
   )
 
   if (!pred && loading) return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+    <div className="glass-card p-6">
       <div className="flex items-center gap-2 text-blue-300 animate-pulse">
         <Brain size={18} /> Running ensemble (LSTM + XGBoost)…
       </div>
@@ -210,7 +210,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
   )
 
   if (!pred) return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+    <div className="glass-card p-6">
       <button onClick={() => fetch()} className="text-blue-400 hover:text-blue-300 text-sm">Load AI prediction</button>
     </div>
   )
@@ -221,7 +221,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
     <div className="bg-gradient-to-br from-blue-900/30 via-gray-800 to-purple-900/20 border border-blue-500/30 rounded-2xl p-6 space-y-5">
       <div className="flex justify-between items-start">
         <div>
-          <div className="flex items-center gap-2 text-sm text-blue-300 mb-1">
+          <div className="flex items-center gap-2 text-sm text-blue-300 mb-1 font-display">
             <Brain size={16} /> AI Prediction — {pred.symbol}
           </div>
           <p className="text-xs text-gray-400">

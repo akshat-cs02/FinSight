@@ -76,13 +76,13 @@ export default function ForexCalendar() {
   const isBuiltIn = source === 'Built-in Schedule'
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-5">
+    <div className="glass-card p-6 space-y-5">
 
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Calendar size={20} className="text-blue-400" />
-          <h2 className="text-lg font-bold text-white">Forex & Economic Calendar</h2>
+          <h2 className="text-lg font-bold text-white font-display">Forex & Economic Calendar</h2>
         </div>
         <div className="flex items-center gap-3">
           {source && (

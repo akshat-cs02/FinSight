@@ -35,7 +35,7 @@ export default function LoginPage() {
           <p className="text-gray-400 text-sm">AI-powered stock market analytics</p>
         </div>
 
-        <form onSubmit={onSubmit} className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-4">
+        <form onSubmit={onSubmit} className="glass-card p-6 space-y-4">
           <h2 className="text-xl font-bold text-white">Sign in</h2>
 
           <div>

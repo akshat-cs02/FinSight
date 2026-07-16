@@ -33,37 +33,39 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose: () => 
   return (
     <>
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />
       )}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
-        bg-gray-800 border-r border-gray-700
+        glass-v2 border-r border-white/5
         w-64 flex flex-col flex-shrink-0
         transform transition-transform duration-300 ease-in-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static
       `}>
-        <div className="p-5 border-b border-gray-700 flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center font-bold text-sm text-white">FS</div>
-          <span className="font-bold text-lg text-white">FinSight</span>
+        <div className="p-5 border-b border-white/5 flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00F5A0] to-[#00D4FF] flex items-center justify-center font-bold text-sm text-[#060b18] shadow-lg shadow-[#00F5A0]/20">FS</div>
+          <span className="font-bold text-lg text-white font-display tracking-tight">FinSight</span>
         </div>
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto py-4">
           {baseItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.path)
             return (
               <Link key={item.path} to={item.path} onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition ${
-                      active ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
+                      active
+                        ? 'bg-gradient-to-r from-[#00F5A0]/15 to-[#00D4FF]/10 text-white border border-[#00F5A0]/20 shadow-sm shadow-[#00F5A0]/5'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}>
-                <Icon size={18} />
+                <Icon size={18} className={active ? 'text-[#00F5A0]' : ''} />
                 <span className="text-sm font-medium">{item.label}</span>
-                {active && <ChevronRight size={14} className="ml-auto" />}
+                {active && <ChevronRight size={14} className="ml-auto text-[#00F5A0]" />}
               </Link>
             )
           })}
         </nav>
-        <div className="p-4 border-t border-gray-700 text-xs text-gray-500">v1.0.0 · Live data</div>
+        <div className="p-4 border-t border-white/5 text-xs text-gray-600">v1.0.0 · Live data</div>
       </aside>
     </>
   )
@@ -71,8 +73,8 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose: () => 
 
 function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
   return (
-    <nav className="bg-gray-800 border-b border-gray-700 px-3 sm:px-6 py-3 flex justify-between items-center gap-4 flex-shrink-0">
-      <button onClick={onMenuToggle} className="lg:hidden text-gray-400 hover:text-white p-1">
+    <nav className="glass-v2 border-b border-white/5 px-3 sm:px-6 py-3 flex justify-between items-center gap-4 flex-shrink-0">
+      <button onClick={onMenuToggle} className="lg:hidden text-gray-400 hover:text-white transition p-1 rounded-lg hover:bg-white/5">
         <Menu size={22} />
       </button>
       <SearchBar />
@@ -83,14 +85,14 @@ function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
 
 function SettingsPage() {
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-gray-900 min-h-dvh">
-      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Settings</h1>
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-4 sm:p-6 text-gray-300 space-y-2">
-        <p><b>Mode:</b> Testing (auth-free)</p>
-        <p><b>API URL:</b> {import.meta.env.VITE_API_URL || 'http://localhost:8000'}</p>
-        <p><b>Data Source:</b> Yahoo Finance (live)</p>
-        <p><b>Sentiment Engine:</b> VADER + Finance Keyword Lexicon</p>
-        <p><b>ML:</b> LSTM + XGBoost ensemble + SHAP explainability</p>
+    <div className="p-4 sm:p-6 lg:p-8 min-h-dvh">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 font-display">Settings</h1>
+      <div className="glass-card p-4 sm:p-6 text-gray-300 space-y-3">
+        <p><b className="text-white">Mode:</b> Testing (auth-free)</p>
+        <p><b className="text-white">API URL:</b> {import.meta.env.VITE_API_URL || 'http://localhost:8000'}</p>
+        <p><b className="text-white">Data Source:</b> Yahoo Finance (live)</p>
+        <p><b className="text-white">Sentiment Engine:</b> VADER + Finance Keyword Lexicon</p>
+        <p><b className="text-white">ML:</b> LSTM + XGBoost ensemble + SHAP explainability</p>
       </div>
     </div>
   )
@@ -107,15 +109,15 @@ const BOTTOM_NAV_ITEMS = [
 function BottomNav() {
   const location = useLocation()
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-30 bg-gray-900/95 backdrop-blur-lg border-t border-gray-700 lg:hidden pb-safe">
+    <nav className="fixed bottom-0 inset-x-0 z-30 glass-v2 border-t border-white/5 lg:hidden pb-safe">
       <div className="flex justify-around items-center h-14">
         {BOTTOM_NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
           return (
             <Link key={item.path} to={item.path}
-                  className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition ${
-                    active ? 'text-blue-400' : 'text-gray-500 hover:text-gray-300'
+                  className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition ${
+                    active ? 'text-[#00F5A0]' : 'text-gray-500 hover:text-gray-300'
                   }`}>
               <Icon size={18} />
               <span className="text-[10px] font-medium">{item.label}</span>
@@ -130,7 +132,14 @@ function BottomNav() {
 export default function App() {
   return (
     <Router>
-      <Toaster position="top-right" toastOptions={{ style: { background: '#1f2937', color: '#fff', border: '1px solid #374151' } }} />
+      <Toaster position="top-right" toastOptions={{
+        style: {
+          background: 'rgba(15, 23, 42, 0.9)',
+          backdropFilter: 'blur(20px)',
+          color: '#f1f5f9',
+          border: '1px solid rgba(255,255,255,0.06)',
+        }
+      }} />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -154,9 +163,9 @@ function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-gray-900 text-white">
+    <div className="flex h-dvh overflow-hidden text-white aurora-bg noise-overlay">
       <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Navbar onMenuToggle={() => setMobileOpen(!mobileOpen)} />
         <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
           <Outlet />

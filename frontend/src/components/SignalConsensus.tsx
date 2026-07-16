@@ -111,7 +111,7 @@ function ContributionBar({ contribution, weightPct }: { contribution: number; we
 // ─── Skeleton while loading ───────────────────────────────────────────────────
 function Skeleton() {
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5 space-y-4 animate-pulse">
+    <div className="glass-card p-5 space-y-4 animate-pulse">
       <div className="flex justify-between items-center">
         <div className="h-5 w-40 bg-gray-700 rounded" />
         <div className="h-8 w-28 bg-gray-700 rounded-full" />

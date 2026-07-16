@@ -57,7 +57,7 @@ export default function PredictionsPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-2 font-display">
             <Brain size={28} className="text-blue-400" /> AI Predictions
           </h1>
           <p className="text-gray-400 text-sm">LSTM + XGBoost ensemble. Trained per symbol on Yahoo Finance data.</p>
@@ -65,7 +65,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Symbol selector */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-4">
+      <div className="glass-card p-4">
         <div className="flex flex-wrap gap-2">
           {(models || []).map((m) => (
             <button
@@ -87,7 +87,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Live TradingView chart for the selected symbol */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3">
+      <div className="glass-card p-3">
         <div className="flex items-center justify-between px-1 pb-2">
           <h2 className="text-sm font-semibold text-gray-300">Live Chart — {selected}</h2>
           <span className="text-xs text-gray-500">Powered by TradingView</span>
@@ -99,7 +99,7 @@ export default function PredictionsPage() {
       <PredictionCard symbol={selected} />
 
       {/* Model management */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+      <div className="glass-card p-6">
         <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
           <Cpu size={18} /> Model Status
         </h2>
@@ -159,7 +159,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* History */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+      <div className="glass-card p-6">
         <h2 className="text-lg font-bold text-white mb-4">Prediction History — {selected}</h2>
         {history.length === 0 ? (
           <div className="text-gray-500 text-sm py-3">No history yet for {selected}</div>

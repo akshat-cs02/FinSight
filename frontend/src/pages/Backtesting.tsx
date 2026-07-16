@@ -150,7 +150,7 @@ function MetricCard({ label, value, good, suffix = '', small = false }: {
   label: string; value: string | number; good: boolean; suffix?: string; small?: boolean
 }) {
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+    <div className="glass-card p-4">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
       <p className={`font-bold ${small ? 'text-lg' : 'text-2xl'} ${good ? 'text-emerald-400' : 'text-red-400'}`}>
         {value}{suffix}
@@ -256,17 +256,17 @@ export default function BacktestingPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-white flex items-center gap-3 font-display">
           <BarChart2 size={28} className="text-blue-400" /> ICT/SMC Backtesting Engine
         </h1>
-        <p className="text-gray-400 mt-1">
+        <p className="text-gray-500 mt-1 text-sm">
           Professional-grade backtesting with ICT & Smart Money Concepts — 8 strategies, news filter, 5-year data
         </p>
       </div>
 
       {/* Controls */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-5">
-        <h2 className="text-base font-bold text-white">Configure Backtest</h2>
+      <div className="glass-card p-6 space-y-5 animate-spring-up stagger-1">
+        <h2 className="text-base font-bold text-white font-display">Configure Backtest</h2>
 
         <div className="flex flex-wrap gap-4 items-start">
           {/* Symbol */}
@@ -447,7 +447,7 @@ export default function BacktestingPage() {
       {/* ── Leaderboard Results ────────────────────────────────────────────────── */}
       {leaderResult && mode === 'leaderboard' && (
         <>
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+          <div className="glass-card p-6 animate-spring-up stagger-2">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <Trophy size={18} className="text-yellow-400" />
@@ -611,7 +611,7 @@ export default function BacktestingPage() {
       {/* ── Single Strategy Results ────────────────────────────────────────────── */}
       {singleResult && mode === 'single' && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 animate-spring-up stagger-3">
             <MetricCard label="Total Return"
               value={`${(singleResult.metrics.total_return_pct || 0) >= 0 ? '+' : ''}${(singleResult.metrics.total_return_pct || 0).toFixed(2)}`}
               good={(singleResult.metrics.total_return_pct || 0) >= 0} suffix="%" />
@@ -632,7 +632,7 @@ export default function BacktestingPage() {
               good={singleResult.metrics.total_trades > 0} />
           </div>
 
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-3 text-sm text-gray-400 flex flex-wrap gap-4">
+          <div className="glass-card p-3 text-sm text-gray-400 flex flex-wrap gap-4">
             <span>{singleResult.symbol} · {singleResult.strategy} · {singleResult.period}</span>
             <span>{singleResult.data_bars} bars</span>
             <span>Initial: ${singleResult.initial_capital.toLocaleString()} →
@@ -661,7 +661,7 @@ export default function BacktestingPage() {
       {mode === 'universe' && universeResult && (
         <>
           {universeResult.status === 'computing' ? (
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 text-center">
+            <div className="glass-card p-8 text-center">
               <RefreshCw size={32} className="animate-spin text-emerald-400 mx-auto mb-3" />
               <p className="text-white font-semibold">Universe analysis computing in background…</p>
               <p className="text-gray-400 text-sm mt-1">{universeResult.message}</p>
@@ -670,7 +670,7 @@ export default function BacktestingPage() {
           ) : (
             <div className="space-y-4">
               {/* Header */}
-              <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+              <div className="glass-card p-6">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
                     <Shield size={18} className="text-emerald-400" /> Global Strategy Rankings
@@ -801,7 +801,7 @@ export default function BacktestingPage() {
 
               {/* Per-symbol best strategy table */}
               {universeResult.per_symbol_best?.length > 0 && (
-                <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                <div className="glass-card p-6">
                   <h3 className="text-base font-bold text-white mb-4">Best Strategy Per Symbol</h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-gray-300">
@@ -865,7 +865,7 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
   return (
     <>
       {equityCurve.length > 0 && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+        <div className="glass-card p-6">
           <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
             <TrendingUp size={16} className="text-emerald-400" />
             Equity Curve — {symbol} · {strategyLabel}
@@ -887,7 +887,7 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
       )}
 
       {trades.length > 0 && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+        <div className="glass-card p-6">
           <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
             <TrendingDown size={16} className="text-blue-400" />
             Trade Log ({trades.length} trades shown)

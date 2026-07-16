@@ -56,7 +56,7 @@ export default function PortfolioPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-white">Portfolio</h1>
+        <h1 className="text-3xl font-bold text-white font-display">Portfolio</h1>
         <div className="flex gap-2">
           <button onClick={() => setShowForm(!showForm)}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm">
@@ -74,7 +74,7 @@ export default function PortfolioPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={add} className="bg-gray-800 border border-gray-700 rounded-2xl p-4 flex flex-wrap gap-3 items-end">
+        <form onSubmit={add} className="glass-card p-4 flex flex-wrap gap-3 items-end">
           <div>
             <label className="block text-xs text-gray-400 mb-1">Symbol</label>
             <input required value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
@@ -104,16 +104,16 @@ export default function PortfolioPage() {
 
       {summary && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-spring-up stagger-1">
+            <div className="glass-card p-5">
               <p className="text-gray-400 text-sm">Total Invested</p>
-              <p className="text-2xl font-bold text-white">{formatPrice(summary.total_invested, 'USD', 2)}</p>
+              <p className="text-2xl font-bold text-white font-mono">{formatPrice(summary.total_invested, 'USD', 2)}</p>
             </div>
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+            <div className="glass-card p-5">
               <p className="text-gray-400 text-sm">Current Value</p>
-              <p className="text-2xl font-bold text-white">{formatPrice(summary.total_value, 'USD', 2)}</p>
+              <p className="text-2xl font-bold text-white font-mono">{formatPrice(summary.total_value, 'USD', 2)}</p>
             </div>
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+            <div className="glass-card p-5">
               <p className="text-gray-400 text-sm">Total Gain/Loss</p>
               <p className={`text-2xl font-bold ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {summary.total_gain_loss >= 0 ? '+' : ''}{formatPrice(summary.total_gain_loss, 'USD', 2)}
@@ -122,7 +122,7 @@ export default function PortfolioPage() {
                 {summary.total_gain_loss_percent.toFixed(2)}%
               </p>
             </div>
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+            <div className="glass-card p-5">
               <p className="text-gray-400 text-sm">Today's P/L</p>
               <p className={`text-2xl font-bold ${summary.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {summary.today_profit_loss >= 0 ? '+' : ''}{formatPrice(summary.today_profit_loss, 'USD', 2)}
@@ -131,11 +131,11 @@ export default function PortfolioPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <div className="glass-card p-6">
               <h2 className="text-lg font-bold text-white mb-4">Asset Allocation</h2>
               <PortfolioChart data={summary.allocation} />
             </div>
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <div className="glass-card p-6">
               <h2 className="text-lg font-bold text-white mb-4">Allocation Breakdown</h2>
               {summary.allocation.length === 0 ? (
                 <div className="text-gray-500 text-sm">No holdings yet</div>
@@ -152,7 +152,7 @@ export default function PortfolioPage() {
             </div>
           </div>
 
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+          <div className="glass-card p-6">
             <h2 className="text-lg font-bold text-white mb-4">Holdings</h2>
             {summary.holdings.length === 0 ? (
               <div className="text-gray-500 text-sm py-6 text-center">No holdings. Click "Add Holding" to start.</div>

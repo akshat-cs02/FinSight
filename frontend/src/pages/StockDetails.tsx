@@ -150,7 +150,7 @@ function StockDetailsContent() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">{SYMBOL}</h1>
+          <h1 className="text-3xl font-bold text-white font-display">{SYMBOL}</h1>
           {quote ? (
             <p className="text-gray-400">
               {quote.name} · {quote.exchange || ''} ·{' '}
@@ -164,7 +164,7 @@ function StockDetailsContent() {
         </div>
         {quote ? (
           <div className="text-right">
-            <p className="text-4xl font-bold text-white">{formatPrice(quote.price, currency)}</p>
+            <p className="text-4xl font-bold text-white font-mono">{formatPrice(quote.price, currency)}</p>
             <p className={`flex items-center gap-1 justify-end ${up ? 'text-emerald-400' : 'text-red-400'}`}>
               {up ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
               {sym}{Math.abs(quote.change).toFixed(2)} ({quote.change_percent.toFixed(2)}%)
@@ -203,7 +203,7 @@ function StockDetailsContent() {
       )}
 
       {/* Action buttons */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 animate-spring-up stagger-1">
         <button onClick={() => setShowAdd(!showAdd)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm">
           <Plus size={16} /> Add to Portfolio
@@ -230,7 +230,7 @@ function StockDetailsContent() {
       </div>
 
       {showAdd && (
-        <form onSubmit={addToPortfolio} className="bg-gray-800 border border-gray-700 rounded-2xl p-4 flex flex-wrap gap-3 items-end">
+        <form onSubmit={addToPortfolio} className="glass-card p-4 flex flex-wrap gap-3 items-end">
           <div>
             <label className="block text-xs text-gray-400 mb-1">Quantity</label>
             <input type="number" step="any" required value={addForm.quantity}
@@ -251,42 +251,42 @@ function StockDetailsContent() {
       {/* Quote details */}
       {quote && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+          <div className="glass-card p-3">
             <p className="text-xs text-gray-400">Open</p>
             <p className="text-white font-semibold">{formatPrice(quote.open, currency)}</p>
           </div>
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+          <div className="glass-card p-3">
             <p className="text-xs text-gray-400">High</p>
             <p className="text-white font-semibold">{formatPrice(quote.high, currency)}</p>
           </div>
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+          <div className="glass-card p-3">
             <p className="text-xs text-gray-400">Low</p>
             <p className="text-white font-semibold">{formatPrice(quote.low, currency)}</p>
           </div>
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+          <div className="glass-card p-3">
             <p className="text-xs text-gray-400">Volume</p>
             <p className="text-white font-semibold">{quote.volume.toLocaleString()}</p>
           </div>
           {quote.fifty_two_week_high && (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+            <div className="glass-card p-3">
               <p className="text-xs text-gray-400">52w High</p>
               <p className="text-white font-semibold">{formatPrice(quote.fifty_two_week_high, currency)}</p>
             </div>
           )}
           {quote.fifty_two_week_low && (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+            <div className="glass-card p-3">
               <p className="text-xs text-gray-400">52w Low</p>
               <p className="text-white font-semibold">{formatPrice(quote.fifty_two_week_low, currency)}</p>
             </div>
           )}
           {quote.market_cap && (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+            <div className="glass-card p-3">
               <p className="text-xs text-gray-400">Market Cap</p>
               <p className="text-white font-semibold">{formatMarketCap(quote.market_cap, currency)}</p>
             </div>
           )}
           {quote.pe_ratio && (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+            <div className="glass-card p-3">
               <p className="text-xs text-gray-400">P/E</p>
               <p className="text-white font-semibold">{quote.pe_ratio.toFixed(2)}</p>
             </div>
@@ -295,7 +295,7 @@ function StockDetailsContent() {
       )}
 
       {/* TradingView Chart — full feature set with all drawing tools + indicators */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3">
+      <div className="glass-card p-3">
         <TradingViewWidget symbol={SYMBOL} tvSymbol={TV_SYMBOL} height={680} />
       </div>
 
@@ -330,7 +330,7 @@ function StockDetailsContent() {
 
       {/* Technical Indicators */}
       {indicators && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+        <div className="glass-card p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-bold text-white">Technical Indicators</h2>
             <div className="flex items-center gap-2">
@@ -358,7 +358,7 @@ function StockDetailsContent() {
       )}
 
       {/* News */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+      <div className="glass-card p-6">
         <h2 className="text-lg font-bold text-white mb-4">Recent News</h2>
         {news === null && <div className="text-gray-500 text-sm">Loading news…</div>}
         {news && news.length === 0 && <div className="text-gray-500 text-sm">No recent news</div>}

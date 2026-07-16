@@ -222,7 +222,7 @@ export default function PaperTrading({
   }
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-5">
+    <div className="glass-card p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -12,7 +12,7 @@ export default function LiveTicker({ symbols = DEFAULT, intervalSec = 5 }: Props
   const { quotes, connected, lastUpdate } = useLiveQuotes({ symbols, intervalSec })
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 overflow-hidden">
+    <div className="glass-card p-3 overflow-hidden">
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center gap-2 text-xs text-gray-400">
           {connected

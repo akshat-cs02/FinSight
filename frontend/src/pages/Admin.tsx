@@ -8,7 +8,7 @@ import { formatTradeDate, formatLocalDate } from '@/utils/timezone'
 
 function Section({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+    <div className="glass-card p-5">
       <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">{icon}{title}</h2>
       {children}
     </div>
@@ -83,7 +83,7 @@ export default function AdminPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-white flex items-center gap-2 font-display">
           <Shield size={28} className="text-blue-400" /> Admin ML Dashboard
         </h1>
         <button onClick={refresh} className="flex items-center gap-2 text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-white">
@@ -94,29 +94,29 @@ export default function AdminPage() {
       {err && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300">{err}</div>}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-spring-up">
         <Section title="Users" icon={<Users size={18} className="text-blue-400" />}>
           {stats === null ? <span className="text-gray-500 text-sm">Loading…</span> : (
             <>
-              <p className="text-3xl font-bold text-white">{stats.users.total}</p>
+              <p className="text-3xl font-bold text-white font-mono">{stats.users.total}</p>
               <p className="text-xs text-emerald-400">{stats.users.active} active</p>
             </>
           )}
         </Section>
         <Section title="Portfolios" icon={<BarChart3 size={18} className="text-emerald-400" />}>
           {stats === null ? <span className="text-gray-500 text-sm">Loading…</span> : (
-            <p className="text-3xl font-bold text-white">{stats.portfolios}</p>
+            <p className="text-3xl font-bold text-white font-mono">{stats.portfolios}</p>
           )}
         </Section>
         <Section title="Predictions Logged" icon={<Cpu size={18} className="text-purple-400" />}>
           {stats === null ? <span className="text-gray-500 text-sm">Loading…</span> : (
-            <p className="text-3xl font-bold text-white">{stats.predictions_logged}</p>
+              <p className="text-3xl font-bold text-white font-mono">{stats.predictions_logged}</p>
           )}
         </Section>
         <Section title="Models Trained" icon={<CheckCircle2 size={18} className="text-yellow-400" />}>
           {stats === null ? <span className="text-gray-500 text-sm">Loading…</span> : (
             <>
-              <p className="text-3xl font-bold text-white">{stats.ml_models.symbols_trained}/{stats.ml_models.symbols_supported}</p>
+              <p className="text-3xl font-bold text-white font-mono">{stats.ml_models.symbols_trained}/{stats.ml_models.symbols_supported}</p>
               <p className="text-xs text-gray-400">symbols</p>
             </>
           )}
@@ -124,6 +124,7 @@ export default function AdminPage() {
       </div>
 
       {/* Models */}
+      <div className="animate-spring-up stagger-2">
       <Section title="Model Performance" icon={<Cpu size={18} className="text-blue-400" />}>
         {models === null ? <div className="text-gray-500 text-sm">Loading…</div> : (
           <div className="overflow-x-auto">
@@ -178,7 +179,10 @@ export default function AdminPage() {
         )}
       </Section>
 
+      </div>
+
       {/* Users */}
+      <div className="animate-spring-up stagger-3">
       <Section title="User Management" icon={<Users size={18} className="text-emerald-400" />}>
         {users === null ? <div className="text-gray-500 text-sm">Loading…</div> : (
           <div className="overflow-x-auto">
@@ -218,6 +222,7 @@ export default function AdminPage() {
           </div>
         )}
       </Section>
+      </div>
     </div>
   )
 }
