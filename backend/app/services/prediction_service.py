@@ -290,7 +290,7 @@ def predict_stock(symbol: str, auto_train: bool = True, forecast_days: int = 7) 
             logger.info(f"No models for {symbol}, auto-training...")
             from app.training.train_xgboost import train_xgb_for_symbol
             try:
-                train_xgb_for_symbol(symbol, period="3y", use_optuna=False, optuna_trials=0)
+                train_xgb_for_symbol(symbol, period="3y")
                 models_present = has_trained_models(symbol)
             except Exception as e:
                 logger.exception(f"auto-train xgb failed: {e}")
