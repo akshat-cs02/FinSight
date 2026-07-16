@@ -19,7 +19,12 @@ from datetime import datetime, timezone
 
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+
+try:
+    from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+    TENSORFLOW_AVAILABLE = True
+except ImportError:
+    TENSORFLOW_AVAILABLE = False
 
 from app.config import settings
 from app.ml.lstm_model import build_lstm_advanced, save_lstm
@@ -45,6 +50,8 @@ COMPAT_SEQ_LEN = 60
 
 
 def _callbacks():
+    if not TENSORFLOW_AVAILABLE:
+        raise ImportError("TensorFlow is not installed. LSTM training is unavailable.")
     return [
         EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True),
         ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=3, min_lr=1e-5),
@@ -68,6 +75,8 @@ def _walk_forward_folds(n: int, n_folds: int = N_FOLDS, train_frac: float = 0.8)
 
 
 def _fit_seed(seq_len, n_features, X_tr, y_tr, X_val, y_val, seed, epochs, batch):
+    if not TENSORFLOW_AVAILABLE:
+        raise ImportError("TensorFlow is not installed. LSTM training is unavailable.")
     import tensorflow as tf
     tf.random.set_seed(seed)
     np.random.seed(seed)

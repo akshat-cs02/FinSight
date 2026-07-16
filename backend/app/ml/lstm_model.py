@@ -23,12 +23,17 @@ from typing import Optional, Tuple
 
 import joblib
 import numpy as np
-from tensorflow.keras.layers import (
-    LSTM, Dense, Dropout, Input, Attention, GlobalAveragePooling1D,
-    Concatenate, LayerNormalization,
-)
-from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.optimizers import Adam
+
+try:
+    from tensorflow.keras.layers import (
+        LSTM, Dense, Dropout, Input, Attention, GlobalAveragePooling1D,
+        Concatenate, LayerNormalization,
+    )
+    from tensorflow.keras.models import Model, load_model
+    from tensorflow.keras.optimizers import Adam
+    TENSORFLOW_AVAILABLE = True
+except ImportError:
+    TENSORFLOW_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +43,9 @@ HORIZON_WEIGHTS = {"intraday": 0.35, "short": 0.25, "mid": 0.25, "long": 0.15}
 
 
 def build_lstm(seq_len: int, n_features: int, lstm1: int = 128, lstm2: int = 64,
-               dropout: float = 0.2, lr: float = 1e-3) -> Model:
+               dropout: float = 0.2, lr: float = 1e-3):
+    if not TENSORFLOW_AVAILABLE:
+        raise ImportError("TensorFlow is not installed. LSTM features are unavailable.")
     inputs = Input(shape=(seq_len, n_features))
     x = LSTM(lstm1, return_sequences=True)(inputs)
     x = Dropout(dropout)(x)
@@ -53,7 +60,9 @@ def build_lstm(seq_len: int, n_features: int, lstm1: int = 128, lstm2: int = 64,
 
 
 def build_lstm_multi_horizon(seq_len: int, n_features: int, lstm1: int = 128, lstm2: int = 64,
-                             dropout: float = 0.2, lr: float = 1e-3) -> Model:
+                             dropout: float = 0.2, lr: float = 1e-3):
+    if not TENSORFLOW_AVAILABLE:
+        raise ImportError("TensorFlow is not installed. LSTM features are unavailable.")
     """
     Multi-horizon LSTM: predicts 4 prices simultaneously.
     Output: [intraday, short, mid, long] — next close at different horizons.
@@ -90,7 +99,9 @@ def build_lstm_multi_horizon(seq_len: int, n_features: int, lstm1: int = 128, ls
 
 def build_lstm_advanced(seq_len: int, n_features: int, lstm1: int = 128, lstm2: int = 64,
                         dropout: float = 0.3, lr: float = 1e-3,
-                        multi_task: bool = False) -> Model:
+                        multi_task: bool = False):
+    if not TENSORFLOW_AVAILABLE:
+        raise ImportError("TensorFlow is not installed. LSTM features are unavailable.")
     """
     Attention + residual + scheduled-dropout LSTM.
 
@@ -140,7 +151,7 @@ def build_lstm_advanced(seq_len: int, n_features: int, lstm1: int = 128, lstm2: 
     return model
 
 
-def save_lstm(model: Model, scaler_features, scaler_target, meta: dict, model_dir: str, symbol: str) -> dict:
+def save_lstm(model, scaler_features, scaler_target, meta: dict, model_dir: str, symbol: str) -> dict:
     os.makedirs(model_dir, exist_ok=True)
     h5_path = os.path.join(model_dir, f"lstm_{symbol}.keras")
     scaler_path = os.path.join(model_dir, f"lstm_{symbol}_scalers.pkl")
