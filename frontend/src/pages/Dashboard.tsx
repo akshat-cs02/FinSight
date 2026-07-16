@@ -133,11 +133,11 @@ export default function DashboardPage() {
                 key={k}
                 onClick={() => setMarket(k)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
-                  market === k ? 'bg-gradient-to-r from-[#00F5A0]/20 to-[#00D4FF]/10 text-white border border-[#00F5A0]/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                   market === k ? 'bg-gradient-to-r from-[#00D4FF]/20 to-[#7C3AED]/10 text-white border border-[#00D4FF]/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {k !== 'ALL' && (
-                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-[#00F5A0] animate-pulse' : 'bg-gray-600'}`} />
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-[#00D4FF] animate-pulse' : 'bg-gray-600'}`} />
                 )}
                 {MARKET_LABELS[k]}
               </button>
@@ -170,12 +170,12 @@ export default function DashboardPage() {
         <div className="animate-spring-up stagger-1">
           <Card>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-[#00F5A0]/10 border border-[#00F5A0]/20"><Wallet className="text-[#00F5A0]" size={18} /></div>
+              <div className="p-2.5 rounded-xl bg-[#00D4FF]/10 border border-[#00D4FF]/20"><Wallet className="text-[#00D4FF]" size={18} /></div>
             </div>
             <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Portfolio Value</h3>
             {portfolio === null ? <Loading label="portfolio" /> : <>
               <p className="text-2xl font-bold text-white font-mono">{formatPrice(portfolio.total_value, 'USD', 2)}</p>
-              <p className={`text-sm mt-1 ${portfolio.total_gain_loss >= 0 ? 'change-up' : 'change-down'}`}>
+                                <p className={`text-sm mt-1 ${portfolio.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {portfolio.total_gain_loss >= 0 ? '+' : ''}{portfolio.total_gain_loss.toFixed(2)}% all-time
               </p>
             </>}
@@ -189,7 +189,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Today's P/L</h3>
             {portfolio === null ? <Loading label="P/L" /> :
-              <p className={`text-2xl font-bold font-mono ${portfolio.today_profit_loss >= 0 ? 'change-up' : 'change-down'}`}>
+              <p className={`text-2xl font-bold font-mono ${portfolio.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {portfolio.today_profit_loss >= 0 ? '+' : ''}{formatPrice(portfolio.today_profit_loss, 'USD', 2)}
               </p>
             }
@@ -210,10 +210,10 @@ export default function DashboardPage() {
                   {open.map((m) => (
                     <div key={m.name} className="flex items-center justify-between">
                       <span className="flex items-center gap-2 text-sm text-gray-300">
-                        <span className="relative"><span className="inline-block w-2 h-2 rounded-full bg-[#00F5A0] pulse-dot active" /></span>
+                        <span className="relative"><span className="inline-block w-2 h-2 rounded-full bg-[#00D4FF] pulse-dot active" /></span>
                         {m.name}
                       </span>
-                      <span className="text-sm font-semibold text-[#00F5A0]">OPEN</span>
+                          <span className="text-sm font-semibold text-[#00D4FF]">OPEN</span>
                     </div>
                   ))}
                 </div>
@@ -308,7 +308,7 @@ export default function DashboardPage() {
           )}
         </Card>
         <Card>
-          <h2 className="text-lg font-bold text-red-400 font-display mb-4">
+          <h2 className="text-lg font-bold text-rose-400 font-display mb-4">
             Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}
           </h2>
           {losers === null && !errors.losers && <Loading label="losers" />}
@@ -336,8 +336,8 @@ export default function DashboardPage() {
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="text-white font-medium flex-1 font-display">{a.title}</h3>
                   <span className={`ml-3 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                    a.sentiment === 'POSITIVE' ? 'bg-[#00F5A0]/10 text-[#00F5A0] border border-[#00F5A0]/20' :
-                    a.sentiment === 'NEGATIVE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                    a.sentiment === 'POSITIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                    a.sentiment === 'NEGATIVE' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
                     'bg-gray-500/10 text-gray-400 border border-gray-500/20'
                   }`}>{a.sentiment}</span>
                 </div>

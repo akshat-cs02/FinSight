@@ -37,15 +37,15 @@ export default function Sidebar() {
       <div className="p-6 border-b border-white/5 flex items-center justify-between">
         {!collapsed && (
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00F5A0] to-[#00D4FF] flex items-center justify-center font-bold text-sm text-[#060b18] font-display shadow-lg shadow-[#00F5A0]/20">FS</div>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00D4FF] to-[#7C3AED] flex items-center justify-center font-bold text-sm text-[#060b18] font-display shadow-lg shadow-[#00D4FF]/20">FS</div>
             <div className="leading-tight">
               <div className="font-bold text-lg text-white tracking-tight font-display">FinSight</div>
-              <div className="text-[10px] uppercase tracking-widest text-[#00F5A0] font-medium">AI-Powered</div>
+              <div className="text-[10px] uppercase tracking-widest text-[#7C3AED] font-medium">AI-Powered</div>
             </div>
           </div>
         )}
         {collapsed && (
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00F5A0] to-[#00D4FF] flex items-center justify-center font-bold text-sm text-[#060b18] font-display mx-auto">FS</div>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00D4FF] to-[#7C3AED] flex items-center justify-center font-bold text-sm text-[#060b18] font-display mx-auto">FS</div>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -66,12 +66,12 @@ export default function Sidebar() {
               to={item.path}
               className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 ${
                 active
-                  ? 'bg-gradient-to-r from-[#00F5A0]/15 to-[#00D4FF]/10 text-white border border-[#00F5A0]/20 shadow-sm shadow-[#00F5A0]/5'
+                  ? 'bg-gradient-to-r from-[#00D4FF]/15 to-[#7C3AED]/10 text-white border border-[#00D4FF]/20 shadow-sm shadow-[#00D4FF]/5'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
               title={item.label}
             >
-              <Icon size={18} className={active ? 'text-[#00F5A0]' : ''} />
+              <Icon size={18} className={active ? 'text-[#00D4FF]' : ''} />
               {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
             </Link>
           )

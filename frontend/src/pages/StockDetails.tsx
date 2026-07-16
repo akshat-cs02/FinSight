@@ -165,7 +165,7 @@ function StockDetailsContent() {
         {quote ? (
           <div className="text-right">
             <p className="text-4xl font-bold text-white font-mono">{formatPrice(quote.price, currency)}</p>
-            <p className={`flex items-center gap-1 justify-end ${up ? 'text-emerald-400' : 'text-red-400'}`}>
+            <p className={`flex items-center gap-1 justify-end ${up ? 'text-emerald-400' : 'text-rose-400'}`}>
               {up ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
               {sym}{Math.abs(quote.change).toFixed(2)} ({quote.change_percent.toFixed(2)}%)
             </p>
@@ -337,7 +337,7 @@ function StockDetailsContent() {
               <span className="text-xs text-gray-500">Technical-only bias:</span>
               <span className={`px-3 py-1 rounded-full text-sm font-bold ${
                 indicators.signal === 'BUY' ? 'bg-emerald-500/20 text-emerald-300' :
-                indicators.signal === 'SELL' ? 'bg-red-500/20 text-red-300' :
+                indicators.signal === 'SELL' ? 'bg-rose-500/20 text-rose-300' :
                 'bg-gray-500/20 text-gray-300'
               }`}>{indicators.signal}</span>
             </div>
@@ -370,8 +370,8 @@ function StockDetailsContent() {
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="text-white font-medium flex-1">{a.title}</h3>
                   <span className={`ml-3 px-2 py-1 rounded text-xs font-semibold ${
-                    a.sentiment === 'POSITIVE' ? 'bg-emerald-500/20 text-emerald-300' :
-                    a.sentiment === 'NEGATIVE' ? 'bg-red-500/20 text-red-300' :
+                    a.sentiment === 'POSITIVE' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' :
+                    a.sentiment === 'NEGATIVE' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20' :
                     'bg-gray-500/20 text-gray-300'
                   }`}>{a.sentiment}</span>
                 </div>

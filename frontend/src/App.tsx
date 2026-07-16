@@ -44,7 +44,7 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose: () => 
         lg:translate-x-0 lg:static
       `}>
         <div className="p-5 border-b border-white/5 flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00F5A0] to-[#00D4FF] flex items-center justify-center font-bold text-sm text-[#060b18] shadow-lg shadow-[#00F5A0]/20">FS</div>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00D4FF] to-[#7C3AED] flex items-center justify-center font-bold text-sm text-[#060b18] shadow-lg shadow-[#00D4FF]/20">FS</div>
           <span className="font-bold text-lg text-white font-display tracking-tight">FinSight</span>
         </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto py-4">
@@ -55,12 +55,12 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose: () => 
               <Link key={item.path} to={item.path} onClick={onClose}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
                       active
-                        ? 'bg-gradient-to-r from-[#00F5A0]/15 to-[#00D4FF]/10 text-white border border-[#00F5A0]/20 shadow-sm shadow-[#00F5A0]/5'
+                        ? 'bg-gradient-to-r from-[#00D4FF]/15 to-[#7C3AED]/10 text-white border border-[#00D4FF]/20 shadow-sm shadow-[#00D4FF]/5'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}>
-                <Icon size={18} className={active ? 'text-[#00F5A0]' : ''} />
+                <Icon size={18} className={active ? 'text-[#00D4FF]' : ''} />
                 <span className="text-sm font-medium">{item.label}</span>
-                {active && <ChevronRight size={14} className="ml-auto text-[#00F5A0]" />}
+                {active && <ChevronRight size={14} className="ml-auto text-[#00D4FF]" />}
               </Link>
             )
           })}
@@ -117,7 +117,7 @@ function BottomNav() {
           return (
             <Link key={item.path} to={item.path}
                   className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition ${
-                    active ? 'text-[#00F5A0]' : 'text-gray-500 hover:text-gray-300'
+                    active ? 'text-[#00D4FF]' : 'text-gray-500 hover:text-gray-300'
                   }`}>
               <Icon size={18} />
               <span className="text-[10px] font-medium">{item.label}</span>

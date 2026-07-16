@@ -152,7 +152,7 @@ function MetricCard({ label, value, good, suffix = '', small = false }: {
   return (
     <div className="glass-card p-4">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
-      <p className={`font-bold ${small ? 'text-lg' : 'text-2xl'} ${good ? 'text-emerald-400' : 'text-red-400'}`}>
+      <p className={`font-bold ${small ? 'text-lg' : 'text-2xl'} ${good ? 'text-emerald-400' : 'text-rose-400'}`}>
         {value}{suffix}
       </p>
     </div>
@@ -511,25 +511,25 @@ export default function BacktestingPage() {
                         <div className="hidden md:flex items-center gap-6 text-xs">
                           <div className="text-center">
                             <div className="text-gray-500">Return</div>
-                            <div className={`font-bold ${(item.metrics.total_return_pct || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <div className={`font-bold ${(item.metrics.total_return_pct || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {(item.metrics.total_return_pct || 0) >= 0 ? '+' : ''}{(item.metrics.total_return_pct || 0).toFixed(1)}%
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-gray-500">Sharpe</div>
-                            <div className={`font-bold ${(item.metrics.sharpe_ratio || 0) >= 1 ? 'text-emerald-400' : (item.metrics.sharpe_ratio || 0) >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                            <div className={`font-bold ${(item.metrics.sharpe_ratio || 0) >= 1 ? 'text-emerald-400' : (item.metrics.sharpe_ratio || 0) >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
                               {(item.metrics.sharpe_ratio || 0).toFixed(2)}
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-gray-500">Win%</div>
-                            <div className={`font-bold ${(item.metrics.win_rate_pct || 0) >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <div className={`font-bold ${(item.metrics.win_rate_pct || 0) >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {(item.metrics.win_rate_pct || 0).toFixed(1)}%
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-gray-500">Drawdown</div>
-                            <div className={`font-bold ${(item.metrics.max_drawdown_pct || 0) > -20 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <div className={`font-bold ${(item.metrics.max_drawdown_pct || 0) > -20 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {(item.metrics.max_drawdown_pct || 0).toFixed(1)}%
                             </div>
                           </div>
@@ -636,7 +636,7 @@ export default function BacktestingPage() {
             <span>{singleResult.symbol} · {singleResult.strategy} · {singleResult.period}</span>
             <span>{singleResult.data_bars} bars</span>
             <span>Initial: ${singleResult.initial_capital.toLocaleString()} →
-              <span className={singleResult.final_capital >= singleResult.initial_capital ? 'text-emerald-400' : 'text-red-400'}>
+              <span className={singleResult.final_capital >= singleResult.initial_capital ? 'text-emerald-400' : 'text-rose-400'}>
                 {' '}${singleResult.final_capital.toLocaleString()}
               </span>
             </span>
@@ -734,19 +734,19 @@ export default function BacktestingPage() {
                           <div className="hidden md:flex items-center gap-6 text-xs">
                             <div className="text-center">
                               <div className="text-gray-500">Avg Sharpe</div>
-                              <div className={`font-bold ${r.avg_sharpe >= 1 ? 'text-emerald-400' : r.avg_sharpe >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                              <div className={`font-bold ${r.avg_sharpe >= 1 ? 'text-emerald-400' : r.avg_sharpe >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
                                 {r.avg_sharpe.toFixed(3)}
                               </div>
                             </div>
                             <div className="text-center">
                               <div className="text-gray-500">Avg Return</div>
-                              <div className={`font-bold ${r.avg_return_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              <div className={`font-bold ${r.avg_return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {r.avg_return_pct >= 0 ? '+' : ''}{r.avg_return_pct.toFixed(1)}%
                               </div>
                             </div>
                             <div className="text-center">
                               <div className="text-gray-500">Avg Win%</div>
-                              <div className={`font-bold ${r.avg_win_rate >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              <div className={`font-bold ${r.avg_win_rate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {r.avg_win_rate.toFixed(1)}%
                               </div>
                             </div>
@@ -777,10 +777,10 @@ export default function BacktestingPage() {
                                     <tr key={ps.symbol} className="border-b border-gray-700/40 hover:bg-gray-700/20">
                                       <td className="py-1 px-1 font-medium text-white">{ps.symbol}</td>
                                       <td className="py-1 px-1 text-gray-500">{ps.asset_class}</td>
-                                      <td className={`py-1 px-1 text-right ${ps.sharpe >= 1 ? 'text-emerald-400' : ps.sharpe >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                      <td className={`py-1 px-1 text-right ${ps.sharpe >= 1 ? 'text-emerald-400' : ps.sharpe >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
                                         {ps.sharpe.toFixed(3)}
                                       </td>
-                                      <td className={`py-1 px-1 text-right ${ps.return_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                      <td className={`py-1 px-1 text-right ${ps.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                         {ps.return_pct >= 0 ? '+' : ''}{ps.return_pct.toFixed(1)}%
                                       </td>
                                       <td className="py-1 px-1 text-right text-gray-400">
@@ -824,10 +824,10 @@ export default function BacktestingPage() {
                               {STRATEGIES.find(s => s.key === pb.best_strategy)?.icon || '📊'}{' '}
                               {STRATEGIES.find(s => s.key === pb.best_strategy)?.label || pb.best_strategy}
                             </td>
-                            <td className={`py-2 px-2 text-right ${pb.sharpe >= 1 ? 'text-emerald-400' : pb.sharpe >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                            <td className={`py-2 px-2 text-right ${pb.sharpe >= 1 ? 'text-emerald-400' : pb.sharpe >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
                               {pb.sharpe.toFixed(3)}
                             </td>
-                            <td className={`py-2 px-2 text-right ${pb.return_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <td className={`py-2 px-2 text-right ${pb.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {pb.return_pct >= 0 ? '+' : ''}{pb.return_pct.toFixed(1)}%
                             </td>
                             <td className="py-2 px-2 text-right">
@@ -913,21 +913,21 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
                     <td className="py-1.5">{formatTradeDate(t.exit_date)}</td>
                     <td className="py-1.5">
                       <span className={`px-1.5 py-0.5 rounded font-bold ${
-                        t.side === 'LONG' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
+                        t.side === 'LONG' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
                       }`}>{t.side}</span>
                     </td>
                     <td className="py-1.5 text-right">{t.entry.toFixed(2)}</td>
                     <td className="py-1.5 text-right">{t.exit.toFixed(2)}</td>
-                    <td className={`py-1.5 text-right font-medium ${t.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <td className={`py-1.5 text-right font-medium ${t.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {t.pnl >= 0 ? '+' : ''}${t.pnl.toFixed(2)}
                     </td>
-                    <td className={`py-1.5 text-right ${t.pnl_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <td className={`py-1.5 text-right ${t.pnl_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {t.pnl_pct >= 0 ? '+' : ''}{t.pnl_pct.toFixed(2)}%
                     </td>
                     <td className="py-1.5 text-gray-500">
                       <span className={`px-1 rounded text-xs ${
                         t.exit_reason === 'TP' ? 'text-emerald-500' :
-                        t.exit_reason === 'SL' ? 'text-red-500' :
+                        t.exit_reason === 'SL' ? 'text-rose-500' :
                         'text-gray-500'
                       }`}>{t.exit_reason}</span>
                     </td>

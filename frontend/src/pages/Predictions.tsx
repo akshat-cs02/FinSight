@@ -77,7 +77,7 @@ export default function PredictionsPage() {
               }`}>
               {m.symbol}
               {(m.lstm || m.xgb) ? (
-                <span className="ml-2 text-xs text-emerald-400">●</span>
+                <span className="ml-2 text-xs text-[#00D4FF]">●</span>
               ) : (
                 <span className="ml-2 text-xs text-gray-500">○</span>
               )}
@@ -120,11 +120,11 @@ export default function PredictionsPage() {
                   <tr key={m.symbol} className="border-b border-gray-700">
                     <td className="py-2 px-2 text-white font-medium">{m.symbol}</td>
                     <td className="py-2 px-2 text-center">
-                      {m.lstm ? <CheckCircle2 className="inline text-emerald-400" size={16} /> :
-                                <Circle className="inline text-gray-500" size={16} />}
+{m.lstm ? <CheckCircle2 className="inline text-purple-400" size={16} /> :
+                                 <Circle className="inline text-gray-500" size={16} />}
                     </td>
                     <td className="py-2 px-2 text-center">
-                      {m.xgb ? <CheckCircle2 className="inline text-emerald-400" size={16} /> :
+                      {m.xgb ? <CheckCircle2 className="inline text-purple-400" size={16} /> :
                                 <Circle className="inline text-gray-500" size={16} />}
                     </td>
                     <td className="py-2 px-2 text-right">
@@ -182,7 +182,7 @@ export default function PredictionsPage() {
                     <td className="py-2 px-2 text-gray-300">{formatLocalDateTime(h.created_at)}</td>
                     <td className="py-2 px-2 text-right text-gray-300">{formatPrice(h.current_price, guessCurrency(selected), 2)}</td>
                     <td className="py-2 px-2 text-right text-white">{formatPrice(h.predicted_price, guessCurrency(selected), 2)}</td>
-                    <td className={`py-2 px-2 text-right ${h.change_percent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <td className={`py-2 px-2 text-right ${h.change_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {h.change_percent >= 0 ? '+' : ''}{h.change_percent.toFixed(2)}%
                     </td>
                     <td className="py-2 px-2 text-right text-gray-300">{h.confidence.toFixed(0)}%</td>

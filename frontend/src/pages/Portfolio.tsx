@@ -115,16 +115,16 @@ export default function PortfolioPage() {
             </div>
             <div className="glass-card p-5">
               <p className="text-gray-400 text-sm">Total Gain/Loss</p>
-              <p className={`text-2xl font-bold ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <p className={`text-2xl font-bold ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.total_gain_loss >= 0 ? '+' : ''}{formatPrice(summary.total_gain_loss, 'USD', 2)}
               </p>
-              <p className={`text-sm ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <p className={`text-sm ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.total_gain_loss_percent.toFixed(2)}%
               </p>
             </div>
             <div className="glass-card p-5">
               <p className="text-gray-400 text-sm">Today's P/L</p>
-              <p className={`text-2xl font-bold ${summary.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <p className={`text-2xl font-bold ${summary.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.today_profit_loss >= 0 ? '+' : ''}{formatPrice(summary.today_profit_loss, 'USD', 2)}
               </p>
             </div>
@@ -189,10 +189,10 @@ export default function PortfolioPage() {
                           <td className="py-2 px-2 text-right text-gray-300">{formatPrice(h.purchase_price, guessCurrency(h.symbol), 2)}</td>
                           <td className="py-2 px-2 text-right text-gray-300">{formatPrice(h.current_price, guessCurrency(h.symbol), 2)}</td>
                           <td className="py-2 px-2 text-right text-white">{formatPrice(h.current_value, guessCurrency(h.symbol), 2)}</td>
-                          <td className={`py-2 px-2 text-right ${h.gain_loss >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          <td className={`py-2 px-2 text-right ${h.gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {h.gain_loss >= 0 ? '+' : ''}{formatPrice(h.gain_loss, guessCurrency(h.symbol), 2)}
                           </td>
-                          <td className={`py-2 px-2 text-right ${h.gain_loss_percent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          <td className={`py-2 px-2 text-right ${h.gain_loss_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {h.gain_loss_percent.toFixed(2)}%
                           </td>
                           <td className="py-2 px-2 text-right">

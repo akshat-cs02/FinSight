@@ -40,8 +40,8 @@ export default function NewsPage() {
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-white font-bold flex-1">{a.title}</h3>
                 <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
-                  a.sentiment === 'POSITIVE' ? 'bg-emerald-500/20 text-emerald-300' :
-                  a.sentiment === 'NEGATIVE' ? 'bg-red-500/20 text-red-300' :
+                  a.sentiment === 'POSITIVE' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' :
+                  a.sentiment === 'NEGATIVE' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20' :
                   'bg-gray-500/20 text-gray-300'
                 }`}>{a.sentiment}</span>
               </div>
