@@ -1,0 +1,61 @@
+# Web framework
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+
+# Auth
+PyJWT
+bcrypt==4.0.1
+python-jose[cryptography]
+passlib[bcrypt]
+email-validator
+
+# DB
+sqlalchemy
+psycopg2-binary
+pymongo
+motor
+
+# Data + ML
+numpy
+pandas
+scikit-learn
+scipy
+joblib
+yfinance
+pandas-ta
+
+# Deep learning
+tensorflow
+keras
+
+# Gradient boosting
+xgboost
+
+# News + sentiment
+textblob
+vaderSentiment
+
+# Explainability
+shap
+
+# Reports
+reportlab
+
+# HTTP
+requests
+aiohttp
+httpx
+
+# Utilities
+python-dotenv
+python-dateutil
+pytz
+cryptography
+
+# Test + prod
+pytest
+gunicorn
+slowapi

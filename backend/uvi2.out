@@ -1,0 +1,50 @@
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53767 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55572 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53118 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50528 - "GET /api/prediction/EURUSD%3DX?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52259 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58763 - "GET /api/prediction/%3Dfalse HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50419 - "GET /api/prediction/EURUSD%3DX?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50419 - "GET /api/prediction/GBPUSD%3DX?persist=false HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50419 - "GET /api/prediction/USDJPY%3DX?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50419 - "GET /api/prediction/USDINR%3DX?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50419 - "GET /api/prediction/AAPL?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50419 - "GET /api/prediction/RELIANCE.NS?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50419 - "GET /api/prediction/BTC-USD?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50419 - "GET /api/prediction/GC%3DF?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50419 - "GET /api/prediction/HG%3DF?persist=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50526 - "GET /api/prediction/GBPUSD%3DX?persist=false HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58598 - "GET /api/prediction/GBPUSD%3DX?persist=false HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56094 - "GET /api/prediction/GBPUSD%3DX?persist=false HTTP/1.1" 404 Not Found

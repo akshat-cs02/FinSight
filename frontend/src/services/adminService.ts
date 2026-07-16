@@ -1,0 +1,57 @@
+import api from './api'
+
+export interface AdminUser {
+  id: number
+  username: string
+  email: string
+  is_active: boolean
+  is_admin: boolean
+  subscription_tier: string
+  created_at: string | null
+  last_login: string | null
+}
+
+export interface ModelMeta {
+  symbol?: string
+  period?: string
+  trained_at?: string
+  rows_total?: number
+  rows_train?: number
+  rows_test?: number
+  metrics?: {
+    rmse?: number
+    mae?: number
+    mape?: number
+    r2_score?: number
+    directional_accuracy?: number
+  }
+  feature_importance?: Record<string, number>
+}
+
+export interface ModelOverview {
+  symbol: string
+  lstm: { trained: boolean; meta: ModelMeta | null }
+  xgb:  { trained: boolean; meta: ModelMeta | null }
+}
+
+export interface SystemStats {
+  users: { total: number; active: number }
+  portfolios: number
+  predictions_logged: number
+  ml_models: {
+    symbols_supported: number
+    symbols_trained: number
+    details: { symbol: string; lstm: boolean; xgb: boolean }[]
+  }
+}
+
+export const adminService = {
+  listUsers: () => api.get<{ count: number; users: AdminUser[] }>('/admin/users').then((r) => r.data),
+  toggleActive: (id: number) => api.patch(`/admin/users/${id}/toggle-active`).then((r) => r.data),
+  deleteUser: (id: number) => api.delete(`/admin/users/${id}`).then((r) => r.data),
+  modelsOverview: () => api.get<{ models: ModelOverview[]; model_dir: string }>('/admin/models').then((r) => r.data),
+  modelMetrics: (symbol: string) => api.get(`/admin/models/${symbol}/metrics`).then((r) => r.data),
+  retrain: (symbol: string, lstm_epochs = 8, skip_lstm = false, skip_xgb = false) =>
+    api.post('/admin/models/retrain', { symbol, lstm_epochs, skip_lstm, skip_xgb }).then((r) => r.data),
+  stats: () => api.get<SystemStats>('/admin/stats').then((r) => r.data),
+}

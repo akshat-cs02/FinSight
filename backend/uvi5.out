@@ -1,0 +1,14 @@
+INFO:     127.0.0.1:59830 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62678 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56891 - "GET /api/signals/consensus/AAPL HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49743 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56891 - "GET /api/signals/consensus/GBPUSD%3DX HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58607 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64795 - "GET /api/signals/consensus/EURUSD%3DX HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64795 - "GET /api/market/trending?market=ALL HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64795 - "GET /api/signals/intraday HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50252 - "OPTIONS /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50252 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52834 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64914 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54950 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK

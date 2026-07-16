@@ -1,0 +1,4 @@
+INFO:     127.0.0.1:60291 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54569 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54978 - "GET /api/signals/consensus/EURUSD%3DX HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55079 - "GET /api/stocks/SUZLON.NS HTTP/1.1" 200 OK
