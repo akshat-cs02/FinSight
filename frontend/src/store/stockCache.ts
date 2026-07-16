@@ -26,6 +26,11 @@ interface StockCacheState {
   refreshConsensus: (symbol: string) => Promise<ConsensusResult>
 
   invalidate: (symbol: string) => void
+
+  _fetchQuote: (symbol: string) => Promise<StockQuote>
+  _fetchIndicators: (symbol: string, period?: string) => Promise<IndicatorsResponse>
+  _fetchNews: (symbol: string, limit?: number) => Promise<NewsArticle[]>
+  _fetchConsensus: (symbol: string) => Promise<ConsensusResult>
 }
 
 const QUOTE_TTL = 30_000         // 30 s — quote refreshes fast
