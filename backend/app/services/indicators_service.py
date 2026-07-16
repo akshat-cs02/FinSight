@@ -5,7 +5,12 @@ RSI, MACD, EMA, SMA, Bollinger Bands.
 import logging
 import yfinance as yf
 import pandas as pd
-import pandas_ta as ta
+
+try:
+    import pandas_ta as ta
+    PANDAS_TA_AVAILABLE = True
+except ImportError:
+    PANDAS_TA_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +37,8 @@ def _safe_list(series, n=60):
 
 
 def calculate_indicators(symbol: str, period: str = "6mo") -> dict:
+    if not PANDAS_TA_AVAILABLE:
+        raise ImportError("pandas_ta is not installed. Technical indicators are unavailable.")
     if period not in PERIOD_MAP:
         period = "6mo"
 

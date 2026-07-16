@@ -25,8 +25,13 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
-import pandas_ta as ta
 import yfinance as yf
+
+try:
+    import pandas_ta as ta
+    PANDAS_TA_AVAILABLE = True
+except ImportError:
+    PANDAS_TA_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +105,8 @@ def _bb_columns(bb: pd.DataFrame) -> Tuple[pd.Series, pd.Series, pd.Series]:
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add all engineered indicator features in-place and return cleaned DF."""
+    if not PANDAS_TA_AVAILABLE:
+        raise ImportError("pandas_ta is not installed. Technical indicators are unavailable.")
     df = df.copy()
 
     df["daily_return"] = df["close"].pct_change()
