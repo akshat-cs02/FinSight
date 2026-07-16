@@ -338,7 +338,15 @@ def get_stock_quote(symbol: str) -> dict:
 
     # ── yfinance fallback (full info: 52w, dividend, currency, exchange) ───────
     ticker = yf.Ticker(yf_symbol)
-    hist = ticker.history(period="5d", interval="1d")
+    try:
+        future = _mds_executor.submit(lambda: ticker.history(period="5d", interval="1d"))
+        done, _ = futures_wait([future], timeout=10.0, return_when=FIRST_COMPLETED)
+        hist = future.result() if done else pd.DataFrame()
+        if not done:
+            logger.warning(f"ticker.history timed out for {symbol}")
+    except Exception as e:
+        logger.warning(f"ticker.history failed for {symbol}: {e}")
+        hist = pd.DataFrame()
 
     # If empty and the user typed a bare Indian stock name (no suffix), try .NS / .BO
     if hist.empty and "." not in yf_symbol and "=" not in yf_symbol and "-" not in yf_symbol:
@@ -360,7 +368,12 @@ def get_stock_quote(symbol: str) -> dict:
 
     info = {}
     try:
-        info = ticker.info or {}
+        future = _mds_executor.submit(lambda: ticker.info or {})
+        done, _ = futures_wait([future], timeout=8.0, return_when=FIRST_COMPLETED)
+        if done:
+            info = future.result() or {}
+        else:
+            logger.warning(f"ticker.info timed out for {symbol} — using empty info")
     except Exception as e:
         logger.warning(f"info() failed for {symbol}: {e}")
 
