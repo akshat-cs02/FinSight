@@ -14,6 +14,7 @@ import FloatingOrbs from '@/components/FloatingOrbs'
 import CommandPalette from '@/components/CommandPalette'
 import SplashScreen from '@/components/SplashScreen'
 import { pageEnter } from '@/utils/animations'
+import { useAuthStore } from '@/store/authStore'
 
 // ─── Lazy-loaded pages (code-split) ───
 const DashboardPage = lazy(() => import('@/pages/Dashboard'))
@@ -112,6 +113,12 @@ function Layout() {
   const isDashboard = location.pathname === '/dashboard'
 
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const pingVisitor = useAuthStore((s) => s.pingVisitor)
+
+  // Ping visitor on route change
+  useEffect(() => {
+    pingVisitor(location.pathname)
+  }, [location.pathname])
 
   // Keyboard shortcuts
   useEffect(() => {

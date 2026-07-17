@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { newsService, NewsArticle } from '@/services/newsService'
 import { pageEnter, staggerItems } from '@/utils/animations'
+import { Lift } from '@/components/ui/motion'
 
 export default function NewsPage() {
   const [articles, setArticles] = useState<NewsArticle[] | null>(null)
@@ -32,7 +33,7 @@ export default function NewsPage() {
           <h1 className="text-[28px] font-bold font-display text-white">Financial News</h1>
           <p className="eyebrow mt-0.5">Latest market news and analysis</p>
         </div>
-        <div className="flex gap-2 card p-1 rounded-xl">
+        <Lift className="flex gap-2 card p-1 rounded-xl">
           {(['ALL', 'POSITIVE', 'NEGATIVE', 'NEUTRAL'] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
@@ -44,7 +45,7 @@ export default function NewsPage() {
                       : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]'
                     }`}>{f}</button>
           ))}
-        </div>
+        </Lift>
       </div>
 
       {err && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300">{err}</div>}
@@ -54,7 +55,7 @@ export default function NewsPage() {
       {list && (
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {list.map((a, i) => (
-            <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
+            <Lift><a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
                 className="card-accent card-surface2 p-5 rounded-xl transition flex flex-col cursor-pointer">
               {a.thumbnail && <img src={a.thumbnail} alt="" className="w-full h-32 object-cover rounded-lg mb-3" />}
               <div className="flex justify-between items-start mb-2 gap-2">
@@ -70,7 +71,7 @@ export default function NewsPage() {
                 <span>{a.source}</span>
                 {a.symbol && <span className="text-amber-400 font-medium">{a.symbol}</span>}
               </div>
-            </a>
+            </a></Lift>
           ))}
         </div>
       )}

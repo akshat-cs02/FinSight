@@ -18,6 +18,7 @@ import watchlistService from '@/services/watchlistService'
 import type { ConsensusResult } from '@/services/signalService'
 import { useStockCache, useQuote, useIndicators, useNews, useConsensus } from '@/store/stockCache'
 import toast from 'react-hot-toast'
+import { Lift } from '@/components/ui/motion'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -244,26 +245,26 @@ function StockDetailsContent() {
 
       {/* Spot-adjusted note */}
       {spotAdjusted && (
-        <div className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
+        <Lift className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
           <span className="text-blue-400 mt-0.5 shrink-0">ⓘ</span>
           <span>
             Showing <strong className="text-white font-medium">spot {spotAdjusted}</strong> prices. Yahoo only carries
             {' '}{spotAdjusted} as a futures contract, so we convert it to the spot scale (anchored to the
             {' '}{spotAdjusted === 'gold' ? 'GLD' : 'SLV'} ETF). Signals, entries, SL/TP and targets are all on the spot scale.
           </span>
-        </div>
+        </Lift>
       )}
 
       {/* Futures-only note */}
       {futuresNote && (
-        <div className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
+        <Lift className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
           <span className="text-amber mt-0.5 shrink-0">ⓘ</span>
           <span>
             Spot {SYMBOL.replace('=X', '')} has no live data feed, so prices, chart, and signals here use{' '}
             <strong className="text-white font-medium">{futuresNote}</strong> — which trades slightly above/below spot.
             The direction and % moves track spot closely.
           </span>
-        </div>
+        </Lift>
       )}
 
       {/* Action buttons */}
@@ -293,7 +294,7 @@ function StockDetailsContent() {
       </div>
 
       {showAdd && (
-        <form onSubmit={addToPortfolio} className="card-layer rounded-xl p-4">
+        <Lift className="card-layer rounded-xl p-4"><form onSubmit={addToPortfolio}>
           <div className="flex flex-wrap gap-3 items-end">
             <div>
               <label className="block text-xs text-white/40 mb-1">Quantity</label>
@@ -310,59 +311,59 @@ function StockDetailsContent() {
             </div>
             <button type="submit" className="btn btn-primary">Save</button>
           </div>
-        </form>
+        </form></Lift>
       )}
 
       {/* Quote details */}
       {quote && (
         <div ref={metricsCardsRef} className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="card-flat card-layer rounded-xl p-3">
+          <Lift className="card-flat card-layer rounded-xl p-3">
             <p className="eyebrow">Open</p>
             <PriceDisplay price={quote.open} currency={currency} size="md" color="default" />
-          </div>
-          <div className="card-flat card-layer rounded-xl p-3">
+          </Lift>
+          <Lift className="card-flat card-layer rounded-xl p-3">
             <p className="eyebrow">High</p>
             <PriceDisplay price={quote.high} currency={currency} size="md" color="default" />
-          </div>
-          <div className="card-flat card-layer rounded-xl p-3">
+          </Lift>
+          <Lift className="card-flat card-layer rounded-xl p-3">
             <p className="eyebrow">Low</p>
             <PriceDisplay price={quote.low} currency={currency} size="md" color="default" />
-          </div>
-          <div className="card-flat card-layer rounded-xl p-3">
+          </Lift>
+          <Lift className="card-flat card-layer rounded-xl p-3">
             <p className="eyebrow">Volume</p>
             <p className="text-white font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
-          </div>
+          </Lift>
           {quote.fifty_two_week_high && (
-            <div className="card-flat card-layer rounded-xl p-3">
+            <Lift className="card-flat card-layer rounded-xl p-3">
               <p className="eyebrow">52w High</p>
               <PriceDisplay price={quote.fifty_two_week_high} currency={currency} size="md" color="default" />
-            </div>
+            </Lift>
           )}
           {quote.fifty_two_week_low && (
-            <div className="card-flat card-layer rounded-xl p-3">
+            <Lift className="card-flat card-layer rounded-xl p-3">
               <p className="eyebrow">52w Low</p>
               <PriceDisplay price={quote.fifty_two_week_low} currency={currency} size="md" color="default" />
-            </div>
+            </Lift>
           )}
           {quote.market_cap && (
-            <div className="card-flat card-layer rounded-xl p-3">
+            <Lift className="card-flat card-layer rounded-xl p-3">
               <p className="eyebrow">Market Cap</p>
               <p className="text-white font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
-            </div>
+            </Lift>
           )}
           {quote.pe_ratio && (
-            <div className="card-flat card-layer rounded-xl p-3">
+            <Lift className="card-flat card-layer rounded-xl p-3">
               <p className="eyebrow">P/E</p>
               <p className="text-white font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
-            </div>
+            </Lift>
           )}
         </div>
       )}
 
       {/* TradingView Chart */}
-      <div ref={chartRef} className="card-layer rounded-xl p-3">
+      <Lift className="card-layer rounded-xl p-3"><div ref={chartRef}>
         <TradingViewWidget symbol={SYMBOL} tvSymbol={TV_SYMBOL} height={680} />
-      </div>
+      </div></Lift>
 
       {/* Signal Consensus + Term Signals */}
       <div className="signal-consensus-section">
@@ -397,7 +398,7 @@ function StockDetailsContent() {
 
       {/* Technical Indicators */}
       {indicators && (
-        <div ref={technicalRef} className="card-accent card-surface2 p-5">
+        <Lift className="card-accent card-surface2 p-5"><div ref={technicalRef}>
           <div className="eyebrow">Analysis</div>
           <h2 className="section-rule mb-4 text-white">Technical Indicators</h2>
           <div className="flex justify-between items-center mb-4">
@@ -416,17 +417,17 @@ function StockDetailsContent() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.entries(indicators.latest).map(([k, v]) => (
-              <div key={k} className="card-flat card-layer rounded-xl p-3">
+              <Lift key={k} className="card-flat card-layer rounded-xl p-3">
                 <p className="text-xs text-white/40 uppercase tracking-wider">{k.replace(/_/g, ' ')}</p>
                 <p className="text-white font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
-              </div>
+              </Lift>
             ))}
           </div>
-        </div>
+        </div></Lift>
       )}
 
       {/* News */}
-      <div ref={newsRef} className="card-surface2 p-5 rounded-xl">
+      <Lift className="card-surface2 p-5 rounded-xl"><div ref={newsRef}>
         <div className="eyebrow">Latest</div>
         <h2 className="text-lg mb-4 text-white font-display font-bold">Recent News</h2>
         {news === null && <div className="text-white/40 text-sm">Loading news…</div>}
@@ -450,7 +451,7 @@ function StockDetailsContent() {
             ))}
           </div>
         )}
-      </div>
+      </div></Lift>
     </div>
   )
 }

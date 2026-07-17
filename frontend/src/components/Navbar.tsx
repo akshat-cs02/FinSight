@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, TrendingUp, Brain, BarChart2, Briefcase, Newspaper,
-  Shield, Search, Bell, User, LogOut, Menu, X, Sparkles,
+  Shield, Search, Bell, User, LogOut, Menu, X, Sparkles, Globe, Mail, Eye, Clock, ChevronRight,
 } from 'lucide-react'
 import gsap from 'gsap'
 import { useAuthStore } from '@/store/authStore'
@@ -25,6 +25,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const logout = useAuthStore((s) => s.logout)
   const user = useAuthStore((s) => s.user)
+  const visitor = useAuthStore((s) => s.visitor)
   const [alertCount, setAlertCount] = useState(0)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -36,9 +37,17 @@ export default function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const linksRef = useRef<(HTMLAnchorElement | null)[]>([])
 
+  const isGuest = user?.id === 0
+  const isRealUser = !isGuest && user !== null && user.id > 0
+
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
-    user?.username || user?.email || 'Account'
+    visitor?.guest_username ||
+    user?.username ||
+    user?.email ||
+    'Guest'
+
+  const displayEmail = isRealUser ? user?.email : (visitor?.ip_address ? `${visitor.ip_address} · Guest` : 'guest@finsight.app')
 
   const isActive = (p: string) => location.pathname === p || location.pathname.startsWith(p + '/')
 
@@ -96,17 +105,16 @@ export default function Navbar() {
   }, [])
 
   // GSAP: user menu open/close
-  const [userMenuVisible, setUserMenuVisible] = useState(false)
   useEffect(() => {
     const menu = userMenuRef.current
     if (!menu) return
     if (showUserMenu) {
-      setUserMenuVisible(true)
+      gsap.set(menu, { display: 'block' })
       gsap.fromTo(menu, { opacity: 0, scale: 0.95, y: -4 }, { opacity: 1, scale: 1, y: 0, duration: 0.2, ease: 'power2.out' })
-    } else if (userMenuVisible) {
+    } else {
       gsap.to(menu, {
         opacity: 0, scale: 0.95, y: -4, duration: 0.15, ease: 'power2.in',
-        onComplete: () => setUserMenuVisible(false),
+        onComplete: () => { gsap.set(menu, { display: 'none' }) },
       })
     }
   }, [showUserMenu])
@@ -199,27 +207,98 @@ export default function Navbar() {
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center flex-shrink-0">
               <User size={16} className="text-black" />
             </div>
-            <span className="hidden md:block text-sm font-medium text-white/80">{displayName}</span>
           </button>
           </div>
         </div>
 
-        {/* User dropdown menu */}
-        {userMenuVisible && (
-          <div className="relative">
-            <div
-              ref={userMenuRef}
-              className="absolute right-4 top-1 mt-1 w-48 bg-[#141414]/95 backdrop-blur-xl rounded-lg shadow-xl border border-white/5 z-50 overflow-hidden"
-            >
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-3 text-sm hover:bg-white/[0.04] transition-all duration-300 flex items-center gap-2 text-rose-400"
-              >
-                <LogOut size={14} /> Logout
-              </button>
+        {/* User profile card popup */}
+        <div className="relative">
+          <div
+            ref={userMenuRef}
+            className="absolute right-4 top-1 mt-1 w-72 bg-[#141414]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/5 z-50 overflow-hidden"
+            style={{ display: 'none' }}
+          >
+              {/* Profile header */}
+              <div className="px-5 pt-5 pb-4 bg-gradient-to-b from-gold/5 to-transparent border-b border-white/5">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center flex-shrink-0 shadow-lg shadow-gold/20">
+                    <span className="text-base font-bold text-black">{displayName.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-white font-display truncate">{displayName}</div>
+                    <div className="text-[11px] text-white/40 truncate mt-0.5">
+                      {isRealUser ? user?.email : `${visitor?.ip_address || 'Unknown IP'} · Guest`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="px-5 py-3 space-y-2.5">
+                {isRealUser ? (
+                  <>
+                    <div className="flex items-center gap-3 text-[12px]">
+                      <Mail size={12} className="text-gold shrink-0" />
+                      <span className="text-white/60 truncate">{user?.email}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[12px]">
+                      <User size={12} className="text-gold shrink-0" />
+                      <span className="text-white/60 truncate">{user?.username}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[12px]">
+                      <Clock size={12} className="text-gold shrink-0" />
+                      <span className="text-white/60 truncate">
+                        Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 text-[12px]">
+                      <Globe size={12} className="text-gold shrink-0" />
+                      <span className="text-white/60 truncate">IP: {visitor?.ip_address || 'Unknown'}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[12px]">
+                      <Eye size={12} className="text-gold shrink-0" />
+                      <span className="text-white/60 truncate">{visitor?.page_views || 1} page views</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[12px]">
+                      <Clock size={12} className="text-gold shrink-0" />
+                      <span className="text-white/60 truncate">
+                        First seen: {visitor?.first_seen ? new Date(visitor.first_seen).toLocaleDateString() : 'Today'}
+                      </span>
+                    </div>
+                    <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/5">
+                      <p className="text-[10px] text-white/30 leading-relaxed">
+                        You're browsing as a guest. Sign in to save your portfolio and access all features.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="px-3 pb-3 pt-1 border-t border-white/5">
+                {isGuest && (
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gold/10 transition-all duration-300 flex items-center gap-2 text-gold"
+                  >
+                    <LogOut size={14} />
+                    Sign In / Register
+                    <ChevronRight size={14} className="ml-auto" />
+                  </button>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-white/[0.04] transition-all duration-300 flex items-center gap-2 text-rose-400"
+                >
+                  <LogOut size={14} />
+                  {isGuest ? 'Reset Session' : 'Logout'}
+                </button>
+              </div>
             </div>
           </div>
-        )}
       </header>
 
       {/* ─── MOBILE DRAWER (<lg) ─── */}
@@ -287,7 +366,7 @@ export default function Navbar() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs font-medium text-white/70 truncate">{displayName}</div>
-              <div className="text-[10px] text-white/30">Free Plan</div>
+              <div className="text-[10px] text-white/30">{isGuest ? 'Guest' : (user?.subscription_tier || 'Free')}</div>
             </div>
           </div>
         </div>

@@ -20,6 +20,7 @@ import PriceDisplay from '@/components/PriceDisplay'
 import { formatPrice, guessCurrency } from '@/utils/currency'
 import { requestCache } from '@/utils/requestCache'
 import { MARKET_ORDER, MARKET_LABELS, tickerSymbolsForMarket } from '@/utils/markets'
+import { Lift } from '@/components/ui/motion'
 
 // ─── Lazy-load below-the-fold components ───
 const AIOutlook = lazy(() => import('@/components/Prediction/AIOutlook'))
@@ -61,6 +62,7 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
   }, [])
 
   return (
+    <Lift>
     <div
       ref={cardRef}
       role="button"
@@ -91,6 +93,7 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
         {up ? '+' : ''}{s.change.toFixed(2)}
       </p>
     </div>
+    </Lift>
   )
 }
 
@@ -274,7 +277,7 @@ export default function DashboardPage() {
       {/* ── Metrics */}
       <div ref={metricsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Portfolio Value */}
-        <div className="card-box p-5">
+        <Lift className="card-box p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="icon-wrap gold"><Wallet size={16} className="text-gold" /></div>
           </div>
@@ -289,10 +292,11 @@ export default function DashboardPage() {
               </p>
             </>
           )}
-        </div>
+        </Lift>
 
         {/* Today's P/L */}
         {portfolio != null ? (
+          <Lift>
           <div className="card p-5"
                style={{ border: '1px solid rgba(255,255,255,0.04)' }}>
             <div className="flex items-center gap-2.5 mb-4">
@@ -303,18 +307,19 @@ export default function DashboardPage() {
             <div className="eyebrow">Today's P/L</div>
             <PriceDisplay price={portfolio.today_profit_loss} size="xl" color={portfolio.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
           </div>
+          </Lift>
         ) : (
-          <div className="card p-5">
+          <Lift className="card p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="icon-wrap gold"><TrendingUp size={16} className="text-gold" /></div>
             </div>
             <div className="eyebrow">Today's P/L</div>
             <div className="mt-2"><Skeleton className="h-8 w-28" /></div>
-          </div>
+          </Lift>
         )}
 
         {/* Market Status */}
-        <div className="card-surface3 p-5">
+        <Lift className="card-surface3 p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="icon-wrap gold"><Activity size={16} className="text-gold" /></div>
           </div>
@@ -337,10 +342,10 @@ export default function DashboardPage() {
               </div>
             )
           })()}
-        </div>
+        </Lift>
 
         {/* Holdings */}
-        <div className="card-flat p-5">
+        <Lift className="card-flat p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="icon-wrap gold"><BarChart3 size={16} className="text-gold" /></div>
           </div>
@@ -350,20 +355,20 @@ export default function DashboardPage() {
           ) : (
             <div className="text-3xl font-extrabold font-mono text-gold mt-2">{portfolio.holdings_count}</div>
           )}
-        </div>
+        </Lift>
       </div>
 
       {/* ── Ticker ── */}
       <div ref={scrollAnimRefs.ticker as React.RefObject<HTMLDivElement>} className="scroll-reveal">
-        <div className="card p-4">
+        <Lift className="card p-4">
           <LiveTicker symbols={tickerSymbolsForMarket(market)} />
-        </div>
+        </Lift>
       </div>
 
       {/* ── Signals + Watchlist ── */}
       <div ref={scrollAnimRefs.signals as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-5">
-        <div className="card overflow-hidden"><IntradaySignals market={market} /></div>
-        <div className="card overflow-hidden"><WatchlistPanel onSearch={(sym) => navigate(`/stocks/${sym}`)} /></div>
+        <Lift className="card overflow-hidden"><IntradaySignals market={market} /></Lift>
+        <Lift className="card overflow-hidden"><WatchlistPanel onSearch={(sym) => navigate(`/stocks/${sym}`)} /></Lift>
       </div>
 
       <div ref={scrollAnimRefs.performance as React.RefObject<HTMLDivElement>} className="scroll-reveal">
@@ -380,7 +385,7 @@ export default function DashboardPage() {
       </Suspense>
 
       {/* ── Market Indices ── */}
-      <div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
+      <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
         <div className="section-rule mb-5 text-white">Market Indices</div>
         {errors.indices && <div className="text-rose-400 text-sm">⚠ {errors.indices}</div>}
         {indices === null && !errors.indices && (
@@ -391,20 +396,20 @@ export default function DashboardPage() {
         {indices && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {indices.map((i, idx) => (
-              <div key={i.symbol} className="card p-3" style={{ animationDelay: `${idx * 0.05}s` }}>
+              <Lift key={i.symbol}><div className="card p-3" style={{ animationDelay: `${idx * 0.05}s` }}>
                 <div className="text-[11px] text-white/40 font-medium truncate">{i.name}</div>
                 <div className="text-lg font-bold text-white/80 font-mono tabular-nums mt-0.5">{i.price.toFixed(2)}</div>
                 <div className={`text-[11px] mt-0.5 font-medium ${i.change_percent >= 0 ? 'text-green-400' : 'text-rose-400'}`}>
                   {i.change_percent >= 0 ? '+' : ''}{i.change_percent.toFixed(2)}%
                 </div>
-              </div>
+              </div></Lift>
             ))}
           </div>
         )}
-      </div>
+      </div></Lift>
 
       {/* ── Trending ── */}
-      <div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-5">
+      <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-5">
         <div className="section-rule mb-5 text-white">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
         </div>
@@ -423,11 +428,11 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
+      </div></Lift>
 
       {/* ── Gainers & Losers ── */}
       <div ref={scrollAnimRefs.gainersLosers as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="card-accent card-surface2 p-5">
+        <Lift className="card-accent card-surface2 p-5">
           <div className="section-rule mb-5 text-white">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
           {errors.gainers && <div className="text-rose-400 text-sm">⚠ {errors.gainers}</div>}
           {gainers === null && !errors.gainers && (
@@ -439,8 +444,8 @@ export default function DashboardPage() {
               {gainers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
-        </div>
-        <div className="card-accent card-surface2 p-5">
+        </Lift>
+        <Lift className="card-accent card-surface2 p-5">
           <div className="section-rule mb-5 text-white">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
           {errors.losers && <div className="text-rose-400 text-sm">⚠ {errors.losers}</div>}
           {losers === null && !errors.losers && (
@@ -452,7 +457,7 @@ export default function DashboardPage() {
               {losers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
-        </div>
+        </Lift>
       </div>
 
       <Suspense fallback={<div className="skeleton h-64 rounded-xl" />}>
@@ -460,7 +465,7 @@ export default function DashboardPage() {
       </Suspense>
 
       {/* ── News ── */}
-      <div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
+      <Lift><div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
         <div className="section-rule mb-5 text-white">Latest Financial News</div>
         {errors.news && <div className="text-rose-400 text-sm">⚠ {errors.news}</div>}
         {news === null && !errors.news && (
@@ -484,7 +489,7 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
+      </div></Lift>
     </div>
   )
 }

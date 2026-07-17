@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { Lift } from '@/components/ui/motion'
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation'
 import { Plus, Trash2, Download, ChevronDown, ChevronRight } from 'lucide-react'
 import gsap from 'gsap'
@@ -127,7 +128,7 @@ export default function PortfolioPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={add} className="card-accent card-flat p-4 rounded-xl flex flex-wrap gap-3 items-end">
+        <Lift className="card-accent card-flat p-4 rounded-xl flex flex-wrap gap-3 items-end"><form onSubmit={add}>
           <div>
             <label className="block text-xs text-white/40 mb-1">Symbol</label>
             <input required value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
@@ -149,7 +150,7 @@ export default function PortfolioPage() {
                   className="bg-gold/10 text-gold hover:bg-gold/20 disabled:opacity-50 text-sm px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-1.5">
             {busy ? 'Adding…' : 'Save'}
           </button>
-        </form>
+        </form></Lift>
       )}
 
       {err && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300">{err}</div>}
@@ -158,34 +159,34 @@ export default function PortfolioPage() {
       {summary && (
         <>
           <div ref={metricsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="card-box p-5">
+            <Lift className="card-box p-5"><div>
               <div className="eyebrow">Total Invested</div>
               <PriceDisplay price={summary.total_invested} size="xl" color="default" />
-            </div>
-            <div className="card-accent card-surface2 p-5">
+            </div></Lift>
+            <Lift className="card-accent card-surface2 p-5"><div>
               <div className="eyebrow">Current Value</div>
               <PriceDisplay price={summary.total_value} size="xl" color="brand" animate />
-            </div>
-            <div className="card p-5">
+            </div></Lift>
+            <Lift className="card p-5"><div>
               <div className="eyebrow">Total Gain/Loss</div>
               <PriceDisplay price={summary.total_gain_loss} size="xl" color={summary.total_gain_loss >= 0 ? 'gains' : 'losses'} showSign />
               <p className={`text-sm mt-0.5 ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.total_gain_loss_percent.toFixed(2)}%
               </p>
-            </div>
-            <div className="card-surface3 p-5">
+            </div></Lift>
+            <Lift className="card-surface3 p-5"><div>
               <div className="eyebrow">Today's P/L</div>
               <PriceDisplay price={summary.today_profit_loss} size="xl" color={summary.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
-            </div>
+            </div></Lift>
           </div>
 
           <div ref={chartRef} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div ref={allocationRef} className="card-accent card-surface2 p-5">
+            <Lift className="card-accent card-surface2 p-5"><div ref={allocationRef}>
               <div className="eyebrow">Allocation</div>
               <h2 className="section-rule">Asset Allocation</h2>
               <PortfolioChart data={summary.allocation} />
-            </div>
-            <div className="card-accent card-surface2 p-5">
+            </div></Lift>
+            <Lift className="card-accent card-surface2 p-5"><div>
               <div className="eyebrow">Breakdown</div>
               <h2 className="section-rule">Allocation Breakdown</h2>
               {summary.allocation.length === 0 ? (
@@ -203,10 +204,10 @@ export default function PortfolioPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </div></Lift>
           </div>
 
-          <div ref={holdingsRef as React.RefObject<HTMLDivElement>} className="card p-5">
+          <Lift className="card p-5"><div ref={holdingsRef as React.RefObject<HTMLDivElement>}>
             <div className="eyebrow">Holdings</div>
             <h2 className="section-rule">Holdings</h2>
             {summary.holdings.length === 0 ? (
@@ -269,7 +270,7 @@ export default function PortfolioPage() {
                 </table>
               </div>
             )}
-          </div>
+          </div></Lift>
         </>
       )}
     </div>

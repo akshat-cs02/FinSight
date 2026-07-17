@@ -210,6 +210,37 @@ class WatchlistItem(Base):
     __table_args__ = (UniqueConstraint("user_id", "symbol"),)
 
 
+class Visitor(Base):
+    """Anonymous guest visitors — tracked by IP + UA fingerprint."""
+    __tablename__ = "visitors"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    # Random friendly name like "Falcon-Aurora-7821" so the user can see their
+    # identity in popups even though they haven't signed up. Unique for collision safety.
+    guest_username  = Column(String(60), unique=True, index=True, nullable=False)
+    ip_address      = Column(String(64), index=True, nullable=True)
+    user_agent      = Column(String(500), nullable=True)
+    country         = Column(String(80), nullable=True)
+    city            = Column(String(80), nullable=True)
+    first_seen      = Column(DateTime, default=_utcnow, index=True)
+    last_seen       = Column(DateTime, default=_utcnow, onupdate=_utcnow, index=True)
+    page_views      = Column(Integer, default=1)
+    # Token to identify the same browser across sessions (cookie / localStorage)
+    visitor_token   = Column(String(80), unique=True, index=True, nullable=False)
+
+
+class VisitorPageView(Base):
+    """Track each page hit by a visitor — for traffic analytics."""
+    __tablename__ = "visitor_page_views"
+
+    id            = Column(Integer, primary_key=True, index=True)
+    visitor_id    = Column(Integer, ForeignKey("visitors.id"), nullable=False, index=True)
+    path          = Column(String(500), nullable=False, index=True)
+    referer       = Column(String(500), nullable=True)
+    duration_ms   = Column(Integer, nullable=True)
+    viewed_at     = Column(DateTime, default=_utcnow, index=True)
+
+
 class IntradaySignal(Base):
     __tablename__ = "intraday_signals"
 
