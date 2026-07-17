@@ -31,7 +31,7 @@
 /* ─── Base ─── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; overscroll-behavior: none; }
+html { scroll-behavior: smooth; overscroll-behavior: none; color: rgba(255, 255, 255, 0.85); }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
