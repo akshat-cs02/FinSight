@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Eye, TrendingUp, TrendingDown } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Eye } from 'lucide-react'
 import signalService, { BreakoutCandidate } from '@/services/signalService'
 
 const REASON_COLORS: Record<string, string> = {
@@ -13,17 +13,17 @@ const REASON_COLORS: Record<string, string> = {
 }
 
 function ReasonChip({ reason }: { reason: string }) {
-  const cls = REASON_COLORS[reason] ?? 'bg-gray-700 text-gray-300'
+  const cls = REASON_COLORS[reason] ?? 'bg-white/[0.05] text-white/60'
   return <span className={`text-xs px-2 py-0.5 rounded-full ${cls}`}>{reason}</span>
 }
 
 function ScoreBar({ value, color }: { value: number; color: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
+      <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
       </div>
-      <span className="text-xs text-gray-400 w-7 text-right">{value}</span>
+      <span className="text-xs text-white/40 w-7 text-right">{value}</span>
     </div>
   )
 }
@@ -43,17 +43,17 @@ export default function WatchThese() {
   if (!loading && candidates.length === 0) return null
 
   return (
-    <div className="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <div className="bg-[#141414] rounded-xl border border-white/5 p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Eye size={18} className="text-cyan-400" />
+        <Eye size={18} className="text-gold" />
         <h2 className="text-lg font-semibold text-white">Watch These Stocks</h2>
-        <span className="text-xs text-gray-500">Near breakout</span>
+        <span className="text-xs text-white/30">Near breakout</span>
       </div>
 
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-24 bg-gray-800/50 animate-pulse rounded-lg" />
+            <div key={i} className="h-24 bg-white/[0.03] animate-pulse rounded-lg" />
           ))}
         </div>
       )}
@@ -62,7 +62,6 @@ export default function WatchThese() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {candidates.map((c) => (
             <div key={c.symbol} className="card-layer rounded-xl p-3 space-y-2">
-              {/* Symbol + price */}
               <div className="flex items-start justify-between">
                 <span className="font-bold text-white text-sm">{c.symbol}</span>
                 <div className="text-right">
@@ -73,15 +72,13 @@ export default function WatchThese() {
                 </div>
               </div>
 
-              {/* Scores */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-white/30">
                   <span>Technical</span>
                 </div>
-                <ScoreBar value={c.technical_score} color="bg-cyan-500" />
+                <ScoreBar value={c.technical_score} color="bg-gold" />
               </div>
 
-              {/* Reason chips */}
               <div className="flex flex-wrap gap-1">
                 {(c.all_reasons ?? [c.reason]).slice(0, 2).map((r) => (
                   <ReasonChip key={r} reason={r} />
