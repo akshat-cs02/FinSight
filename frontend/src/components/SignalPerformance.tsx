@@ -15,10 +15,10 @@ const TABS: { label: string; value: Days }[] = [
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="bg-gray-800/60 rounded-lg p-3 text-center">
+    <div className="bg-white/[0.03] rounded-xl p-3 text-center border border-white/5">
       <div className="text-xl font-bold text-white">{value}</div>
-      <div className="text-xs text-gray-400 mt-0.5">{label}</div>
-      {sub && <div className="text-xs text-gray-500 mt-0.5">{sub}</div>}
+      <div className="text-xs text-white/40 mt-0.5">{label}</div>
+      {sub && <div className="text-xs text-white/30 mt-0.5">{sub}</div>}
     </div>
   )
 }
@@ -34,7 +34,6 @@ export default function SignalPerformance() {
       const data = await signalService.getPerformance(d)
       setStats(data)
     } catch {
-      // keep stale
     } finally {
       setLoading(false)
     }
@@ -43,20 +42,19 @@ export default function SignalPerformance() {
   useEffect(() => { load(days) }, [days])
 
   return (
-    <div className="bg-gray-900 rounded-xl border border-gray-800 p-5">
-      {/* Header */}
+    <div className="bg-[#141414] rounded-xl border border-white/5 p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <BarChart2 size={18} className="text-green-400" />
+          <BarChart2 size={18} className="text-gold" />
           <h2 className="text-lg font-semibold text-white">My Signal Performance</h2>
         </div>
-        <div className="flex gap-1 bg-gray-800 rounded-lg p-0.5">
+        <div className="flex gap-1 bg-white/[0.03] rounded-lg p-0.5">
           {TABS.map((t) => (
             <button
               key={t.value}
               onClick={() => setDays(t.value)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                days === t.value ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-300 ${
+                days === t.value ? 'bg-gold text-black' : 'text-white/40 hover:text-white/70'
               }`}
             >
               {t.label}
@@ -66,12 +64,11 @@ export default function SignalPerformance() {
       </div>
 
       {loading && !stats && (
-        <div className="h-40 flex items-center justify-center text-gray-500 text-sm">Loading...</div>
+        <div className="h-40 flex items-center justify-center text-white/30 text-sm">Loading...</div>
       )}
 
       {stats && (
         <>
-          {/* Stat cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
             <StatCard
               label="Win Rate"
@@ -95,43 +92,41 @@ export default function SignalPerformance() {
             />
           </div>
 
-          {/* Cumulative P&L chart */}
           {stats.daily_pnl.length > 1 && (
             <div className="mb-4">
-              <div className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+              <div className="text-xs text-white/40 mb-2 flex items-center gap-1">
                 <TrendingUp size={11} /> Cumulative P&L (R-multiples)
               </div>
               <ResponsiveContainer width="100%" height={110}>
                 <AreaChart data={stats.daily_pnl} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#D4AF37" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#6b7280' }} />
-                  <YAxis tick={{ fontSize: 9, fill: '#6b7280' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
+                  <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
                   <Tooltip
-                    contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 6, fontSize: 11 }}
+                    contentStyle={{ background: '#141414', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
                     formatter={(val: number) => [`${val >= 0 ? '+' : ''}${val}R`, 'Cumulative']}
                   />
-                  <Area type="monotone" dataKey="cumulative" stroke="#6366f1" fill="url(#pnlGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="cumulative" stroke="#D4AF37" fill="url(#pnlGrad)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           )}
 
-          {/* Daily wins/losses bar chart */}
           {stats.daily_pnl.length > 1 && (
             <div>
-              <div className="text-xs text-gray-500 mb-2">Daily Wins vs Losses</div>
+              <div className="text-xs text-white/40 mb-2">Daily Wins vs Losses</div>
               <ResponsiveContainer width="100%" height={80}>
                 <BarChart data={stats.daily_pnl} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#6b7280' }} />
-                  <YAxis tick={{ fontSize: 9, fill: '#6b7280' }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
+                  <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
                   <Tooltip
-                    contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 6, fontSize: 11 }}
+                    contentStyle={{ background: '#141414', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
                   />
                   <Bar dataKey="wins" fill="#10b981" radius={[2, 2, 0, 0]} />
                   <Bar dataKey="losses" fill="#ef4444" radius={[2, 2, 0, 0]} />
@@ -141,7 +136,7 @@ export default function SignalPerformance() {
           )}
 
           {stats.daily_pnl.length <= 1 && (
-            <div className="text-center py-6 text-gray-500 text-sm">
+            <div className="text-center py-6 text-white/30 text-sm">
               Not enough data yet — signals will appear here as they generate and resolve.
             </div>
           )}

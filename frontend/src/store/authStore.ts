@@ -39,7 +39,7 @@ const GUEST_USER: User = {
   email: 'guest@finsight.app',
   first_name: 'Demo',
   last_name: null,
-  is_admin: true,
+  is_admin: false,
   subscription_tier: 'free',
   created_at: new Date().toISOString(),
 }

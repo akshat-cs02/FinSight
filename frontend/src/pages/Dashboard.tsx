@@ -296,9 +296,7 @@ export default function DashboardPage() {
 
         {/* Today's P/L */}
         {portfolio != null ? (
-          <Lift>
-          <div className="card p-5"
-               style={{ border: '1px solid rgba(255,255,255,0.04)' }}>
+          <Lift className="card-box p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="icon-wrap gold">
                 <TrendingUp size={16} className="text-gold" />
@@ -306,10 +304,9 @@ export default function DashboardPage() {
             </div>
             <div className="eyebrow">Today's P/L</div>
             <PriceDisplay price={portfolio.today_profit_loss} size="xl" color={portfolio.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
-          </div>
           </Lift>
         ) : (
-          <Lift className="card p-5">
+          <Lift className="card-box p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="icon-wrap gold"><TrendingUp size={16} className="text-gold" /></div>
             </div>
