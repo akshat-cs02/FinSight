@@ -18,7 +18,7 @@ from app.database import init_db
 from app.rate_limit import limiter
 from app.api import (
     stocks, market_new, portfolio_new, news_new, reports, prediction,
-    auth_new, admin_new, ws, forex, backtesting, signals, watchlist,
+    auth_new, admin_new, ws, forex, backtesting, signals, watchlist, platform,
 )
 from app.services.signal_service import background_signals_loop, resolve_signal_outcomes
 
@@ -132,3 +132,4 @@ app.include_router(forex.router, prefix="/api/forex", tags=["Forex"])
 app.include_router(backtesting.router, prefix="/api/backtest", tags=["Backtesting"])
 app.include_router(signals.router, prefix="/api/signals", tags=["Signals"])
 app.include_router(watchlist.router, prefix="/api/watchlist", tags=["Watchlist"])
+app.include_router(platform.router, prefix='/api/platform', tags=['Platform'])

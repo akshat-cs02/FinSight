@@ -7,10 +7,10 @@ const decSize = { sm: 'text-[10px]', md: 'text-[11px]', lg: 'text-[12px]', xl: '
 const gapMap = { sm: 'gap-px', md: 'gap-px', lg: 'gap-0.5', xl: 'gap-0.5', hero: 'gap-0.5' }
 
 const colorMap: Record<string, string> = {
-  default: 'text-[rgba(220,252,231,0.7)]',
+  default: 'text-white/80',
   gains: 'text-green-400',
   losses: 'text-red-400',
-  brand: 'text-green-400',
+  brand: 'text-gold',
   emerald: 'text-emerald-400',
   purple: 'text-purple-400',
   cyan: 'text-cyan-400',
