@@ -37,7 +37,7 @@ function Sparkline({ h }: { h: HorizonPrediction }) {
   const W = 180, H = 44, pad = 4
 
   if (entry == null || target == null) {
-    return <div className="h-11 flex items-center text-xs text-gray-600">No trajectory</div>
+    return <div className="h-11 flex items-center text-xs text-ink-500">No trajectory</div>
   }
 
   // Build a gentle curve from entry (left) to target (right).

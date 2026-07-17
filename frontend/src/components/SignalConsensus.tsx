@@ -75,7 +75,7 @@ function ScoreMeter({ score }: { score: number }) {
         />
       </div>
       {/* Zone labels */}
-      <div className="flex justify-between text-[10px] text-gray-600 px-0.5">
+      <div className="flex justify-between text-[10px] text-ink-500 px-0.5">
         <span>Strong Sell</span>
         <span>Sell</span>
         <span>Neutral</span>
@@ -211,7 +211,7 @@ export default function SignalConsensus({ result, loading, onRefresh }: Props) {
               <div className="flex items-center gap-1.5 w-48 flex-shrink-0">
                 <span className="text-gray-500">{COMPONENT_ICONS[key]}</span>
                 <span className="text-xs text-gray-300 truncate">{c.label}</span>
-                <span className="text-xs text-gray-600 ml-auto flex-shrink-0">{c.weight_pct}%</span>
+                <span className="text-xs text-ink-500 ml-auto flex-shrink-0">{c.weight_pct}%</span>
               </div>
               <SignalChip signal={c.signal} />
               <ContributionBar contribution={c.contribution} weightPct={c.weight_pct} />
@@ -235,7 +235,7 @@ export default function SignalConsensus({ result, loading, onRefresh }: Props) {
             <p className="text-[10px] text-gray-500 mt-0.5 truncate">{result.position_note}</p>
           )}
           {sizePct > 0 && (
-            <p className="text-[10px] text-gray-600 mt-0.5">
+            <p className="text-[10px] text-ink-500 mt-0.5">
               Win prob ≈ {(winProb * 100).toFixed(0)}% at 2:1 R:R · f = (p·b−q)/b, half-fraction.
             </p>
           )}
@@ -244,8 +244,8 @@ export default function SignalConsensus({ result, loading, onRefresh }: Props) {
 
       {/* ── Disclaimer ──────────────────────────────────────────────────────── */}
       <div className="flex items-start gap-1.5 pt-1 border-t border-gray-700/50">
-        <Info size={11} className="text-gray-600 flex-shrink-0 mt-0.5" />
-        <p className="text-[10px] text-gray-600 leading-relaxed">
+        <Info size={11} className="text-ink-500 flex-shrink-0 mt-0.5" />
+        <p className="text-[10px] text-ink-500 leading-relaxed">
           Timeframe divergence is normal — short-term SELL + long-term BUY means the asset is pulling back within an uptrend.
           The master signal reflects the weighted balance, not a prediction guarantee.
         </p>

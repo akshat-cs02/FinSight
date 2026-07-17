@@ -114,7 +114,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
             </div>
             <div className="text-xs text-gray-400 flex-shrink-0">
               <span className="text-emerald-400 font-medium">{bulls} BUY</span>
-              <span className="text-gray-600 mx-1">/</span>
+              <span className="text-ink-500 mx-1">/</span>
               <span className="text-red-400 font-medium">{bears} SELL</span>
             </div>
           </div>

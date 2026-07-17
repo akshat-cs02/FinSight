@@ -194,12 +194,12 @@ export default function Navbar() {
           {/* User avatar */}
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.04] transition-all duration-300"
+            className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/[0.04] transition-all duration-300 border border-transparent hover:border-white/5"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center">
-              <User size={15} className="text-black" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center flex-shrink-0">
+              <User size={16} className="text-black" />
             </div>
-            <span className="hidden md:block text-xs font-medium text-white/70">{displayName}</span>
+            <span className="hidden md:block text-sm font-medium text-white/80">{displayName}</span>
           </button>
           </div>
         </div>

@@ -229,7 +229,7 @@ export default function ForexCalendar() {
         )}
       </div>
 
-      <p className="text-xs text-gray-600 flex items-center gap-1">
+      <p className="text-xs text-ink-500 flex items-center gap-1">
         <Calendar size={10} />
         Source: {source || 'Loading…'} · High-impact events can cause significant price gaps — avoid trading during NFP, CPI, FOMC releases.
       </p>

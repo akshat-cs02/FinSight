@@ -149,14 +149,14 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
                     <div>
                       <div className="text-gray-500">SL</div>
                       <div className="text-red-400 font-semibold">{formatPrice(sig.sl, currency)}</div>
-                      <div className="text-gray-600 text-xs">
+                      <div className="text-ink-500 text-xs">
                         {sig.entry ? `${(Math.abs(sig.sl - sig.entry) / sig.entry * 100).toFixed(1)}%` : ''}
                       </div>
                     </div>
                     <div>
                       <div className="text-gray-500">TP</div>
                       <div className="text-emerald-400 font-semibold">{formatPrice(sig.tp, currency)}</div>
-                      <div className="text-gray-600 text-xs">
+                      <div className="text-ink-500 text-xs">
                         {sig.entry ? `${(Math.abs(sig.tp - sig.entry) / sig.entry * 100).toFixed(1)}%` : ''}
                       </div>
                     </div>
@@ -164,7 +164,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
                 )}
 
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-600">
+                  <div className="text-xs text-ink-500">
                     ATR(14): {formatPrice(sig.atr, currency)} · {formatLocalTime(sig.generated_at)}
                   </div>
                   {!isHold && onTrade && (
@@ -186,7 +186,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
       )}
 
       {data?.errors && data.errors.length > 0 && (
-        <div className="mt-3 text-xs text-gray-600">
+        <div className="mt-3 text-xs text-ink-500">
           {data.errors.map((e) => (
             <div key={e.strategy}>{e.strategy}: {e.error}</div>
           ))}

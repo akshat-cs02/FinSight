@@ -300,7 +300,7 @@ export default function BacktestingPage() {
                 </button>
               ))}
             </div>
-            <div className="flex gap-3 mt-1 text-xs text-ink-600">
+            <div className="flex gap-3 mt-1 text-xs text-ink-500">
               <span className="text-ink-400">US</span>
               <span className="text-orange-500">IN</span>
               <span className="text-purple-500">FX</span>
@@ -312,7 +312,7 @@ export default function BacktestingPage() {
           {/* Interval */}
           <div>
             <label className="block text-xs text-ink-400 mb-1">
-              Interval <span className="text-ink-600 font-normal">(ICT/SMC = intraday)</span>
+              Interval <span className="text-ink-500 font-normal">(ICT/SMC = intraday)</span>
             </label>
             <div className="flex gap-1">
               {(['15m', '30m', '1h'] as const).map((iv) => (

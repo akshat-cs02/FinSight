@@ -95,7 +95,7 @@ export default function Footer() {
           <p className="text-xs text-ink-500">
             © {new Date().getFullYear()} FinSight. All rights reserved.
             <span className="hidden sm:inline mx-2">·</span>
-            <span className="block sm:inline text-ink-600">
+            <span className="block sm:inline text-ink-500">
               Data provided by Yahoo Finance. Not financial advice.
             </span>
           </p>

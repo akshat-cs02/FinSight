@@ -141,7 +141,7 @@ export default function WatchlistPanel({ onSearch }: Props) {
               )}
               <button
                 onClick={() => handleRemove(item.symbol)}
-                className="text-gray-600 hover:text-red-400 transition-colors ml-0.5"
+                className="text-ink-500 hover:text-red-400 transition-colors ml-0.5"
               >
                 <X size={12} />
               </button>

@@ -264,7 +264,7 @@ export default function PaperTrading({
         <div className="bg-gray-700/60 rounded-lg p-3">
           <div className="text-xs text-gray-500">Win Rate</div>
           <div className="font-bold text-white">{winRate}{winRate !== '—' ? '%' : ''}</div>
-          <div className="text-xs text-gray-600">{winCount}W / {lossCount}L</div>
+          <div className="text-xs text-ink-500">{winCount}W / {lossCount}L</div>
         </div>
         <div className="bg-gray-700/60 rounded-lg p-3">
           <div className="text-xs text-gray-500">Open Trades</div>
@@ -386,7 +386,7 @@ export default function PaperTrading({
                         }`}>{t.side}</span>
                         <span className="text-white font-semibold text-sm">{t.symbol}</span>
                         {t.strategy && <span className="text-xs text-gray-500">{t.strategy}</span>}
-                        <span className="text-xs text-gray-600">{formatLocalDateTime(t.openedAt)}</span>
+                        <span className="text-xs text-ink-500">{formatLocalDateTime(t.openedAt)}</span>
                       </div>
                       <div className="flex flex-wrap gap-3 mt-2 text-xs">
                         <div><span className="text-gray-500">Entry </span><span className="text-blue-300">{formatPrice(t.entry, currency)}</span></div>
@@ -462,7 +462,7 @@ export default function PaperTrading({
                         'text-gray-500'
                       }`}>{t.closeReason}</span>
                     </td>
-                    <td className="py-1.5 px-1 text-gray-600">{t.closedAt ? formatLocalDateTime(t.closedAt) : '—'}</td>
+                    <td className="py-1.5 px-1 text-ink-500">{t.closedAt ? formatLocalDateTime(t.closedAt) : '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -475,7 +475,7 @@ export default function PaperTrading({
       <div className="flex items-center gap-2 pt-1 border-t border-gray-700">
         {!resetConfirm ? (
           <button onClick={() => setResetConfirm(true)}
-                  className="text-xs text-gray-600 hover:text-red-400 transition">
+                  className="text-xs text-ink-500 hover:text-red-400 transition">
             Reset portfolio
           </button>
         ) : (
