@@ -68,14 +68,14 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
   const nextKZ = !activeKZ ? (currentHour < 7 ? `London opens at 07:00 UTC` : currentHour < 13 ? `NY opens at 13:00 UTC` : `London opens tomorrow at 07:00 UTC`) : null
 
   return (
-    <div className="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <div className="card-surface2 rounded-xl border border-[rgba(74,222,128,0.06)] p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Zap size={18} className="text-yellow-400" />
           <h2 className="text-lg font-semibold text-white">Intraday Signals</h2>
           {market !== 'ALL' && (
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium text-blue-300 bg-blue-500/10">
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium text-green-300 bg-green-500/10">
               {MARKET_LABELS[market]}
             </span>
           )}
@@ -86,7 +86,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
           )}
         </div>
         <div className="flex items-center gap-3">
-          {lastUpdate && <span className="text-xs text-gray-500">Updated {lastUpdate}</span>}
+          {lastUpdate &&          <span className="text-xs text-[rgba(74,222,128,0.4)]">Updated {lastUpdate}</span>}
           <button
             onClick={() => load(false)}
             disabled={loading}

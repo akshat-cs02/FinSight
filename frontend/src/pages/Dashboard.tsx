@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Activity, Wallet, TrendingUp, AlertCircle, ArrowUp, ArrowDown, ExternalLink,
-  BarChart3, Globe, Sparkles, LineChart, Database,
+  Activity, Wallet, TrendingUp, ArrowUp, ArrowDown, ExternalLink,
+  BarChart3, Sparkles,
 } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { pageEnter, staggerItems } from '@/utils/animations'
 import { dashboardService, MarketIndex, MarketStatus, MarketKey } from '@/services/dashboardService'
 import { portfolioService, PortfolioSummary } from '@/services/portfolioService'
 import { newsService, NewsArticle } from '@/services/newsService'
@@ -21,31 +24,57 @@ import PriceDisplay from '@/components/PriceDisplay'
 import { formatPrice, guessCurrency } from '@/utils/currency'
 import { MARKET_ORDER, MARKET_LABELS, tickerSymbolsForMarket } from '@/utils/markets'
 
+gsap.registerPlugin(ScrollTrigger)
+
 /* ─── Skeleton ─── */
 function Skeleton({ className = '' }: { className?: string }) {
   return <div className={`skeleton ${className}`} />
 }
 
-/* ─── Stock Card ─── */
+/* ─── Stock Card with mouse glow ─── */
 function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
   const up = s.change_percent >= 0
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Mouse glow on hover
+  useEffect(() => {
+    const card = cardRef.current
+    if (!card) return
+    const onMove = (e: MouseEvent) => {
+      const rect = card.getBoundingClientRect()
+      card.style.setProperty('--glow-x', `${e.clientX - rect.left}px`)
+      card.style.setProperty('--glow-y', `${e.clientY - rect.top}px`)
+      card.style.setProperty('--glow-opacity', '1')
+    }
+    const onLeave = () => {
+      card.style.setProperty('--glow-opacity', '0')
+    }
+    card.addEventListener('mousemove', onMove)
+    card.addEventListener('mouseleave', onLeave)
+    return () => {
+      card.removeEventListener('mousemove', onMove)
+      card.removeEventListener('mouseleave', onLeave)
+    }
+  }, [])
+
   return (
     <div
+      ref={cardRef}
       role="button"
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick() }}
-      className="group relative card p-4 pr-12 text-left w-full transition-all duration-300 cursor-pointer card-glow indigo hover:-translate-y-0.5"
+      className="group relative card p-4 pr-12 text-left w-full transition-all duration-300 cursor-pointer hover:scale-[1.02] card-glow"
     >
       <a href={getTradingViewUrl(s.symbol)} target="_blank" rel="noopener noreferrer"
          onClick={(e) => e.stopPropagation()}
-         className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition bg-black/40 hover:bg-black/60 p-1.5 rounded-lg">
-        <ExternalLink size={12} className="text-ink-400" />
+         className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 hover:bg-black/60 p-1.5 rounded-lg">
+        <ExternalLink size={12} className="text-white/40" />
       </a>
       <div className="flex items-center justify-between mb-2.5 gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-ink-100 text-[15px] font-display truncate">{s.symbol}</h3>
-          <p className="text-[11px] text-ink-500 truncate">{s.name}</p>
+          <h3 className="font-bold text-white/80 text-[15px] font-display truncate">{s.symbol}</h3>
+          <p className="text-[11px] text-white/40 truncate">{s.name}</p>
         </div>
         <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded ${
           up ? 'badge-gains' : 'badge-losses'
@@ -55,7 +84,7 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
         </span>
       </div>
       <PriceDisplay price={s.price} currency={s.currency || guessCurrency(s.symbol)} size="lg" />
-      <p className={`text-[11px] mt-1 ${up ? 'text-emerald-400/60' : 'text-rose-400/60'}`}>
+      <p className={`text-[11px] mt-1 ${up ? 'text-green-400/60' : 'text-rose-400/60'}`}>
         {up ? '+' : ''}{s.change.toFixed(2)}
       </p>
     </div>
@@ -75,6 +104,13 @@ export default function DashboardPage() {
   const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null)
   const [news, setNews] = useState<NewsArticle[] | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Refs for GSAP animations
+  const mainRef = useRef<HTMLDivElement>(null)
+  const metricsRef = useRef<HTMLDivElement>(null)
+  const trendingCardsRef = useRef<HTMLDivElement>(null)
+  const gainersCardsRef = useRef<HTMLDivElement>(null)
+  const losersCardsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     dashboardService.getMarketStatus().then((s) => {
@@ -108,31 +144,118 @@ export default function DashboardPage() {
     return () => clearInterval(id)
   }, [market])
 
+  // GSAP: page entrance on mount
+  useEffect(() => { pageEnter(mainRef.current) }, [])
+
+  // GSAP: stagger metrics cards
+  useEffect(() => {
+    if (!metricsRef.current) return
+    const cards = metricsRef.current.querySelectorAll(':scope > div')
+    staggerItems(cards, { stagger: 0.08, y: 30, delay: 0.2 })
+  }, [])
+
+  // GSAP: trending cards stagger
+  useEffect(() => {
+    if (!trendingCardsRef.current || !trending) return
+    const cards = trendingCardsRef.current.querySelectorAll(':scope > div')
+    if (cards.length === 0) return
+    gsap.fromTo(
+      cards,
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'power2.out', delay: 0.1 }
+    )
+  }, [trending])
+
+  // GSAP: gainers stagger
+  useEffect(() => {
+    if (!gainersCardsRef.current || !gainers) return
+    const cards = gainersCardsRef.current.children
+    if (cards.length === 0) return
+    gsap.fromTo(
+      cards,
+      { y: 15, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.3, stagger: 0.04, ease: 'power2.out' }
+    )
+  }, [gainers])
+
+  // GSAP: losers stagger
+  useEffect(() => {
+    if (!losersCardsRef.current || !losers) return
+    const cards = losersCardsRef.current.children
+    if (cards.length === 0) return
+    gsap.fromTo(
+      cards,
+      { y: 15, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.3, stagger: 0.04, ease: 'power2.out' }
+    )
+  }, [losers])
+
+  // GSAP: ScrollTrigger for sections below the fold
+  useEffect(() => {
+    const sections = mainRef.current?.querySelectorAll('.scroll-reveal')
+    if (!sections || sections.length === 0) return
+    sections.forEach((section) => {
+      gsap.fromTo(
+        section,
+        { y: 30, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.5, ease: 'power2.out',
+          scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none none' },
+        }
+      )
+    })
+  }, [])
+
+  // GSAP: market buttons animated underline — tracks active button
+  const activeBtnRef = useRef<HTMLButtonElement>(null)
+  const underlineRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const underline = underlineRef.current
+    const btn = activeBtnRef.current
+    if (!underline || !btn) return
+    gsap.to(underline, {
+      left: btn.offsetLeft,
+      width: btn.offsetWidth,
+      duration: 0.3,
+      ease: 'power3.out',
+    })
+  }, [market])
+
+  const scrollAnimRefs = {
+    ticker: useRef<HTMLDivElement>(null),
+    signals: useRef<HTMLDivElement>(null),
+    performance: useRef<HTMLDivElement>(null),
+    indices: useRef<HTMLDivElement>(null),
+    gainersLosers: useRef<HTMLDivElement>(null),
+    news: useRef<HTMLDivElement>(null),
+  }
+
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1600px] mx-auto">
+    <div ref={mainRef} className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 anim-up">
-        <div>
-          <div className="eyebrow">Overview</div>
-          <h1 className="text-[28px] font-bold text-white font-display tracking-tight leading-tight">Dashboard</h1>
-        </div>
-        <div className="flex flex-nowrap gap-1 p-1 card rounded-xl overflow-x-auto">
-          {MARKET_ORDER.map((k) => {
-            const om = status?.markets?.find((m) => m.key === k)
-            const isOpen = k === 'ALL' ? status?.is_open : om?.is_open
-            return (
-              <button key={k} onClick={() => setMarket(k)}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition whitespace-nowrap flex items-center gap-1.5 ${
-                  market === k
-                    ? 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20'
-                    : 'text-ink-500 hover:text-ink-300 hover:bg-white/[0.03]'
-                }`}>
-                {k !== 'ALL' && <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-ink-500'}`} />}
-                {MARKET_LABELS[k]}
-              </button>
-            )
-          })}
-        </div>
+      <div>
+        <div className="eyebrow">OVERVIEW</div>
+        <h1 className="text-3xl font-bold text-white font-display tracking-tight leading-tight">Dashboard</h1>
+      </div>
+
+      {/* Market Tabs — below heading, left-aligned */}
+      <div className="relative flex flex-wrap gap-1.5 p-1 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+        {MARKET_ORDER.map((k) => {
+          const om = status?.markets?.find((m) => m.key === k)
+          const isOpen = k === 'ALL' ? status?.is_open : om?.is_open
+          return (
+            <button key={k} ref={k === market ? activeBtnRef : undefined} onClick={() => setMarket(k)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 ${
+                market === k
+                  ? 'bg-white/[0.08] text-white shadow-sm'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+              }`}>
+              {k !== 'ALL' && <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-green-400 animate-pulse' : 'bg-white/20'}`} />}
+              {MARKET_LABELS[k]}
+            </button>
+          )
+        })}
+        <div ref={underlineRef} className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-gold to-gold-2 rounded-full" />
       </div>
 
       {status && (() => {
@@ -142,70 +265,70 @@ export default function DashboardPage() {
         if (!sel) return null
         if (market === 'ALL' && status.is_open) return null
         if (sel.key === 'CRYPTO') return null
-        return <div className="anim-up delay-1"><MarketClosedBanner marketName={sel.name} isOpen={sel.is_open} nextOpen={sel.next_open} nextOpenLocal={sel.next_open_local} /></div>
+        return <MarketClosedBanner marketName={sel.name} isOpen={sel.is_open} nextOpen={sel.next_open} nextOpenLocal={sel.next_open_local} />
       })()}
 
-      {/* ── Metrics — each card looks different ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Portfolio Value — boxed, elevated */}
-        <div className="card-box p-5 anim-up delay-1">
+      {/* ── Metrics */}
+      <div ref={metricsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Portfolio Value */}
+        <div className="card-box p-5">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="icon-wrap indigo"><Wallet size={16} className="text-indigo-400" /></div>
+            <div className="icon-wrap gold"><Wallet size={16} className="text-gold" /></div>
           </div>
           <div className="eyebrow">Portfolio Value</div>
           {portfolio === null ? (
             <div className="mt-2 space-y-2"><Skeleton className="h-8 w-36" /><Skeleton className="h-3 w-20" /></div>
           ) : (
             <>
-              <PriceDisplay price={portfolio.total_value} size="xl" className="text-ink-100" animate />
-              <p className={`text-xs mt-1.5 ${portfolio.total_gain_loss >= 0 ? 'text-emerald-400/60' : 'text-rose-400/60'}`}>
+              <PriceDisplay price={portfolio.total_value} size="xl" className="text-white/80" animate />
+              <p className={`text-xs mt-1.5 ${portfolio.total_gain_loss >= 0 ? 'text-green-400/60' : 'text-rose-400/60'}`}>
                 {portfolio.total_gain_loss >= 0 ? '+' : ''}{portfolio.total_gain_loss.toFixed(2)}% all-time
               </p>
             </>
           )}
         </div>
 
-        {/* Today's P/L — accent card with dynamic glow */}
+        {/* Today's P/L */}
         {portfolio != null ? (
-          <div className={`card-accent p-5 anim-up delay-2 ${portfolio.today_profit_loss >= 0 ? 'emerald' : 'rose'}`}
-               style={{ background: portfolio.today_profit_loss >= 0 ? 'rgba(16,185,129,0.03)' : 'rgba(244,63,94,0.03)', border: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="card p-5"
+               style={{ border: '1px solid rgba(255,255,255,0.04)' }}>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className={`icon-wrap ${portfolio.today_profit_loss >= 0 ? 'emerald' : 'rose'}`}>
-                <TrendingUp size={16} className={portfolio.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'} />
+              <div className="icon-wrap gold">
+                <TrendingUp size={16} className="text-gold" />
               </div>
             </div>
             <div className="eyebrow">Today's P/L</div>
             <PriceDisplay price={portfolio.today_profit_loss} size="xl" color={portfolio.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
           </div>
         ) : (
-          <div className="card p-5 anim-up delay-2">
+          <div className="card p-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="icon-wrap indigo"><TrendingUp size={16} className="text-indigo-400" /></div>
+              <div className="icon-wrap gold"><TrendingUp size={16} className="text-gold" /></div>
             </div>
             <div className="eyebrow">Today's P/L</div>
             <div className="mt-2"><Skeleton className="h-8 w-28" /></div>
           </div>
         )}
 
-        {/* Market Status — surface-3 elevated */}
-        <div className="card-surface3 p-5 anim-up delay-3">
+        {/* Market Status */}
+        <div className="card-surface3 p-5">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="icon-wrap cyan"><Activity size={16} className="text-cyan-400" /></div>
+            <div className="icon-wrap gold"><Activity size={16} className="text-gold" /></div>
           </div>
           <div className="eyebrow">Market Status</div>
           {status === null ? (
             <div className="mt-2"><Skeleton className="h-8 w-24" /></div>
           ) : (() => {
             const open = (status.markets || []).filter((m) => m.is_open)
-            if (open.length === 0) return <div className="text-lg font-bold font-mono text-ink-500 mt-2">CLOSED</div>
+            if (open.length === 0) return <div className="text-lg font-bold font-mono text-white/30 mt-2">CLOSED</div>
             return (
               <div className="space-y-1.5 mt-1">
                 {open.map((m) => (
                   <div key={m.name} className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-sm text-ink-400">
+                    <span className="flex items-center gap-2 text-sm text-white/50">
                       <span className="pulse-dot live" />{m.name}
                     </span>
-                    <span className="text-[10px] font-semibold text-emerald-400">LIVE</span>
+                    <span className="text-[10px] font-semibold text-green-400">LIVE</span>
                   </div>
                 ))}
               </div>
@@ -213,39 +336,41 @@ export default function DashboardPage() {
           })()}
         </div>
 
-        {/* Holdings — card-flat style */}
-        <div className="card-flat p-5 anim-up delay-4">
+        {/* Holdings */}
+        <div className="card-flat p-5">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="icon-wrap amber"><BarChart3 size={16} className="text-amber-400" /></div>
+            <div className="icon-wrap gold"><BarChart3 size={16} className="text-gold" /></div>
           </div>
           <div className="eyebrow">Holdings</div>
           {portfolio === null ? (
             <div className="mt-2"><Skeleton className="h-8 w-16" /></div>
           ) : (
-            <div className="text-3xl font-extrabold font-mono grad-text-indigo mt-2">{portfolio.holdings_count}</div>
+            <div className="text-3xl font-extrabold font-mono text-gold mt-2">{portfolio.holdings_count}</div>
           )}
         </div>
       </div>
 
       {/* ── Ticker ── */}
-      <div className="card p-4 anim-up delay-5">
-        <LiveTicker symbols={tickerSymbolsForMarket(market)} />
+      <div ref={scrollAnimRefs.ticker as React.RefObject<HTMLDivElement>} className="scroll-reveal">
+        <div className="card p-4">
+          <LiveTicker symbols={tickerSymbolsForMarket(market)} />
+        </div>
       </div>
 
       {/* ── Signals + Watchlist ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-5 anim-up delay-6">
+      <div ref={scrollAnimRefs.signals as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-5">
         <div className="card overflow-hidden"><IntradaySignals market={market} /></div>
         <div className="card overflow-hidden"><WatchlistPanel onSearch={(sym) => navigate(`/stocks/${sym}`)} /></div>
       </div>
 
-      <div className="anim-up delay-7"><SignalPerformance /></div>
+      <div ref={scrollAnimRefs.performance as React.RefObject<HTMLDivElement>} className="scroll-reveal"><SignalPerformance /></div>
 
       <WatchThese />
       <AIOutlook />
 
-      {/* ── Market Indices — teal accent ── */}
-      <div className="card-accent teal card-surface2 p-5 anim-up delay-2">
-        <div className="section-rule teal mb-5 text-white">Market Indices</div>
+      {/* ── Market Indices ── */}
+      <div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
+        <div className="section-rule mb-5 text-white">Market Indices</div>
         {errors.indices && <div className="text-rose-400 text-sm">⚠ {errors.indices}</div>}
         {indices === null && !errors.indices && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -255,10 +380,10 @@ export default function DashboardPage() {
         {indices && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {indices.map((i, idx) => (
-              <div key={i.symbol} className="card p-3 anim-up" style={{ animationDelay: `${idx * 0.05}s` }}>
-                <div className="text-[11px] text-ink-500 font-medium truncate">{i.name}</div>
-                <div className="text-lg font-bold text-ink-100 font-mono tabular-nums mt-0.5">{i.price.toFixed(2)}</div>
-                <div className={`text-[11px] mt-0.5 font-medium ${i.change_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <div key={i.symbol} className="card p-3" style={{ animationDelay: `${idx * 0.05}s` }}>
+                <div className="text-[11px] text-white/40 font-medium truncate">{i.name}</div>
+                <div className="text-lg font-bold text-white/80 font-mono tabular-nums mt-0.5">{i.price.toFixed(2)}</div>
+                <div className={`text-[11px] mt-0.5 font-medium ${i.change_percent >= 0 ? 'text-green-400' : 'text-rose-400'}`}>
                   {i.change_percent >= 0 ? '+' : ''}{i.change_percent.toFixed(2)}%
                 </div>
               </div>
@@ -268,8 +393,8 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Trending ── */}
-      <div className="card-accent indigo card p-5 anim-up delay-3">
-        <div className="section-rule indigo mb-5 text-white">
+      <div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-5">
+        <div className="section-rule mb-5 text-white">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
         </div>
         {errors.trending && <div className="text-rose-400 text-sm">⚠ {errors.trending}</div>}
@@ -279,9 +404,9 @@ export default function DashboardPage() {
           </div>
         )}
         {trending && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {trending.map((s, idx) => (
-              <div key={s.symbol} className="anim-up" style={{ animationDelay: `${idx * 0.04}s` }}>
+          <div ref={trendingCardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {trending.map((s) => (
+              <div key={s.symbol}>
                 <StockCard s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />
               </div>
             ))}
@@ -290,29 +415,29 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Gainers & Losers ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 anim-up delay-4">
-        <div className="card-accent emerald card-surface2 p-5">
-          <div className="section-rule emerald mb-5 text-white">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
+      <div ref={scrollAnimRefs.gainersLosers as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div className="card-accent card-surface2 p-5">
+          <div className="section-rule mb-5 text-white">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
           {errors.gainers && <div className="text-rose-400 text-sm">⚠ {errors.gainers}</div>}
           {gainers === null && !errors.gainers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
           )}
-          {gainers && gainers.length === 0 && <div className="text-sm text-ink-500 py-6 text-center">No active gainers</div>}
+          {gainers && gainers.length === 0 && <div className="text-sm text-white/30 py-6 text-center">No active gainers</div>}
           {gainers && gainers.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div ref={gainersCardsRef} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {gainers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
         </div>
-        <div className="card-accent rose card-surface2 p-5">
-          <div className="section-rule rose mb-5 text-white">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
+        <div className="card-accent card-surface2 p-5">
+          <div className="section-rule mb-5 text-white">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
           {errors.losers && <div className="text-rose-400 text-sm">⚠ {errors.losers}</div>}
           {losers === null && !errors.losers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
           )}
-          {losers && losers.length === 0 && <div className="text-sm text-ink-500 py-6 text-center">No active losers</div>}
+          {losers && losers.length === 0 && <div className="text-sm text-white/30 py-6 text-center">No active losers</div>}
           {losers && losers.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div ref={losersCardsRef} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {losers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
@@ -321,9 +446,9 @@ export default function DashboardPage() {
 
       <ForexCalendar />
 
-      {/* ── News — amber accent ── */}
-      <div className="card-accent amber card-surface2 p-5 anim-up delay-5">
-        <div className="section-rule amber mb-5 text-white">Latest Financial News</div>
+      {/* ── News ── */}
+      <div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
+        <div className="section-rule mb-5 text-white">Latest Financial News</div>
         {errors.news && <div className="text-rose-400 text-sm">⚠ {errors.news}</div>}
         {news === null && !errors.news && (
           <div className="space-y-3">{[1,2,3].map((i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>
@@ -332,10 +457,10 @@ export default function DashboardPage() {
           <div className="space-y-1">
             {news.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                 className="flex items-start justify-between gap-3 py-3 px-3 -mx-3 rounded-xl transition-colors hover:bg-white/[0.02]">
+                 className="flex items-start justify-between gap-3 py-3 px-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-white/[0.02]">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-ink-200 font-display leading-snug">{a.title}</h3>
-                  <p className="text-[11px] text-ink-500 mt-1">{a.source}</p>
+                  <h3 className="text-sm font-medium text-white/70 font-display leading-snug">{a.title}</h3>
+                  <p className="text-[11px] text-white/40 mt-1">{a.source}</p>
                 </div>
                 <span className={`flex-shrink-0 badge ${
                   a.sentiment === 'POSITIVE' ? 'badge-gains' :

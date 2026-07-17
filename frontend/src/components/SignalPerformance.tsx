@@ -47,7 +47,7 @@ export default function SignalPerformance() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <BarChart2 size={18} className="text-indigo-400" />
+          <BarChart2 size={18} className="text-green-400" />
           <h2 className="text-lg font-semibold text-white">My Signal Performance</h2>
         </div>
         <div className="flex gap-1 bg-gray-800 rounded-lg p-0.5">
@@ -56,7 +56,7 @@ export default function SignalPerformance() {
               key={t.value}
               onClick={() => setDays(t.value)}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                days === t.value ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+                days === t.value ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
               {t.label}

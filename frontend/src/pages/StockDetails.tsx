@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { Download, ArrowUp, ArrowDown, Plus, Star } from 'lucide-react'
-import type { StockQuote, IndicatorsResponse } from '@/services/stockService'
-import type { NewsArticle } from '@/services/newsService'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { portfolioService } from '@/services/portfolioService'
 import TradingViewWidget from '@/components/charts/TradingViewWidget'
 import PredictionCard from '@/components/Prediction/PredictionCard'
@@ -12,12 +12,14 @@ import StockTermSignals from '@/components/StockTermSignals'
 import SignalConsensus from '@/components/SignalConsensus'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { API_URL } from '@/services/api'
-import { formatPrice, formatMarketCap, guessCurrency, getCurrencySymbol } from '@/utils/currency'
+import { formatMarketCap, guessCurrency, getCurrencySymbol } from '@/utils/currency'
 import PriceDisplay from '@/components/PriceDisplay'
 import watchlistService from '@/services/watchlistService'
 import type { ConsensusResult } from '@/services/signalService'
 import { useStockCache, useQuote, useIndicators, useNews, useConsensus } from '@/store/stockCache'
 import toast from 'react-hot-toast'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default function StockDetailsPage() {
   return (
@@ -134,27 +136,99 @@ function StockDetailsContent() {
 
   const up = quote ? quote.change_percent >= 0 : false
 
+  // Refs for GSAP animations
+  const headerRef = useRef<HTMLDivElement>(null)
+  const priceRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<HTMLDivElement>(null)
+  const metricsCardsRef = useRef<HTMLDivElement>(null)
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const predictionRef = useRef<HTMLDivElement>(null)
+  const technicalRef = useRef<HTMLDivElement>(null)
+  const newsRef = useRef<HTMLDivElement>(null)
+
+  // GSAP: price count-up on symbol change
+  useEffect(() => {
+    if (!priceRef.current || !quote) return
+    const el = priceRef.current.querySelector('.price-value')
+    if (!el) return
+    gsap.fromTo(el, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' })
+  }, [quote?.price])
+
+  // GSAP: chart draw-in animation
+  useEffect(() => {
+    if (!chartRef.current) return
+    gsap.fromTo(chartRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.15 })
+  }, [])
+
+  // GSAP: metric cards stagger
+  useEffect(() => {
+    if (!metricsCardsRef.current || !quote) return
+    const cards = metricsCardsRef.current.querySelectorAll(':scope > div')
+    gsap.fromTo(cards, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.04, ease: 'power2.out', delay: 0.2 })
+  }, [quote])
+
+  // GSAP: action buttons stagger
+  useEffect(() => {
+    if (!actionsRef.current) return
+    const btns = actionsRef.current.querySelectorAll('button, a')
+    gsap.fromTo(btns, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, stagger: 0.04, ease: 'power2.out', delay: 0.1 })
+  }, [])
+
+  // GSAP: prediction data staggered reveal
+  useEffect(() => {
+    if (!predictionRef.current) return
+    const sections = predictionRef.current.children
+    gsap.fromTo(sections, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.06, ease: 'power2.out' })
+  }, [])
+
+  // GSAP: ScrollTrigger for sections
+  const initScrollTriggers = useRef(false)
+  useEffect(() => {
+    if (initScrollTriggers.current) return
+    initScrollTriggers.current = true
+
+    const sections = [
+      technicalRef.current,
+      newsRef.current,
+      document.querySelector('.signal-consensus-section'),
+    ].filter(Boolean)
+
+    sections.forEach((section) => {
+      if (!section) return
+      gsap.fromTo(
+        section,
+        { y: 25, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.5, ease: 'power2.out',
+          scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none none' },
+        }
+      )
+    })
+  }, [])
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-spring-up stagger-0">
+      <div ref={headerRef} className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-          <div className="section-eyebrow">Stock Details</div>
-          <h1 className="text-3xl font-bold text-ink-900 font-display">{SYMBOL}</h1>
+          <div className="eyebrow">Stock Details</div>
+          <h1 className="text-3xl font-bold text-white font-display">{SYMBOL}</h1>
           {quote ? (
-            <p className="text-ink-600">
+            <p className="text-white/50">
               {quote.name} · {quote.exchange || ''} ·{' '}
-              <span className="text-blue-400 font-semibold">{currency}</span>
+              <span className="text-green-400 font-semibold">{currency}</span>
             </p>
           ) : !err ? (
-            <p className="text-ink-500 text-sm animate-pulse">Loading {SYMBOL}…</p>
+            <p className="text-white/40 text-sm animate-pulse">Loading {SYMBOL}…</p>
           ) : (
-            <p className="text-ink-500 text-sm">Symbol not found</p>
+            <p className="text-white/40 text-sm">Symbol not found</p>
           )}
         </div>
         {quote ? (
-          <div className="text-right">
-            <PriceDisplay price={quote.price} currency={currency} size="hero" color="default" />
+          <div ref={priceRef} className="text-right">
+            <div className="price-value">
+              <PriceDisplay price={quote.price} currency={currency} size="hero" color="default" />
+            </div>
             <p className={`flex items-center gap-1 justify-end ${up ? 'text-emerald-400' : 'text-rose-400'}`}>
               {up ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
               {sym}{Math.abs(quote.change).toFixed(2)} ({quote.change_percent.toFixed(2)}%)
@@ -170,10 +244,10 @@ function StockDetailsContent() {
 
       {/* Spot-adjusted note */}
       {spotAdjusted && (
-        <div className="card-accent-top blue card-layer rounded-xl px-4 py-2.5 text-ink-600 text-sm flex items-start gap-2 animate-spring-up stagger-1">
+        <div className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
           <span className="text-blue-400 mt-0.5 shrink-0">ⓘ</span>
           <span>
-            Showing <strong className="text-ink-800 font-medium">spot {spotAdjusted}</strong> prices. Yahoo only carries
+            Showing <strong className="text-white font-medium">spot {spotAdjusted}</strong> prices. Yahoo only carries
             {' '}{spotAdjusted} as a futures contract, so we convert it to the spot scale (anchored to the
             {' '}{spotAdjusted === 'gold' ? 'GLD' : 'SLV'} ETF). Signals, entries, SL/TP and targets are all on the spot scale.
           </span>
@@ -182,18 +256,18 @@ function StockDetailsContent() {
 
       {/* Futures-only note */}
       {futuresNote && (
-        <div className="card-accent-top amber card-layer rounded-xl px-4 py-2.5 text-ink-600 text-sm flex items-start gap-2 animate-spring-up stagger-1">
+        <div className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
           <span className="text-amber-400 mt-0.5 shrink-0">ⓘ</span>
           <span>
             Spot {SYMBOL.replace('=X', '')} has no live data feed, so prices, chart, and signals here use{' '}
-            <strong className="text-ink-800 font-medium">{futuresNote}</strong> — which trades slightly above/below spot.
+            <strong className="text-white font-medium">{futuresNote}</strong> — which trades slightly above/below spot.
             The direction and % moves track spot closely.
           </span>
         </div>
       )}
 
       {/* Action buttons */}
-      <div className="flex flex-wrap gap-3 animate-spring-up stagger-1">
+      <div ref={actionsRef} className="flex flex-wrap gap-3">
         <button onClick={() => setShowAdd(!showAdd)} className="btn btn-primary">
           <Plus size={16} /> Add to Portfolio
         </button>
@@ -219,159 +293,159 @@ function StockDetailsContent() {
       </div>
 
       {showAdd && (
-        <form onSubmit={addToPortfolio} className="card-layer rounded-xl p-4 animate-spring-up stagger-2">
+        <form onSubmit={addToPortfolio} className="card-layer rounded-xl p-4">
           <div className="flex flex-wrap gap-3 items-end">
             <div>
-              <label className="block section-eyebrow mb-1">Quantity</label>
+              <label className="block text-xs text-white/40 mb-1">Quantity</label>
               <input type="number" step="any" required value={addForm.quantity}
                      onChange={(e) => setAddForm({ ...addForm, quantity: e.target.value })}
-                     className="input-glow w-32" />
+                     className="inp w-32" />
             </div>
             <div>
-              <label className="block section-eyebrow mb-1">Buy Price ({sym})</label>
+              <label className="block text-xs text-white/40 mb-1">Buy Price ({sym})</label>
               <input type="number" step="any" required value={addForm.purchase_price}
                      onChange={(e) => setAddForm({ ...addForm, purchase_price: e.target.value })}
                      placeholder={quote?.price.toFixed(2) || '0.00'}
-                     className="input-glow w-32" />
+                     className="inp w-32" />
             </div>
-            <button type="submit" className="btn btn-emerald">Save</button>
+            <button type="submit" className="btn btn-primary">Save</button>
           </div>
         </form>
       )}
 
       {/* Quote details */}
       {quote && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 animate-spring-up stagger-1">
+        <div ref={metricsCardsRef} className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="card-flat card-layer rounded-xl p-3">
-            <p className="section-eyebrow">Open</p>
+            <p className="eyebrow">Open</p>
             <PriceDisplay price={quote.open} currency={currency} size="md" color="default" />
           </div>
           <div className="card-flat card-layer rounded-xl p-3">
-            <p className="section-eyebrow">High</p>
+            <p className="eyebrow">High</p>
             <PriceDisplay price={quote.high} currency={currency} size="md" color="default" />
           </div>
           <div className="card-flat card-layer rounded-xl p-3">
-            <p className="section-eyebrow">Low</p>
+            <p className="eyebrow">Low</p>
             <PriceDisplay price={quote.low} currency={currency} size="md" color="default" />
           </div>
           <div className="card-flat card-layer rounded-xl p-3">
-            <p className="section-eyebrow">Volume</p>
-            <p className="text-ink-900 font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
+            <p className="eyebrow">Volume</p>
+            <p className="text-white font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
           </div>
           {quote.fifty_two_week_high && (
             <div className="card-flat card-layer rounded-xl p-3">
-              <p className="section-eyebrow">52w High</p>
+              <p className="eyebrow">52w High</p>
               <PriceDisplay price={quote.fifty_two_week_high} currency={currency} size="md" color="default" />
             </div>
           )}
           {quote.fifty_two_week_low && (
             <div className="card-flat card-layer rounded-xl p-3">
-              <p className="section-eyebrow">52w Low</p>
+              <p className="eyebrow">52w Low</p>
               <PriceDisplay price={quote.fifty_two_week_low} currency={currency} size="md" color="default" />
             </div>
           )}
           {quote.market_cap && (
             <div className="card-flat card-layer rounded-xl p-3">
-              <p className="section-eyebrow">Market Cap</p>
-              <p className="text-ink-900 font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
+              <p className="eyebrow">Market Cap</p>
+              <p className="text-white font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
             </div>
           )}
           {quote.pe_ratio && (
             <div className="card-flat card-layer rounded-xl p-3">
-              <p className="section-eyebrow">P/E</p>
-              <p className="text-ink-900 font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
+              <p className="eyebrow">P/E</p>
+              <p className="text-white font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
             </div>
           )}
         </div>
       )}
 
       {/* TradingView Chart */}
-      <div className="card-layer rounded-xl p-3 animate-spring-up stagger-2">
+      <div ref={chartRef} className="card-layer rounded-xl p-3">
         <TradingViewWidget symbol={SYMBOL} tvSymbol={TV_SYMBOL} height={680} />
       </div>
 
       {/* Signal Consensus + Term Signals */}
-      <SignalConsensus
-        result={consensus}
-        loading={consensusEntry.loading}
-        onRefresh={() => {
-          useStockCache.getState().refreshConsensus(SYMBOL).catch(() => {})
-        }}
-      />
+      <div className="signal-consensus-section">
+        <SignalConsensus
+          result={consensus}
+          loading={consensusEntry.loading}
+          onRefresh={() => {
+            useStockCache.getState().refreshConsensus(SYMBOL).catch(() => {})
+          }}
+        />
+      </div>
       <StockTermSignals symbol={SYMBOL} masterSignal={consensus?.master_signal} />
 
       {/* AI Prediction · ICT Signals · Paper trading */}
-      <PredictionCard symbol={SYMBOL} currency={currency} />
-      <ICTSignals symbol={SYMBOL} currency={currency} onTrade={(t) => {
-        setPaperTrade(t)
-        document.getElementById('paper-trading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }} />
-      <div id="paper-trading">
-        <PaperTrading
-          symbol={SYMBOL}
-          currency={currency}
-          suggestedEntry={paperTrade?.entry}
-          suggestedSl={paperTrade?.sl}
-          suggestedTp={paperTrade?.tp}
-          suggestedStrategy={paperTrade?.strategy}
-        />
+      <div ref={predictionRef}>
+        <PredictionCard symbol={SYMBOL} currency={currency} />
+        <ICTSignals symbol={SYMBOL} currency={currency} onTrade={(t) => {
+          setPaperTrade(t)
+          document.getElementById('paper-trading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }} />
+        <div id="paper-trading">
+          <PaperTrading
+            symbol={SYMBOL}
+            currency={currency}
+            suggestedEntry={paperTrade?.entry}
+            suggestedSl={paperTrade?.sl}
+            suggestedTp={paperTrade?.tp}
+            suggestedStrategy={paperTrade?.strategy}
+          />
+        </div>
       </div>
 
-      {/* Technical Indicators — purple accent */}
+      {/* Technical Indicators */}
       {indicators && (
-        <div className="card-accent-top purple card-layer rounded-xl p-5 animate-spring-up stagger-3">
-          <div className="section-eyebrow">Analysis</div>
-          <h2 className="accent-heading text-purple-400 text-lg mb-4">
-            <span className="text-ink-900">Technical Indicators</span>
-          </h2>
+        <div ref={technicalRef} className="card-accent card-surface2 p-5">
+          <div className="eyebrow">Analysis</div>
+          <h2 className="section-rule mb-4 text-white">Technical Indicators</h2>
           <div className="flex justify-between items-center mb-4">
-            <p className="text-xs text-ink-500">
-              This bias comes from RSI / MACD / Bollinger only. The <strong className="text-blue-400">AI Prediction</strong> above
+            <p className="text-xs text-white/50">
+              This bias comes from RSI / MACD / Bollinger only. The <strong className="text-green-400">AI Prediction</strong> above
               is the authoritative recommendation — it combines these indicators with the LSTM+XGBoost forecast.
             </p>
             <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-              <span className="text-xs text-ink-500">Technical-only bias:</span>
-              <span className={`tag ${
-                indicators.signal === 'BUY' ? 'tag-emerald' :
-                indicators.signal === 'SELL' ? 'tag-rose' :
-                'tag-gray'
+              <span className="text-xs text-white/50">Technical-only bias:</span>
+              <span className={`badge ${
+                indicators.signal === 'BUY' ? 'badge-gains' :
+                indicators.signal === 'SELL' ? 'badge-losses' :
+                'badge-neutral'
               }`}>{indicators.signal}</span>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.entries(indicators.latest).map(([k, v]) => (
               <div key={k} className="card-flat card-layer rounded-xl p-3">
-                <p className="section-eyebrow">{k.replace(/_/g, ' ')}</p>
-                <p className="text-ink-900 font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
+                <p className="text-xs text-white/40 uppercase tracking-wider">{k.replace(/_/g, ' ')}</p>
+                <p className="text-white font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* News — cyan accent */}
-      <div className="card-accent-top cyan card-layer rounded-xl p-5 animate-spring-up stagger-4">
-        <div className="section-eyebrow">Latest</div>
-        <h2 className="accent-heading text-cyan-400 text-lg mb-4">
-          <span className="text-ink-900">Recent News</span>
-        </h2>
-        {news === null && <div className="text-ink-500 text-sm">Loading news…</div>}
-        {news && news.length === 0 && <div className="text-ink-500 text-sm">No recent news</div>}
+      {/* News */}
+      <div ref={newsRef} className="card-surface2 p-5 rounded-xl">
+        <div className="eyebrow">Latest</div>
+        <h2 className="text-lg mb-4 text-white font-display font-bold">Recent News</h2>
+        {news === null && <div className="text-white/40 text-sm">Loading news…</div>}
+        {news && news.length === 0 && <div className="text-white/40 text-sm">No recent news</div>}
         {news && news.length > 0 && (
           <div className="space-y-3">
             {news.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                 className="block pb-3 border-b border-white/[0.04] last:border-b-0 hover:bg-white/[0.02] rounded p-2 -m-2 transition-colors">
+                 className="block pb-3 border-b border-white/5 last:border-b-0 hover:bg-white/[0.02] rounded p-2 -m-2 transition-all duration-300">
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-ink-900 font-medium flex-1">{a.title}</h3>
-                  <span className={`ml-3 tag ${
-                    a.sentiment === 'POSITIVE' ? 'tag-emerald' :
-                    a.sentiment === 'NEGATIVE' ? 'tag-rose' :
-                    'tag-gray'
+                  <h3 className="text-white/70 font-medium flex-1">{a.title}</h3>
+                  <span className={`ml-3 badge ${
+                    a.sentiment === 'POSITIVE' ? 'badge-gains' :
+                    a.sentiment === 'NEGATIVE' ? 'badge-losses' :
+                    'badge-neutral'
                   }`}>{a.sentiment}</span>
                 </div>
-                {a.summary && <p className="text-ink-600 text-sm line-clamp-2">{a.summary}</p>}
-                <p className="text-ink-500 text-xs mt-1">{a.source}</p>
+                {a.summary && <p className="text-white/50 text-sm line-clamp-2">{a.summary}</p>}
+                <p className="text-white/40 text-xs mt-1">{a.source}</p>
               </a>
             ))}
           </div>

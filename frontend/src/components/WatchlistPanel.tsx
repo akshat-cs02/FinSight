@@ -101,7 +101,7 @@ export default function WatchlistPanel({ onSearch }: Props) {
         <button
           onClick={handleAdd}
           disabled={!query.trim()}
-          className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-lg px-3 py-2 transition-colors"
+          className="bg-green-600 hover:bg-green-500 disabled:opacity-40 text-white rounded-lg px-3 py-2 transition-colors"
         >
           <Plus size={15} />
         </button>
@@ -126,7 +126,7 @@ export default function WatchlistPanel({ onSearch }: Props) {
               className="flex items-center gap-1.5 bg-gray-800 rounded-lg px-2.5 py-1.5 text-sm group"
             >
               <span
-                className="text-white font-medium cursor-pointer hover:text-indigo-400 transition-colors"
+                className="text-white font-medium cursor-pointer hover:text-green-400 transition-colors"
                 onClick={() => onSearch?.(item.symbol)}
               >
                 {item.symbol}

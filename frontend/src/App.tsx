@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Outlet, Link, useLocation, Navigate } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { PageTransition, spring } from '@/components/ui/motion'
 import { Toaster } from 'react-hot-toast'
+import gsap from 'gsap'
 import {
-  LayoutDashboard, TrendingUp, Briefcase, Newspaper, Settings,
-  Brain, Shield, BarChart2, Menu, Bell, Command, Search,
-  ChevronDown, LogOut, Sparkles, PanelRightClose,
+  LayoutDashboard, TrendingUp, Brain, Briefcase, Newspaper, Settings,
+  ChevronDown, HelpCircle,
 } from 'lucide-react'
 import DashboardPage from '@/pages/Dashboard'
 import StockDetailsPage from '@/pages/StockDetails'
@@ -13,172 +15,53 @@ import NewsPage from '@/pages/News'
 import PredictionsPage from '@/pages/Predictions'
 import AdminPage from '@/pages/Admin'
 import BacktestingPage from '@/pages/Backtesting'
-import SearchBar from '@/components/SearchBar'
+import Navbar from '@/components/Navbar'
+import CanvasParticles from '@/components/CanvasParticles'
+import FloatingOrbs from '@/components/FloatingOrbs'
+import StatsCounter from '@/components/StatsCounter'
+import CTASection from '@/components/CTASection'
+import Footer from '@/components/Footer'
+import CommandPalette from '@/components/CommandPalette'
+import { pageEnter } from '@/utils/animations'
 
-type AccentName = 'indigo' | 'emerald' | 'purple' | 'blue' | 'amber' | 'rose' | 'teal' | 'orange' | 'cyan' | 'gray'
+/* ─── Mouse glow effect ─── */
+function MouseGlow() {
+  const glowRef = useRef<HTMLDivElement>(null)
 
-interface NavItem {
-  icon: typeof LayoutDashboard
-  label: string
-  path: string
-  accent: AccentName
+  useEffect(() => {
+    const glow = glowRef.current
+    if (!glow) return
+    const onMove = (e: MouseEvent) => {
+      gsap.to(glow, {
+        x: e.clientX - 150,
+        y: e.clientY - 150,
+        duration: 0.6,
+        ease: 'power2.out',
+      })
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  return (
+    <div
+      ref={glowRef}
+      className="fixed top-0 left-0 w-[300px] h-[300px] rounded-full pointer-events-none z-[9999]"
+      style={{ background: 'radial-gradient(circle, rgba(212,168,83,0.06) 0%, transparent 60%)' }}
+    />
+  )
 }
 
-const accentColors: Record<AccentName, { activeBg: string; activeDot: string; text: string }> = {
-  indigo:  { activeBg: 'bg-indigo-500/10', activeDot: 'bg-indigo-400', text: 'text-indigo-400' },
-  emerald: { activeBg: 'bg-emerald-500/10', activeDot: 'bg-emerald-400', text: 'text-emerald-400' },
-  purple:  { activeBg: 'bg-purple-500/10', activeDot: 'bg-purple-400', text: 'text-purple-400' },
-  blue:    { activeBg: 'bg-blue-500/10', activeDot: 'bg-blue-400', text: 'text-blue-400' },
-  amber:   { activeBg: 'bg-amber-500/10', activeDot: 'bg-amber-400', text: 'text-amber-400' },
-  rose:    { activeBg: 'bg-rose-500/10', activeDot: 'bg-rose-400', text: 'text-rose-400' },
-  teal:    { activeBg: 'bg-teal-500/10', activeDot: 'bg-teal-400', text: 'text-teal-400' },
-  orange:  { activeBg: 'bg-orange-500/10', activeDot: 'bg-orange-400', text: 'text-orange-400' },
-  cyan:    { activeBg: 'bg-cyan-500/10', activeDot: 'bg-cyan-400', text: 'text-cyan-400' },
-  gray:    { activeBg: 'bg-white/[0.06]', activeDot: 'bg-gray-400', text: 'text-gray-400' },
-}
-
-const sections: { label: string; items: NavItem[] }[] = [
-  {
-    label: 'Markets',
-    items: [
-      { icon: LayoutDashboard, label: 'Dashboard',  path: '/dashboard',   accent: 'indigo' },
-      { icon: TrendingUp,      label: 'Stocks',      path: '/stocks',      accent: 'blue' },
-      { icon: Brain,           label: 'Predictions',  path: '/predictions', accent: 'purple' },
-    ],
-  },
-  {
-    label: 'Analysis',
-    items: [
-      { icon: BarChart2, label: 'Backtesting', path: '/backtesting', accent: 'teal' },
-      { icon: Briefcase, label: 'Portfolio',   path: '/portfolio',   accent: 'emerald' },
-    ],
-  },
-  {
-    label: 'General',
-    items: [
-      { icon: Newspaper, label: 'News',    path: '/news',    accent: 'amber' },
-      { icon: Settings,  label: 'Settings', path: '/settings', accent: 'gray' },
-      { icon: Shield,    label: 'Admin',    path: '/admin',   accent: 'rose' },
-    ],
-  },
-]
-
-/* ─── Sidebar (floating glass) ─── */
-function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+/* ─── Page transition wrapper ─── */
+function PageContent({ children }: { children: React.ReactNode }) {
   const location = useLocation()
-  const isActive = (p: string) => location.pathname === p || location.pathname.startsWith(p + '/')
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  return (
-    <>
-      {open && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onClose} />}
-      <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50
-        w-64 flex flex-col flex-shrink-0
-        transition-all duration-300 ease-out
-        ${open ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0
-      `}>
-        {/* Floating glass panel */}
-        <div className="flex-1 flex flex-col m-3 rounded-2xl glass-panel overflow-hidden border border-white/[0.06] shadow-elev-3">
-          {/* Logo */}
-          <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-white/[0.04]">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
-              FS
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-bold text-sm text-white font-display tracking-tight">FinSight</div>
-              <div className="text-[10px] text-ink-500 flex items-center gap-1">
-                <span>Pro Workspace</span>
-                <ChevronDown size={9} />
-              </div>
-            </div>
-            <button className="w-7 h-7 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-ink-500 hover:text-ink-300 transition-colors">
-              <PanelRightClose size={13} />
-            </button>
-          </div>
+  useEffect(() => {
+    pageEnter(containerRef.current)
+  }, [location.pathname])
 
-          {/* Nav */}
-          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
-            {sections.map((section) => (
-              <div key={section.label}>
-                <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-500/50">
-                  {section.label}
-                </div>
-                <div className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const Icon = item.icon
-                    const active = isActive(item.path)
-                    const ac = accentColors[item.accent]
-                    return (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        onClick={onClose}
-                        className={`
-                          group relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium
-                          transition-all duration-200
-                          ${active ? `${ac.activeBg} text-white` : 'text-ink-400 hover:text-ink-200 hover:bg-white/[0.02]'}
-                        `}
-                      >
-                        {active && (
-                          <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-full ${ac.activeDot}`} />
-                        )}
-                        <Icon size={16} className={active ? ac.text : 'text-ink-500 group-hover:text-ink-300'} />
-                        <span>{item.label}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
-
-          {/* Profile */}
-          <div className="p-3 border-t border-white/[0.04]">
-            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.02] transition cursor-pointer group">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
-                G
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-ink-300 truncate">Guest</div>
-                <div className="text-[10px] text-ink-500">Free Plan</div>
-              </div>
-              <LogOut size={12} className="text-ink-500 opacity-0 group-hover:opacity-100 transition" />
-            </div>
-          </div>
-        </div>
-      </aside>
-    </>
-  )
-}
-
-/* ─── Navbar ─── */
-function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
-  return (
-    <header className="sticky top-0 z-30 px-3 pt-3 lg:px-4 lg:pt-4">
-      <div className="glass-panel rounded-xl px-4 py-2.5 flex items-center justify-between gap-4 shadow-elev-2">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onMenuToggle}
-            className="lg:hidden w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-ink-400 hover:text-ink-200 transition"
-          >
-            <Menu size={18} />
-          </button>
-          <SearchBar />
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="btn-icon relative">
-            <Sparkles size={15} />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          </button>
-          <button className="btn-icon relative">
-            <Bell size={15} />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-rose-400" />
-          </button>
-        </div>
-      </div>
-    </header>
-  )
+  return <div ref={containerRef}>{children}</div>
 }
 
 /* ─── Settings ─── */
@@ -188,11 +71,11 @@ function SettingsPage() {
       <div className="eyebrow">Settings</div>
       <h1 className="text-display-sm text-white font-display">Preferences</h1>
       <div className="card-surface2 p-5 rounded-xl space-y-3 text-sm">
-        <p className="text-ink-400"><span className="text-ink-200 font-medium">Mode:</span> Testing (auth-free)</p>
-        <p className="text-ink-400"><span className="text-ink-200 font-medium">API URL:</span> {import.meta.env.VITE_API_URL || 'http://localhost:8000'}</p>
-        <p className="text-ink-400"><span className="text-ink-200 font-medium">Data:</span> Yahoo Finance (live)</p>
-        <p className="text-ink-400"><span className="text-ink-200 font-medium">Sentiment:</span> VADER + Finance Lexicon</p>
-        <p className="text-ink-400"><span className="text-ink-200 font-medium">ML:</span> LSTM + XGBoost + SHAP</p>
+        <p className="text-white/50"><span className="text-white/70 font-medium">Mode:</span> Testing (auth-free)</p>
+        <p className="text-white/50"><span className="text-white/70 font-medium">API URL:</span> {import.meta.env.VITE_API_URL || 'http://localhost:8000'}</p>
+        <p className="text-white/50"><span className="text-white/70 font-medium">Data:</span> Yahoo Finance (live)</p>
+        <p className="text-white/50"><span className="text-white/70 font-medium">Sentiment:</span> VADER + Finance Lexicon</p>
+        <p className="text-white/50"><span className="text-white/70 font-medium">ML:</span> LSTM + XGBoost + SHAP</p>
       </div>
     </div>
   )
@@ -210,19 +93,23 @@ const bottomItems = [
 function BottomNav() {
   const location = useLocation()
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-30 glass-panel border-t border-white/[0.04] lg:hidden pb-safe">
+    <nav className="fixed bottom-0 inset-x-0 z-30 glass-panel border-t border-white/5 lg:hidden pb-safe">
       <div className="flex justify-around items-center h-14 px-2">
         {bottomItems.map((item) => {
           const Icon = item.icon
           const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
           return (
             <Link key={item.path} to={item.path}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
-                active ? 'text-ink-100' : 'text-ink-500 hover:text-ink-300'
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all duration-300 ${
+                active ? 'text-gold' : 'text-white/40 hover:text-white/60'
               }`}
             >
-              <Icon size={18} />
-              <span className="text-[9px] font-medium">{item.label}</span>
+              {active && (
+                <motion.span layoutId="bottomnav-active" transition={spring}
+                  className="absolute inset-0 rounded-lg bg-white/[0.06]" />
+              )}
+              <Icon size={18} className="relative z-10" />
+              <span className="relative z-10 text-[9px] font-medium">{item.label}</span>
             </Link>
           )
         })}
@@ -233,28 +120,153 @@ function BottomNav() {
 
 /* ─── Layout ─── */
 function Layout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showShortcuts, setShowShortcuts] = useState(false)
+  const location = useLocation()
+  const sectionKey = '/' + (location.pathname.split('/')[1] || '')
+  const isDashboard = location.pathname === '/dashboard'
+
+  const [showScrollTop, setShowScrollTop] = useState(false)
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault()
+        setShowShortcuts((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  // Hide shortcuts on click outside
+  useEffect(() => {
+    if (!showShortcuts) return
+    const handler = () => setShowShortcuts(false)
+    window.addEventListener('click', handler, { once: true })
+    return () => window.removeEventListener('click', handler)
+  }, [showShortcuts])
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollTop(window.scrollY > 400)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // GSAP scroll-to-top button entrance
+  const scrollBtnRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const btn = scrollBtnRef.current
+    if (!btn) return
+    if (showScrollTop) {
+      gsap.to(btn, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out', pointerEvents: 'auto' })
+    } else {
+      gsap.to(btn, { opacity: 0, y: 16, scale: 0.8, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' })
+    }
+  }, [showScrollTop])
 
   return (
-    <div className="flex h-dvh overflow-hidden aurora noise grid-bg">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        <Navbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-y-auto pb-16 lg:pb-4">
-          <Outlet />
+    <div className="min-h-screen bg-[#0a0a0a] aurora noise grid-bg">
+      <MouseGlow />
+      {isDashboard && <CanvasParticles count={50} speed={0.2} connectDistance={100} />}
+      <FloatingOrbs />
+      <CommandPalette />
+
+      {/* Navbar at top - fixed */}
+      <Navbar />
+
+      {/* Main content with pt-16 to offset fixed navbar */}
+      <div className="relative z-10 pt-16">
+        <main className="flex-1 min-h-screen pb-20 lg:pb-8">
+          <AnimatePresence mode="wait">
+            <PageTransition key={sectionKey}>
+              <PageContent>
+                <Outlet />
+              </PageContent>
+            </PageTransition>
+          </AnimatePresence>
         </main>
+
+        {isDashboard && <StatsCounter />}
+        {isDashboard && <CTASection />}
+        <Footer />
       </div>
+
       <BottomNav />
+
+      {/* Keyboard shortcuts hint */}
+      <KeyboardShortcutsHint show={showShortcuts} />
+
+      {/* Scroll-to-top button */}
+      <button
+        ref={scrollBtnRef}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-6 right-6 z-50 w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-2 text-black font-bold shadow-lg shadow-gold/20 flex items-center justify-center hover:shadow-gold/30 hover:-translate-y-0.5 transition-all duration-300"
+        style={{ opacity: 0, y: 16, scale: 0.8, pointerEvents: 'none' }}
+      >
+        <ChevronDown size={18} className="rotate-180" />
+      </button>
+
+      {/* ? button for shortcuts */}
+      <button
+        onClick={() => setShowShortcuts((prev) => !prev)}
+        className="fixed bottom-6 left-6 z-50 w-9 h-9 rounded-xl bg-[#141414]/80 backdrop-blur-md border border-white/5 text-white/40 hover:text-white/70 hover:border-white/10 flex items-center justify-center transition-all duration-300 shadow-lg"
+      >
+        <HelpCircle size={16} />
+      </button>
+    </div>
+  )
+}
+
+/* ─── Keyboard shortcuts hint ─── */
+function KeyboardShortcutsHint({ show }: { show: boolean }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    gsap.to(el, {
+      opacity: show ? 1 : 0,
+      y: show ? 0 : 8,
+      duration: 0.3,
+      ease: 'power2.out',
+    })
+  }, [show])
+
+  if (!show) return null
+
+  return (
+    <div
+      ref={ref}
+      className="fixed bottom-20 right-6 z-50 card-surface3 rounded-xl border border-white/5 shadow-xl p-4 min-w-[180px]"
+    >
+      <div className="text-xs font-semibold text-white/70 mb-2">Keyboard Shortcuts</div>
+      <div className="space-y-1.5 text-[11px]">
+        <div className="flex items-center justify-between">
+          <span className="text-white/50">Search</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-white/[0.04] text-white/40">⌘K</kbd>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-white/50">Shortcuts</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-white/[0.04] text-white/40">?</kbd>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-white/50">Home</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-white/[0.04] text-white/40">⌘⇧H</kbd>
+        </div>
+      </div>
     </div>
   )
 }
 
 const toastStyle = {
   style: {
-    background: 'rgba(26,34,53,0.9)',
+    background: 'rgba(20,20,20,0.9)',
     backdropFilter: 'blur(20px)',
-    color: '#E5E7EB',
-    border: '1px solid rgba(255,255,255,0.06)',
+    color: 'rgba(232,232,224,0.8)',
+    border: '1px solid rgba(212,168,83,0.06)',
     borderRadius: '0.75rem',
     fontSize: '0.875rem',
   },

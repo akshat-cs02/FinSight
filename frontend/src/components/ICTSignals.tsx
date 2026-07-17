@@ -82,7 +82,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2 font-display">
-            <Shield size={18} className="text-emerald-400" /> ICT/SMC Live Signals
+            <Shield size={18} className="text-gold" /> ICT/SMC Live Signals
           </h2>
           <p className="text-xs text-gray-400 mt-0.5">
             {data?.source === 'universe_top3'

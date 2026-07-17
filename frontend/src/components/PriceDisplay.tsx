@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 
 const symSize = { sm: 'text-[9px]', md: 'text-[10px]', lg: 'text-[11px]', xl: 'text-[13px]', hero: 'text-[15px]' }
 const intSize = { sm: 'font-medium text-sm', md: 'font-semibold text-base', lg: 'font-bold text-xl', xl: 'font-bold text-2xl', hero: 'font-extrabold text-[32px]' }
@@ -6,10 +7,10 @@ const decSize = { sm: 'text-[10px]', md: 'text-[11px]', lg: 'text-[12px]', xl: '
 const gapMap = { sm: 'gap-px', md: 'gap-px', lg: 'gap-0.5', xl: 'gap-0.5', hero: 'gap-0.5' }
 
 const colorMap: Record<string, string> = {
-  default: 'text-ink-800',
-  gains: 'text-positive',
-  losses: 'text-negative',
-  brand: 'text-blue-400',
+  default: 'text-[rgba(220,252,231,0.7)]',
+  gains: 'text-green-400',
+  losses: 'text-red-400',
+  brand: 'text-green-400',
   emerald: 'text-emerald-400',
   purple: 'text-purple-400',
   cyan: 'text-cyan-400',
@@ -82,15 +83,41 @@ export default function PriceDisplay({
 
   const prev = useRef(price)
   const [flash, setFlash] = useState<'up' | 'down' | null>(null)
+  const containerRef = useRef<HTMLSpanElement>(null)
 
+  // GSAP number animation
   useEffect(() => {
-    if (!animate) { prev.current = price; return }
+    if (!animate || !containerRef.current) { prev.current = price; return }
     if (prev.current === price) return
-    setFlash(price > prev.current ? 'up' : 'down')
-    const t = setTimeout(() => setFlash(null), 700)
+
+    const el = containerRef.current
+    const fromVal = prev.current
+    const toVal = price
+
+    // Flash animation
+    setFlash(price > fromVal ? 'up' : 'down')
+    const flashTimer = setTimeout(() => setFlash(null), 700)
+
+    // GSAP count-up for the integer part
+    const intEl = el.querySelector('.pd-int')
+    if (intEl) {
+      const obj = { val: fromVal }
+      gsap.to(obj, {
+        val: toVal,
+        duration: 0.8,
+        ease: 'power3.out',
+        onUpdate: () => {
+          const parts = splitParts(obj.val, decimals)
+          intEl.textContent = withCommas(parts.int)
+          const decEl = el.querySelector('.pd-dec')
+          if (decEl) decEl.textContent = parts.dec
+        },
+      })
+    }
+
     prev.current = price
-    return () => clearTimeout(t)
-  }, [price, animate])
+    return () => clearTimeout(flashTimer)
+  }, [price, animate, decimals])
 
   const flashClass = flash === 'up' ? 'flash-up' : flash === 'down' ? 'flash-down' : ''
 
@@ -105,12 +132,15 @@ export default function PriceDisplay({
   }
 
   return (
-    <span className={`inline-flex items-baseline font-mono tabular-nums ${s.gap} ${c} ${flashClass} ${className}`}>
+    <span
+      ref={containerRef}
+      className={`inline-flex items-baseline font-mono tabular-nums ${s.gap} ${c} ${flashClass} ${className}`}
+    >
       {showSign && price > 0 && <span className="opacity-50 text-[0.75em]">+</span>}
       {price < 0 && <span className="opacity-50 text-[0.75em]">−</span>}
       <span className={`opacity-35 font-medium ${s.sym}`}>{sym}</span>
-      <span className={s.int}>{intComma}</span>
-      {dec && <span className={`opacity-40 ${s.dec}`}>.{dec}</span>}
+      <span className={`pd-int ${s.int}`}>{intComma}</span>
+      {dec && <span className={`pd-dec opacity-40 ${s.dec}`}>.{dec}</span>}
     </span>
   )
 }

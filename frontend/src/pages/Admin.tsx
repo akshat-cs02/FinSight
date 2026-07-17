@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Shield, Users, Cpu, BarChart3, RefreshCw, PlayCircle, CheckCircle2, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { pageEnter, staggerItems } from '@/utils/animations'
 import {
   adminService, AdminUser, ModelOverview, SystemStats,
 } from '@/services/adminService'
@@ -21,6 +22,20 @@ export default function AdminPage() {
   const [models, setModels] = useState<ModelOverview[] | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
+  const mainRef = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLDivElement>(null)
+  const modelsRef = useRef<HTMLDivElement>(null)
+  const usersRef = useRef<HTMLDivElement>(null)
+
+  // GSAP: page entrance
+  useEffect(() => { pageEnter(mainRef.current) }, [])
+
+  // GSAP: stagger stats cards
+  useEffect(() => {
+    if (!statsRef.current) return
+    const cards = statsRef.current.children
+    staggerItems(cards, { stagger: 0.06, y: 15 })
+  }, [stats])
 
   const refresh = async () => {
     setErr(null)
@@ -80,12 +95,12 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div ref={mainRef} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-ink-100 flex items-center gap-2 font-display">
-          <Shield size={28} className="text-rose-400" /> Admin ML Dashboard
+          <Shield size={28} className="text-gold" /> Admin Dashboard
         </h1>
-        <button onClick={refresh} className="btn-accent rose">
+        <button onClick={refresh} className="btn-accent">
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
@@ -93,26 +108,26 @@ export default function AdminPage() {
       {err && <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 text-rose-300">{err}</div>}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 anim-up delay-100">
-        <Section title="Users" icon={<Users size={18} className="text-rose-400" />} className="card-accent rose card-surface2 p-5">
+      <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Section title="Users" icon={<Users size={18} className="text-gold" />} className="card-accent card-surface2 p-5">
           {stats === null ? <span className="text-ink-500 text-sm">Loading…</span> : (
             <>
               <p className="text-3xl font-bold text-ink-100 font-mono">{stats.users.total}</p>
-              <p className="text-xs text-emerald-400">{stats.users.active} active</p>
+              <p className="text-xs text-gold">{stats.users.active} active</p>
             </>
           )}
         </Section>
-        <Section title="Portfolios" icon={<BarChart3 size={18} className="text-emerald-400" />}>
+        <Section title="Portfolios" icon={<BarChart3 size={18} className="text-gold" />}>
           {stats === null ? <span className="text-ink-500 text-sm">Loading…</span> : (
             <p className="text-3xl font-bold text-ink-100 font-mono">{stats.portfolios}</p>
           )}
         </Section>
-        <Section title="Predictions Logged" icon={<Cpu size={18} className="text-purple-400" />}>
+        <Section title="Predictions Logged" icon={<Cpu size={18} className="text-gold" />}>
           {stats === null ? <span className="text-ink-500 text-sm">Loading…</span> : (
               <p className="text-3xl font-bold text-ink-100 font-mono">{stats.predictions_logged}</p>
           )}
         </Section>
-        <Section title="Models Trained" icon={<CheckCircle2 size={18} className="text-yellow-400" />}>
+        <Section title="Models Trained" icon={<CheckCircle2 size={18} className="text-gold" />}>
           {stats === null ? <span className="text-ink-500 text-sm">Loading…</span> : (
             <>
               <p className="text-3xl font-bold text-ink-100 font-mono">{stats.ml_models.symbols_trained}/{stats.ml_models.symbols_supported}</p>
@@ -123,8 +138,8 @@ export default function AdminPage() {
       </div>
 
       {/* Models */}
-      <div className="anim-up delay-200">
-      <Section title="Model Performance" icon={<Cpu size={18} className="text-purple-400" />} className="card-accent purple card p-5">
+      <div ref={modelsRef}>
+      <Section title="Model Performance" icon={<Cpu size={18} className="text-gold" />} className="card-accent card p-5">
         {models === null ? <div className="text-ink-500 text-sm">Loading…</div> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -164,7 +179,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => retrain(m.symbol, 'both')}
                           disabled={busy === `${m.symbol}:both`}
-                          className="text-xs px-2 py-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded text-ink-100 inline-flex items-center gap-1"
+                          className="text-xs px-2 py-1 bg-gold hover:bg-gold-2 disabled:opacity-50 rounded text-black inline-flex items-center gap-1"
                         >
                           <PlayCircle size={11} /> {busy === `${m.symbol}:both` ? 'Training…' : 'Retrain'}
                         </button>
@@ -180,8 +195,8 @@ export default function AdminPage() {
       </div>
 
       {/* Users */}
-      <div className="anim-up delay-300">
-      <Section title="User Management" icon={<Users size={18} className="text-rose-400" />} className="card p-5">
+      <div ref={usersRef}>
+      <Section title="User Management" icon={<Users size={18} className="text-gold" />} className="card p-5">
         {users === null ? <div className="text-ink-500 text-sm">Loading…</div> : (
           <div className="overflow-x-auto">
             <table className="tbl w-full text-sm">
@@ -215,7 +230,7 @@ export default function AdminPage() {
                       <button onClick={() => toggleUser(u.id)} className="text-ink-400 hover:text-ink-100">
                         {u.is_active ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                       </button>
-                      <button onClick={() => deleteUser(u.id, u.email)} className="text-rose-400 hover:text-rose-300">
+                      <button onClick={() => deleteUser(u.id, u.email)} className="text-gold hover:text-gold-2">
                         <Trash2 size={14} />
                       </button>
                     </td>

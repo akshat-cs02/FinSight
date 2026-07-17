@@ -10,62 +10,59 @@ export default {
         serif: ['"Instrument Serif"', 'serif'],
       },
       colors: {
-        base:    '#09090B',
-        surface: '#111827',
-        'surface-2': '#1A2235',
-        'surface-3': '#20293F',
+        // ─── Warm Monochrome surfaces ───
+        base:    '#0a0a0a',
+        surface: '#141414',
+        'surface-2': '#1a1a1a',
+        'surface-3': '#222222',
 
-        // Page accents
-        indigo:  '#6366F1',
+        // ─── Brand accent — Gold ───
+        gold:    '#D4A853',
+        'gold-2':'#C9952E',
+        'gold-3':'#A67B2B',
+        'gold-4':'#8B6914',
+        'gold-5':'#B8860B',
+
+        // ─── Semantic — keep for financial data ───
+        green:   '#22C55E',
         emerald:'#10B981',
         purple:  '#8B5CF6',
         blue:    '#3B82F6',
         amber:   '#F59E0B',
         rose:    '#F43F5E',
-        teal:    '#14B8A6',
-        orange:  '#F97316',
-        cyan:    '#06B6D4',
 
-        // Semantic
-        green:   '#22C55E',
-        red:     '#EF4444',
+        gain:    '#22C55E',
+        loss:    '#EF4444',
+        neutral: '#9CA3AF',
         warn:    '#F59E0B',
         info:    '#3B82F6',
 
-        // Text
+        // ─── Ink — warm gray text ───
         ink: {
-          50:  '#FAFAFA',
-          100: '#F5F5F5',
-          200: '#E5E7EB',
-          300: '#D1D5DB',
-          400: '#9CA3AF',
-          500: '#6B7280',
-          600: '#4B5563',
-          700: '#374151',
-          800: '#1F2937',
-          900: '#111827',
+          50:  '#f5f5f0',
+          100: '#e5e5e0',
+          200: '#d0d0c8',
+          300: '#b0b0a8',
+          400: '#808080',
+          500: '#606060',
+          600: '#404040',
         },
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
       boxShadow: {
         'elev-1': '0 1px 2px rgba(0,0,0,0.5)',
-        'elev-2': '0 4px 12px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)',
-        'elev-3': '0 12px 32px -8px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3)',
-        'elev-4': '0 24px 48px -16px rgba(0,0,0,0.6)',
-        'glow-indigo':  '0 0 24px -4px rgba(99,102,241,0.35)',
-        'glow-emerald': '0 0 24px -4px rgba(16,185,129,0.35)',
-        'glow-purple':  '0 0 24px -4px rgba(139,92,246,0.35)',
-        'glow-blue':    '0 0 24px -4px rgba(59,130,246,0.35)',
-        'glow-amber':   '0 0 24px -4px rgba(245,158,11,0.35)',
-        'glow-rose':    '0 0 24px -4px rgba(244,63,94,0.35)',
-        'glow-teal':    '0 0 24px -4px rgba(20,184,166,0.35)',
+        'elev-2': '0 4px 12px rgba(0,0,0,0.4)',
+        'elev-3': '0 12px 32px -8px rgba(0,0,0,0.5)',
+        'elev-card': '0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)',
+        'elev-card-hover': '0 8px 24px -8px rgba(0,0,0,0.5)',
+        'glow-gold':   '0 0 24px -4px rgba(212,168,83,0.35)',
+        'glow-purple': '0 0 24px -4px rgba(139,92,246,0.35)',
       },
       animation: {
-        'float':     'float 6s ease-in-out infinite',
-        'float-slow':'float 10s ease-in-out infinite',
+        'float':       'float 6s ease-in-out infinite',
+        'float-slow':  'float 10s ease-in-out infinite',
+        'float-slower':'float 14s ease-in-out infinite',
         'pulse-subtle': 'pulse-subtle 3s ease-in-out infinite',
+        'drift':        'drift 20s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -75,6 +72,12 @@ export default {
         'pulse-subtle': {
           '0%,100%': { opacity: '0.4' },
           '50%':     { opacity: '0.8' },
+        },
+        drift: {
+          '0%,100%': { transform: 'translate(0, 0)' },
+          '25%':     { transform: 'translate(10px, -10px)' },
+          '50%':     { transform: 'translate(-5px, 5px)' },
+          '75%':     { transform: 'translate(8px, -5px)' },
         },
       },
     },

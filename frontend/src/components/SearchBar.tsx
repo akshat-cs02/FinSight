@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
+import gsap from 'gsap'
 import { stockService, SearchResult } from '@/services/stockService'
 
 type Market = 'all' | 'us' | 'india' | 'crypto' | 'forex' | 'europe' | 'commodities'
@@ -28,8 +29,6 @@ const MARKET_SUGGESTIONS: Record<Market, { symbol: string; name: string; type?: 
     { symbol: 'JPM',   name: 'JPMorgan Chase',      type: 'EQUITY' },
   ],
   india: [
-    // Type any NSE ticker in the search box — backend auto-appends .NS / .BO.
-    // List below is just popular quick-picks; not a limit.
     { symbol: 'RELIANCE.NS',    name: 'Reliance Industries', type: 'EQUITY' },
     { symbol: 'TCS.NS',         name: 'Tata Consultancy',    type: 'EQUITY' },
     { symbol: 'HDFCBANK.NS',    name: 'HDFC Bank',           type: 'EQUITY' },
@@ -158,8 +157,6 @@ const MARKET_SUGGESTIONS: Record<Market, { symbol: string; name: string; type?: 
     { symbol: 'NESN.SW',  name: 'Nestlé',      type: 'EQUITY' },
   ],
   commodities: [
-    // Spot-tracking ETFs (yfinance quotes match TradingView's AMEX:* chart).
-    // No futures contracts — these are the "main" symbols traders use.
     { symbol: 'GLD',  name: 'Gold',        type: 'ETF' },
     { symbol: 'SLV',  name: 'Silver',      type: 'ETF' },
     { symbol: 'USO',  name: 'Crude Oil',   type: 'ETF' },
@@ -182,9 +179,16 @@ export default function SearchBar() {
   const [results,  setResults]  = useState<SearchResult[]>([])
   const [open,     setOpen]     = useState(false)
   const [loading,  setLoading]  = useState(false)
-  const [market,   setMarket]   = useState<Market>('all')
+  const [market,   setMarket]   = useState<Market>('crypto')
+  const [expanded, setExpanded] = useState(false)
   const timer  = useRef<number | null>(null)
   const boxRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const nicheMarkets = MARKET_LABELS.filter((m) => ['crypto','forex','europe','commodities'].includes(m.id))
+  const activeMarket = MARKET_LABELS.find((m) => m.id === market)
+  const suggestions = MARKET_SUGGESTIONS[market]
+  const showSuggestions = !q.trim() && market !== 'all' && suggestions.length > 0
 
   // Search when query changes
   useEffect(() => {
@@ -202,10 +206,39 @@ export default function SearchBar() {
     return () => { if (timer.current) window.clearTimeout(timer.current) }
   }, [q])
 
+  // GSAP: expand/collapse animation
+  useEffect(() => {
+    const el = boxRef.current
+    if (!el) return
+    if (expanded) {
+      gsap.to(el, {
+        width: 400,
+        duration: 0.35,
+        ease: 'power3.out',
+      })
+      gsap.fromTo(
+        el.querySelector('.search-content'),
+        { opacity: 0, y: -8 },
+        { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out', delay: 0.15 }
+      )
+      setTimeout(() => searchInputRef.current?.focus(), 200)
+    } else {
+      gsap.to(el, {
+        width: '36px',
+        minWidth: '36px',
+        duration: 0.25,
+        ease: 'power2.out',
+      })
+    }
+  }, [expanded])
+
   // Close on outside click
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false)
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
+        setOpen(false)
+        setExpanded(false)
+      }
     }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
@@ -220,114 +253,145 @@ export default function SearchBar() {
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && q.trim()) pick(q.trim())
+    if (e.key === 'Escape') { setExpanded(false); setOpen(false) }
   }
 
-  // What to show in the dropdown
-  const suggestions = MARKET_SUGGESTIONS[market]
-  const showSuggestions = !q.trim() && market !== 'all' && suggestions.length > 0
+  const toggleExpand = () => {
+    if (expanded) {
+      setExpanded(false)
+      setOpen(false)
+    } else {
+      setExpanded(true)
+    }
+  }
 
   return (
-    <div ref={boxRef} className="relative w-full max-w-lg">
-      {/* Market filter chips — hidden on mobile, shown on sm+ */}
-      <div className="hidden sm:flex gap-1 mb-2 flex-wrap">
-        {MARKET_LABELS.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => { setMarket(m.id); if (!q.trim()) setOpen(true) }}
-            className={`px-2 py-0.5 rounded-full text-xs font-medium transition ${
-              market === m.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
-            }`}
-          >
-            {m.flag} {m.label}
-          </button>
-        ))}
-      </div>
+    <div
+      ref={boxRef}
+      className="relative overflow-visible"
+      style={{ width: '36px', minWidth: '36px' }}
+    >
+      {/* Collapsed: just search icon */}
+      {!expanded && (
+        <button
+          onClick={toggleExpand}
+          className="w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/70 transition-all duration-300"
+          title="Search"
+        >
+          <Search size={16} />
+        </button>
+      )}
 
-      {/* Search input */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={onKey}
-          onFocus={() => (results.length > 0 || showSuggestions) && setOpen(true)}
-          placeholder={
-            market === 'all'   ? 'Search any stock, crypto, forex, ETF…' :
-            market === 'us'    ? 'Search US stocks (AAPL, MSFT, NVDA…)' :
-            market === 'india' ? 'Any NSE/BSE stock — type the name (e.g. ADANIPORTS, IRCTC, ZOMATO)' :
-            market === 'crypto'? 'Search crypto (BTC-USD, ETH-USD…)' :
-            market === 'forex' ? 'Any pair — EURUSD, GBPUSD, USDJPY…' :
-            market === 'europe'? 'Search European stocks (SAP.DE, AZN.L…)' :
-                                 'Commodities — GLD/SLV/USO for full features, XAUUSD/USOIL for chart-only'
-          }
-          className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-        />
-      </div>
-
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute z-50 mt-1 w-full card-layer rounded-xl shadow-xl max-h-80 overflow-auto">
-          {/* Mobile market filter row */}
-          <div className="flex sm:hidden gap-1 p-2 border-b border-gray-700 flex-wrap">
-            {MARKET_LABELS.map((m) => (
+      {/* Expanded: chips + search input */}
+      {expanded && (
+        <div className="search-content">
+          {/* 4 niche market chips on TOP */}
+          <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+            {nicheMarkets.map((m) => (
               <button
                 key={m.id}
-                onClick={() => { setMarket(m.id); if (!q.trim()) setOpen(true) }}
-                className={`px-2 py-0.5 rounded-full text-xs font-medium transition ${
+                onClick={() => { setMarket(m.id); if (!q.trim()) setOpen(true); searchInputRef.current?.focus() }}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
                   market === m.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-400'
+                    ? 'bg-green-600/20 text-green-400 border border-green-500/30'
+                    : 'text-white/40 hover:text-white/70 border border-transparent hover:border-white/[0.06]'
                 }`}
               >
                 {m.flag} {m.label}
               </button>
             ))}
+            {/* Close button */}
+            <button
+              onClick={toggleExpand}
+              className="ml-auto w-6 h-6 rounded-md bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-white/30 hover:text-white/60 transition-all duration-200"
+              title="Close search"
+            >
+              <X size={12} />
+            </button>
           </div>
-          {/* Market suggestions (no query) */}
-          {showSuggestions && !q.trim() && (
-            <>
-              <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-700">
-                Popular in {MARKET_LABELS.find((m) => m.id === market)?.label}
+
+          {/* Search input BELOW chips */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
+            <input
+              ref={searchInputRef}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={onKey}
+              onFocus={() => (results.length > 0 || showSuggestions) && setOpen(true)}
+              placeholder={
+                market === 'crypto'? 'Search crypto (BTC-USD, ETH-USD, SOL-USD…)' :
+                market === 'forex' ? 'Any pair — EURUSD, GBPUSD, USDJPY…' :
+                market === 'europe'? 'European stocks (SAP.DE, AZN.L, MC.PA…)' :
+                                     'Commodities — GLD, SLV, USO, UNG…'
+              }
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-white/25 focus:outline-none focus:border-green-500/50 focus:bg-white/[0.06] transition-all duration-300"
+            />
+          </div>
+
+          {/* Dropdown */}
+          {open && (
+            <div className="absolute z-50 mt-1 w-full card-layer rounded-xl shadow-xl max-h-80 overflow-auto">
+              {/* Mobile market chips (desktop chips already visible above input) */}
+              <div className="flex sm:hidden gap-1.5 p-2.5 border-b border-white/[0.06] flex-wrap">
+                {MARKET_LABELS.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => { setMarket(m.id); if (!q.trim()) setOpen(true) }}
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                      market === m.id
+                        ? 'bg-green-600/20 text-green-400 border border-green-500/30'
+                        : 'text-white/40 hover:text-white/70'
+                    }`}
+                  >
+                    {m.flag} {m.label}
+                  </button>
+                ))}
               </div>
-              {suggestions.map((s) => (
-                <button key={s.symbol} onClick={() => pick(s.symbol)}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 border-b border-gray-700 last:border-b-0 flex items-center justify-between">
+              {/* Market suggestions */}
+              {showSuggestions && !q.trim() && (
+                <>
+                  <div className="px-3 py-2 text-xs text-white/30 border-b border-white/[0.06]">
+                    Popular in {MARKET_LABELS.find((m) => m.id === market)?.label}
+                  </div>
+                  {suggestions.map((s) => (
+                    <button key={s.symbol} onClick={() => pick(s.symbol)}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-white/[0.03] border-b border-white/[0.04] last:border-b-0 flex items-center justify-between">
+                      <span>
+                        <span className="font-bold text-white/80">{s.symbol}</span>
+                        <span className="text-white/30 ml-2">{s.name}</span>
+                      </span>
+                      {s.type && (
+                        <span className="text-xs text-white/20 bg-white/[0.04] px-2 py-0.5 rounded-full">
+                          {TYPE_LABEL[s.type] || s.type}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </>
+              )}
+              {/* Live search results */}
+              {q.trim() && loading && (
+                <div className="px-3 py-2 text-white/40 text-sm">Searching…</div>
+              )}
+              {q.trim() && !loading && results.length === 0 && (
+                <button onClick={() => pick(q)} className="w-full text-left px-3 py-2 text-sm hover:bg-white/[0.03]">
+                  <span className="font-bold text-white/80">{q.toUpperCase()}</span>
+                  <span className="text-white/30 ml-2">— go directly to this ticker</span>
+                </button>
+              )}
+              {q.trim() && results.map((r) => (
+                <button key={r.symbol} onClick={() => pick(r.symbol, r.tv_symbol)}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-white/[0.03] border-b border-white/[0.04] last:border-b-0 flex items-center justify-between">
                   <span>
-                    <span className="font-bold text-white">{s.symbol}</span>
-                    <span className="text-gray-400 ml-2">{s.name}</span>
+                    <span className="font-bold text-white/80">{r.symbol}</span>
+                    {r.name && <span className="text-white/30 ml-2">{r.name}</span>}
                   </span>
-                  {s.type && (
-                    <span className="text-xs text-gray-500 bg-gray-700 px-2 py-0.5 rounded-full">
-                      {TYPE_LABEL[s.type] || s.type}
-                    </span>
-                  )}
+                  {r.exchange && <span className="text-xs text-white/20">{r.exchange}</span>}
                 </button>
               ))}
-            </>
+            </div>
           )}
-
-          {/* Live search results */}
-          {q.trim() && loading && (
-            <div className="px-3 py-2 text-gray-400 text-sm">Searching…</div>
-          )}
-          {q.trim() && !loading && results.length === 0 && (
-            <button onClick={() => pick(q)} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700">
-              <span className="font-bold text-white">{q.toUpperCase()}</span>
-              <span className="text-gray-400 ml-2">— go directly to this ticker</span>
-            </button>
-          )}
-          {q.trim() && results.map((r) => (
-            <button key={r.symbol} onClick={() => pick(r.symbol, r.tv_symbol)}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 border-b border-gray-700 last:border-b-0 flex items-center justify-between">
-              <span>
-                <span className="font-bold text-white">{r.symbol}</span>
-                {r.name && <span className="text-gray-400 ml-2">{r.name}</span>}
-              </span>
-              {r.exchange && <span className="text-xs text-gray-500">{r.exchange}</span>}
-            </button>
-          ))}
         </div>
       )}
     </div>

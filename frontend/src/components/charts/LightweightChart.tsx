@@ -168,17 +168,17 @@ export default function LightweightChart({ symbol, height = 680, interval = 'D',
   return (
     <div className="w-full">
       <div
-        className="w-full rounded-xl overflow-hidden border border-gray-700 bg-gray-900 relative"
+        className="w-full rounded-xl overflow-hidden card-layer relative"
         style={{ height }}
       >
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 z-20">
-            <div className="text-gray-400 text-sm animate-pulse">Loading chart…</div>
+          <div className="absolute inset-0 flex items-center justify-center bg-surface/80 z-20">
+            <div className="text-ink-400 text-sm animate-pulse">Loading chart…</div>
           </div>
         )}
 
         {error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/90 z-20 gap-3">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/90 z-20 gap-3">
             <p className="text-gray-400 text-sm">{error}</p>
             <a
               href={fallbackHref}

@@ -221,7 +221,7 @@ export default function TradingViewWidget({ symbol, tvSymbol: tvSymbolProp, heig
   return (
     <div className="w-full">
       <div
-        className="w-full rounded-xl overflow-hidden border border-gray-700 bg-gray-900 relative"
+        className="w-full rounded-xl overflow-hidden card-layer relative"
         style={{ height }}
       >
         <iframe
