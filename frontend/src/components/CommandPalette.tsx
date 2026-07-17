@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Command, LayoutDashboard, TrendingUp, Briefcase, Newspaper, Brain, BarChart2, Shield, Settings, ArrowUpDown } from 'lucide-react'
+import { Search, Command, LayoutDashboard, TrendingUp, Briefcase, Newspaper, Brain, BarChart2, Shield, ArrowUpDown } from 'lucide-react'
 import gsap from 'gsap'
 
 interface PageItem {
@@ -18,7 +18,6 @@ const PAGES: PageItem[] = [
   { label: 'Backtesting', path: '/backtesting', icon: BarChart2, keywords: ['test', 'strategy', 'ict'] },
   { label: 'News', path: '/news', icon: Newspaper, keywords: ['articles', 'financial'] },
   { label: 'Admin', path: '/admin', icon: Shield, keywords: ['manage', 'users', 'system'] },
-  { label: 'Settings', path: '/settings', icon: Settings, keywords: ['preferences', 'config'] },
 ]
 
 function fuzzyMatch(text: string, query: string): boolean {

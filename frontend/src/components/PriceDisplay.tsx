@@ -7,7 +7,7 @@ const decSize = { sm: 'text-[10px]', md: 'text-[11px]', lg: 'text-[12px]', xl: '
 const gapMap = { sm: 'gap-px', md: 'gap-px', lg: 'gap-0.5', xl: 'gap-0.5', hero: 'gap-0.5' }
 
 const colorMap: Record<string, string> = {
-  default: 'text-white/80',
+  default: 'text-ink-100',
   gains: 'text-green-400',
   losses: 'text-red-400',
   brand: 'text-gold',

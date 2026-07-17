@@ -5,7 +5,7 @@ import { PageTransition, spring } from '@/components/ui/motion'
 import { Toaster } from 'react-hot-toast'
 import gsap from 'gsap'
 import {
-  LayoutDashboard, TrendingUp, Brain, Briefcase, Newspaper, Settings,
+  LayoutDashboard, TrendingUp, Brain, Briefcase, Newspaper,
   ChevronDown, HelpCircle,
 } from 'lucide-react'
 import DashboardPage from '@/pages/Dashboard'
@@ -22,6 +22,7 @@ import StatsCounter from '@/components/StatsCounter'
 import CTASection from '@/components/CTASection'
 import Footer from '@/components/Footer'
 import CommandPalette from '@/components/CommandPalette'
+import SplashScreen from '@/components/SplashScreen'
 import { pageEnter } from '@/utils/animations'
 
 /* ─── Mouse glow effect ─── */
@@ -62,23 +63,6 @@ function PageContent({ children }: { children: React.ReactNode }) {
   }, [location.pathname])
 
   return <div ref={containerRef}>{children}</div>
-}
-
-/* ─── Settings ─── */
-function SettingsPage() {
-  return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-4">
-      <div className="eyebrow">Settings</div>
-      <h1 className="text-display-sm text-white font-display">Preferences</h1>
-      <div className="card-surface2 p-5 rounded-xl space-y-3 text-sm">
-        <p className="text-white/50"><span className="text-white/70 font-medium">Mode:</span> Testing (auth-free)</p>
-        <p className="text-white/50"><span className="text-white/70 font-medium">API URL:</span> {import.meta.env.VITE_API_URL || 'http://localhost:8000'}</p>
-        <p className="text-white/50"><span className="text-white/70 font-medium">Data:</span> Yahoo Finance (live)</p>
-        <p className="text-white/50"><span className="text-white/70 font-medium">Sentiment:</span> VADER + Finance Lexicon</p>
-        <p className="text-white/50"><span className="text-white/70 font-medium">ML:</span> LSTM + XGBoost + SHAP</p>
-      </div>
-    </div>
-  )
 }
 
 /* ─── Bottom Nav (mobile) ─── */
@@ -259,9 +243,7 @@ function KeyboardShortcutsHint({ show }: { show: boolean }) {
       </div>
     </div>
   )
-}
-
-const toastStyle = {
+}const toastStyle = {
   style: {
     background: 'rgba(20,20,20,0.9)',
     backdropFilter: 'blur(20px)',
@@ -274,8 +256,19 @@ const toastStyle = {
 
 /* ─── App ─── */
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false)
+  const firstVisit = useRef(sessionStorage.getItem('finsight_splash') !== 'true')
+
+  const handleSplashFinish = () => {
+    sessionStorage.setItem('finsight_splash', 'true')
+    setSplashDone(true)
+  }
+
   return (
     <Router>
+      {!splashDone && firstVisit.current && (
+        <SplashScreen onFinish={handleSplashFinish} />
+      )}
       <Toaster position="top-right" toastOptions={toastStyle} />
       <Routes>
         <Route element={<Layout />}>
@@ -287,7 +280,6 @@ export default function App() {
           <Route path="/portfolio"   element={<PortfolioPage />} />
           <Route path="/news"        element={<NewsPage />} />
           <Route path="/admin"       element={<AdminPage />} />
-          <Route path="/settings"    element={<SettingsPage />} />
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

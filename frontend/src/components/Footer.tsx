@@ -1,5 +1,5 @@
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
-import { Brain, Github, Twitter, Mail, ChevronUp } from 'lucide-react'
+import { Brain, Twitter, Mail, ChevronUp, BookOpen } from 'lucide-react'
 
 const footerLinks = [
   {
@@ -25,7 +25,6 @@ const footerLinks = [
     links: [
       { text: 'News', href: '/news' },
       { text: 'API Docs', href: '/api/docs' },
-      { text: 'Settings', href: '/settings' },
       { text: 'Support', href: 'mailto:support@finsight.app' },
     ],
   },
@@ -59,8 +58,8 @@ export default function Footer() {
               and institutional-grade backtesting tools.
             </p>
             <div className="flex gap-3 mt-4">
-              <a href="#" className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-gold/10 flex items-center justify-center text-ink-400 hover:text-gold transition-all">
-                <Github size={14} />
+              <a href="/api/docs" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-gold/10 flex items-center justify-center text-ink-400 hover:text-gold transition-all" title="API Documentation">
+                <BookOpen size={14} />
               </a>
               <a href="#" className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-gold/10 flex items-center justify-center text-ink-400 hover:text-gold transition-all">
                 <Twitter size={14} />

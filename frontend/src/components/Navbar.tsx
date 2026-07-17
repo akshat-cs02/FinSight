@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, TrendingUp, Brain, BarChart2, Briefcase, Newspaper,
-  Settings, Shield, Search, Bell, User, LogOut, Menu, X, Sparkles,
+  Shield, Search, Bell, User, LogOut, Menu, X, Sparkles,
 } from 'lucide-react'
 import gsap from 'gsap'
 import { useAuthStore } from '@/store/authStore'
@@ -18,7 +18,6 @@ const navItems = [
   { icon: BarChart2,       label: 'Backtesting', path: '/backtesting' },
   { icon: Briefcase,       label: 'Portfolio',   path: '/portfolio' },
   { icon: Newspaper,       label: 'News',        path: '/news' },
-  { icon: Settings,        label: 'Settings',    path: '/settings' },
 ]
 
 export default function Navbar() {
@@ -213,14 +212,8 @@ export default function Navbar() {
               className="absolute right-4 top-1 mt-1 w-48 bg-[#141414]/95 backdrop-blur-xl rounded-lg shadow-xl border border-white/5 z-50 overflow-hidden"
             >
               <button
-                onClick={() => { navigate('/settings'); setShowUserMenu(false) }}
-                className="w-full text-left px-4 py-3 text-sm hover:bg-white/[0.04] transition-all duration-300 flex items-center gap-2 text-white/70"
-              >
-                <Settings size={14} /> Settings
-              </button>
-              <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-3 text-sm hover:bg-white/[0.04] transition-all duration-300 flex items-center gap-2 border-t border-white/5 text-rose-400"
+                className="w-full text-left px-4 py-3 text-sm hover:bg-white/[0.04] transition-all duration-300 flex items-center gap-2 text-rose-400"
               >
                 <LogOut size={14} /> Logout
               </button>
