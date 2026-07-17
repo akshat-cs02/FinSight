@@ -150,7 +150,7 @@ function MetricCard({ label, value, good, suffix = '', small = false }: {
   label: string; value: string | number; good: boolean; suffix?: string; small?: boolean
 }) {
   return (
-    <div className="card-layer rounded-xl p-4">
+    <div className="card p-4">
       <p className="text-xs text-ink-400 mb-1">{label}</p>
       <p className={`font-bold tabular-nums ${small ? 'text-lg' : 'text-2xl'} ${good ? 'text-emerald-400' : 'text-rose-400'}`}>
         {value}{suffix}
@@ -255,9 +255,9 @@ export default function BacktestingPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
 
       {/* Header */}
-      <div className="animate-spring-up stagger-0">
+      <div className="anim-up delay-0">
         <h1 className="text-3xl font-bold text-ink-50 flex items-center gap-3 font-display">
-          <BarChart2 size={28} className="text-amber-400" /> ICT/SMC Backtesting Engine
+          <BarChart2 size={28} className="text-teal-400" /> ICT/SMC Backtesting Engine
         </h1>
         <p className="text-ink-500 mt-1 text-sm">
           Professional-grade backtesting with ICT & Smart Money Concepts — 8 strategies, news filter, 5-year data
@@ -265,8 +265,8 @@ export default function BacktestingPage() {
       </div>
 
       {/* Controls */}
-      <div className="card-accent-top amber card-layer rounded-xl p-6 space-y-5 animate-spring-up stagger-1">
-        <div className="section-eyebrow amber">
+      <div className="card-accent teal card p-5 anim-up delay-1">
+        <div className="section-rule teal">
           <h2 className="font-display text-ink-50">Configure Backtest</h2>
         </div>
 
@@ -290,7 +290,7 @@ export default function BacktestingPage() {
                 <button key={sym} onClick={() => setSymbol(sym)}
                         title={`${sym} · ${group}`}
                         className={`px-2 py-1 text-xs rounded transition ${symbol === sym
-                          ? 'bg-amber-500 text-white'
+                          ? 'bg-teal-500 text-white'
                           : group === 'IN'     ? 'bg-orange-900/50 text-orange-300 hover:bg-orange-800/60'
                           : group === 'FX'     ? 'bg-purple-900/50 text-purple-300 hover:bg-purple-800/60'
                           : group === 'Crypto' ? 'bg-yellow-900/50 text-yellow-300 hover:bg-yellow-800/60'
@@ -322,7 +322,7 @@ export default function BacktestingPage() {
                   if (!validPeriods.includes(period)) setPeriod(validPeriods[validPeriods.length - 1])
                 }}
                         className={`px-3 py-2 text-xs rounded transition ${interval === iv
-                          ? 'bg-amber-500 text-white'
+                          ? 'bg-teal-500 text-white'
                           : 'bg-gray-700 text-ink-300 hover:bg-gray-600'}`}>
                   {iv.toUpperCase()}
                 </button>
@@ -337,7 +337,7 @@ export default function BacktestingPage() {
               {INTERVAL_PERIODS[interval].map((p) => (
                 <button key={p} onClick={() => setPeriod(p)}
                         className={`px-3 py-2 text-xs rounded transition ${period === p
-                          ? 'bg-amber-500 text-white'
+                          ? 'bg-teal-500 text-white'
                           : 'bg-gray-700 text-ink-300 hover:bg-gray-600'}`}>
                   {p.toUpperCase()}
                 </button>
@@ -357,13 +357,13 @@ export default function BacktestingPage() {
           <div className="flex flex-col gap-2 pt-5">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={allowShort} onChange={(e) => setAllowShort(e.target.checked)}
-                     className="accent-amber-500" />
+                     className="accent-teal-500" />
               <span className="text-xs text-ink-300">Allow Short</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={filterNews} onChange={(e) => setFilterNews(e.target.checked)}
-                     className="accent-amber-500" />
-              <span className="text-xs text-amber-300 flex items-center gap-1">
+                     className="accent-teal-500" />
+              <span className="text-xs text-teal-300 flex items-center gap-1">
                 <Shield size={10} /> News Filter
               </span>
             </label>
@@ -376,7 +376,7 @@ export default function BacktestingPage() {
             <button
               onClick={() => setMode('leaderboard')}
               className={`px-4 py-2 text-sm rounded-lg font-medium transition flex items-center gap-2 ${
-                mode === 'leaderboard' ? 'bg-amber-500 text-white' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
+                mode === 'leaderboard' ? 'bg-teal-500 text-white' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
               }`}
             >
               <Trophy size={14} /> Leaderboard (All 8 Strategies)
@@ -400,7 +400,7 @@ export default function BacktestingPage() {
           </div>
 
           {mode === 'leaderboard' && (
-            <p className="text-xs text-amber-400 flex items-center gap-1">
+            <p className="text-xs text-teal-400 flex items-center gap-1">
               <Trophy size={11} /> Runs all 8 ICT/SMC strategies and ranks by Sharpe ratio. May take 20-40s.
             </p>
           )}
@@ -413,7 +413,7 @@ export default function BacktestingPage() {
                   onClick={() => setSelectedStrategy(s.key)}
                   className={`p-3 rounded-lg text-left border transition ${
                     selectedStrategy === s.key
-                      ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                      ? 'bg-teal-500/20 border-teal-500 text-teal-300'
                       : 'bg-gray-700 border-gray-600 text-ink-300 hover:bg-gray-600'
                   }`}
                 >
@@ -435,7 +435,7 @@ export default function BacktestingPage() {
           </button>
         ) : (
           <button onClick={run} disabled={loading}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 rounded-lg text-white font-medium transition">
+                  className="flex items-center gap-2 px-6 py-2.5 bg-teal-500 hover:bg-teal-600 disabled:opacity-50 rounded-lg text-white font-medium transition">
             {loading ? <RefreshCw size={16} className="animate-spin" /> : <BarChart2 size={16} />}
             {loading ? (mode === 'leaderboard' ? 'Running 8 strategies…' : 'Running backtest…') : 'Run Backtest'}
           </button>
@@ -443,16 +443,16 @@ export default function BacktestingPage() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm animate-spring-up stagger-2">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm anim-up delay-2">{error}</div>
       )}
 
       {/* ── Leaderboard Results ────────────────────────────────────────────────── */}
       {leaderResult && mode === 'leaderboard' && (
         <>
-          <div className="card-layer rounded-xl p-6 animate-spring-up stagger-2">
-            <div className="section-eyebrow amber">
+          <div className="card-box p-6 anim-up delay-2">
+            <div className="section-rule teal">
               <h2 className="font-display text-ink-50 flex items-center gap-2">
-                <Trophy size={18} className="text-amber-400" />
+                <Trophy size={18} className="text-teal-400" />
                 Strategy Leaderboard — {leaderResult.symbol} ({leaderResult.period})
               </h2>
             </div>
@@ -467,7 +467,7 @@ export default function BacktestingPage() {
                   <div key={item.strategy}
                        className={`rounded-xl border transition overflow-hidden ${
                          isWinner
-                           ? 'border-amber-500/40 bg-amber-500/[0.03]'
+                           ? 'border-teal-500/40 bg-teal-500/[0.03]'
                            : hasError
                              ? 'border-gray-700 bg-gray-800/50 opacity-60'
                              : 'border-gray-700 bg-gray-800/80'
@@ -479,7 +479,7 @@ export default function BacktestingPage() {
                     >
                       {/* Rank */}
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        isWinner ? 'bg-amber-500 text-black'
+                        isWinner ? 'bg-teal-500 text-black'
                           : item.rank === 2 ? 'bg-gray-400 text-black'
                           : item.rank === 3 ? 'bg-orange-600 text-white'
                           : 'bg-gray-700 text-ink-300'
@@ -496,7 +496,7 @@ export default function BacktestingPage() {
                           <span className="font-semibold text-ink-50 text-sm">
                             {STRATEGIES.find(s => s.key === item.strategy)?.label || item.strategy}
                           </span>
-                          {isWinner && <span className="text-amber-400 text-xs">👑 Best</span>}
+                          {isWinner && <span className="text-teal-400 text-xs">👑 Best</span>}
                         </div>
                       </div>
 
@@ -605,7 +605,7 @@ export default function BacktestingPage() {
       {/* ── Single Strategy Results ────────────────────────────────────────────── */}
       {singleResult && mode === 'single' && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 animate-spring-up stagger-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 anim-up delay-3">
             <MetricCard label="Total Return"
               value={`${(singleResult.metrics.total_return_pct || 0) >= 0 ? '+' : ''}${(singleResult.metrics.total_return_pct || 0).toFixed(2)}`}
               good={(singleResult.metrics.total_return_pct || 0) >= 0} suffix="%" />
@@ -626,7 +626,7 @@ export default function BacktestingPage() {
               good={singleResult.metrics.total_trades > 0} />
           </div>
 
-          <div className="card-layer rounded-xl p-4 text-sm text-ink-400 flex flex-wrap gap-4 animate-spring-up stagger-4">
+          <div className="card p-4 text-sm text-ink-400 flex flex-wrap gap-4 anim-up delay-4">
             <span>{singleResult.symbol} · {singleResult.strategy} · {singleResult.period}</span>
             <span>{singleResult.data_bars} bars</span>
             <span>Initial: ${singleResult.initial_capital.toLocaleString()} →
@@ -635,7 +635,7 @@ export default function BacktestingPage() {
               </span>
             </span>
             {singleResult.news_filter && (
-              <span className="text-amber-400">
+              <span className="text-teal-400">
                 <Shield size={12} className="inline mr-1" />{singleResult.blackout_days} news days excluded
               </span>
             )}
@@ -655,7 +655,7 @@ export default function BacktestingPage() {
       {mode === 'universe' && universeResult && (
         <>
           {universeResult.status === 'computing' ? (
-            <div className="card-layer rounded-xl p-8 text-center animate-spring-up stagger-2">
+            <div className="card p-6 text-center anim-up delay-2">
               <RefreshCw size={32} className="animate-spin text-emerald-400 mx-auto mb-3" />
               <p className="font-semibold text-ink-50">Universe analysis computing in background…</p>
               <p className="text-ink-400 text-sm mt-1">{universeResult.message}</p>
@@ -664,7 +664,7 @@ export default function BacktestingPage() {
           ) : (
             <div className="space-y-4">
               {/* Header */}
-              <div className="card-layer rounded-xl p-6 animate-spring-up stagger-2">
+              <div className="card-surface2 p-6 anim-up delay-2">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-bold text-ink-50 flex items-center gap-2">
                     <Shield size={18} className="text-emerald-400" /> Global Strategy Rankings
@@ -683,7 +683,7 @@ export default function BacktestingPage() {
                   <div className="flex flex-wrap gap-3 mb-5">
                     {universeResult.top_strategies.map((s, i) => (
                       <div key={s} className={`px-4 py-2 rounded-xl border flex items-center gap-2 ${
-                        i === 0 ? 'bg-amber-500/10 border-amber-500/50 text-amber-300'
+                        i === 0 ? 'bg-teal-500/10 border-teal-500/50 text-teal-300'
                         : i === 1 ? 'bg-gray-400/10 border-gray-400/50 text-ink-300'
                         : 'bg-orange-600/10 border-orange-600/50 text-orange-300'
                       }`}>
@@ -713,7 +713,7 @@ export default function BacktestingPage() {
                           className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-700/30 transition"
                         >
                           <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                            r.rank === 1 ? 'bg-amber-500 text-black'
+                            r.rank === 1 ? 'bg-teal-500 text-black'
                             : r.rank === 2 ? 'bg-gray-400 text-black'
                             : r.rank === 3 ? 'bg-orange-600 text-white'
                             : 'bg-gray-700 text-ink-300'
@@ -756,7 +756,7 @@ export default function BacktestingPage() {
                         {isExpanded && r.per_symbol && (
                           <div className="px-4 pb-4 border-t border-gray-700/50">
                             <div className="overflow-x-auto mt-3">
-                              <table className="table-base w-full text-xs text-ink-300">
+                              <table className="tbl w-full text-xs text-ink-300">
                                 <thead>
                                   <tr className="text-ink-500 border-b border-gray-700">
                                     <th className="text-left py-1 px-1">Symbol</th>
@@ -795,10 +795,10 @@ export default function BacktestingPage() {
 
               {/* Per-symbol best strategy table */}
               {universeResult.per_symbol_best?.length > 0 && (
-                <div className="card-layer rounded-xl p-6 animate-spring-up stagger-3">
+                <div className="card-box p-6 anim-up delay-3">
                   <h3 className="text-base font-bold text-ink-50 mb-4">Best Strategy Per Symbol</h3>
                   <div className="overflow-x-auto">
-                    <table className="table-base w-full text-xs text-ink-300">
+                    <table className="tbl w-full text-xs text-ink-300">
                       <thead>
                         <tr className="text-ink-500 border-b border-gray-700">
                           <th className="text-left py-2 px-2">Symbol</th>
@@ -814,7 +814,7 @@ export default function BacktestingPage() {
                           <tr key={pb.symbol} className="border-b border-gray-700/40 hover:bg-gray-700/20">
                             <td className="py-2 px-2 font-bold text-ink-50">{pb.symbol}</td>
                             <td className="py-2 px-2 text-ink-500">{pb.asset_class}</td>
-                            <td className="py-2 px-2 text-amber-300">
+                            <td className="py-2 px-2 text-teal-300">
                               {STRATEGIES.find(s => s.key === pb.best_strategy)?.icon || '📊'}{' '}
                               {STRATEGIES.find(s => s.key === pb.best_strategy)?.label || pb.best_strategy}
                             </td>
@@ -827,7 +827,7 @@ export default function BacktestingPage() {
                             <td className="py-2 px-2 text-right">
                               <button
                                 onClick={() => { setSymbol(pb.symbol); setMode('leaderboard'); }}
-                                className="text-xs text-amber-400 hover:text-amber-300 underline"
+                                className="text-xs text-teal-400 hover:text-teal-300 underline"
                               >
                                 Backtest →
                               </button>
@@ -859,8 +859,8 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
   return (
     <>
       {equityCurve.length > 0 && (
-        <div className="card-accent-top purple card-layer rounded-xl p-6 animate-spring-up stagger-4">
-          <div className="section-eyebrow purple">
+        <div className="card-accent purple card p-5 anim-up delay-4">
+          <div className="section-rule purple">
             <h2 className="font-display text-ink-50 flex items-center gap-2">
               <TrendingUp size={16} className="text-purple-400" />
               Equity Curve — {symbol} · {strategyLabel}
@@ -883,15 +883,15 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
       )}
 
       {trades.length > 0 && (
-        <div className="card-accent-top cyan card-layer rounded-xl p-6 animate-spring-up stagger-5">
-          <div className="section-eyebrow cyan">
+        <div className="card-accent cyan card p-5 anim-up delay-5">
+          <div className="section-rule cyan">
             <h2 className="font-display text-ink-50 flex items-center gap-2">
               <TrendingDown size={16} className="text-cyan-400" />
               Trade Log ({trades.length} trades shown)
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="table-base w-full text-xs text-ink-300">
+            <table className="tbl w-full text-xs text-ink-300">
               <thead>
                 <tr className="border-b border-gray-700 text-ink-500 text-left">
                   <th className="pb-2">Entry</th>

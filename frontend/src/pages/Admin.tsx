@@ -8,7 +8,7 @@ import { formatTradeDate, formatLocalDate } from '@/utils/timezone'
 
 function Section({ title, icon, className, children }: { title: string; icon?: React.ReactNode; className?: string; children: React.ReactNode }) {
   return (
-    <div className={`card-layer rounded-xl ${className ?? ''}`}>
+    <div className={`card ${className ?? ''}`}>
       <h2 className="section-eyebrow font-display text-ink-100 mb-4 flex items-center gap-2">{icon}{title}</h2>
       {children}
     </div>
@@ -85,7 +85,7 @@ export default function AdminPage() {
         <h1 className="text-3xl font-bold text-ink-100 flex items-center gap-2 font-display">
           <Shield size={28} className="text-rose-400" /> Admin ML Dashboard
         </h1>
-        <button onClick={refresh} className="flex items-center gap-2 text-sm bg-ink-700 hover:bg-ink-600 px-3 py-1.5 rounded-lg text-ink-100">
+        <button onClick={refresh} className="btn-accent rose">
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
@@ -93,8 +93,8 @@ export default function AdminPage() {
       {err && <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 text-rose-300">{err}</div>}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-spring-up">
-        <Section title="Users" icon={<Users size={18} className="text-rose-400" />} className="card-accent-top rose">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 anim-up delay-100">
+        <Section title="Users" icon={<Users size={18} className="text-rose-400" />} className="card-accent rose card-surface2 p-5">
           {stats === null ? <span className="text-ink-500 text-sm">Loading…</span> : (
             <>
               <p className="text-3xl font-bold text-ink-100 font-mono">{stats.users.total}</p>
@@ -123,8 +123,8 @@ export default function AdminPage() {
       </div>
 
       {/* Models */}
-      <div className="animate-spring-up stagger-2">
-      <Section title="Model Performance" icon={<Cpu size={18} className="text-purple-400" />}>
+      <div className="anim-up delay-200">
+      <Section title="Model Performance" icon={<Cpu size={18} className="text-purple-400" />} className="card-accent purple card p-5">
         {models === null ? <div className="text-ink-500 text-sm">Loading…</div> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -180,11 +180,11 @@ export default function AdminPage() {
       </div>
 
       {/* Users */}
-      <div className="animate-spring-up stagger-3">
-      <Section title="User Management" icon={<Users size={18} className="text-rose-400" />} className="card-accent-left rose">
+      <div className="anim-up delay-300">
+      <Section title="User Management" icon={<Users size={18} className="text-rose-400" />} className="card p-5">
         {users === null ? <div className="text-ink-500 text-sm">Loading…</div> : (
           <div className="overflow-x-auto">
-            <table className="table-base w-full text-sm">
+            <table className="tbl w-full text-sm">
               <thead>
                 <tr className="text-ink-400 border-b border-ink-700">
                   <th className="text-left py-2 px-2">ID</th>
@@ -204,9 +204,9 @@ export default function AdminPage() {
                     <td className="py-2 px-2 text-ink-300">{u.email}</td>
                     <td className="py-2 px-2 text-center">
                       {u.is_admin ? (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">Admin</span>
+                        <span className="badge-neutral">Admin</span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">User</span>
+                        <span className="badge-info">User</span>
                       )}
                     </td>
                     <td className="py-2 px-2 text-center">{u.is_active ? '✓' : '✗'}</td>

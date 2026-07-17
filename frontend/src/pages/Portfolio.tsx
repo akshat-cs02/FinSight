@@ -56,9 +56,9 @@ export default function PortfolioPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
-      <div className="flex justify-between items-center flex-wrap gap-3 animate-spring-up">
+      <div className="flex justify-between items-center flex-wrap gap-3 anim-up delay-0">
         <div>
-          <div className="section-eyebrow">Portfolio Overview</div>
+          <div className="eyebrow">Portfolio Overview</div>
           <h1 className="text-3xl font-bold text-ink-800 font-display">Portfolio</h1>
           <p className="text-ink-500 text-sm mt-0.5">Track your holdings and performance</p>
         </div>
@@ -79,7 +79,7 @@ export default function PortfolioPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={add} className="card-accent-top emerald card-layer rounded-xl p-4 flex flex-wrap gap-3 items-end animate-spring-up stagger-1">
+        <form onSubmit={add} className="card-accent emerald card-flat p-4 rounded-xl flex flex-wrap gap-3 items-end anim-up delay-1">
           <div>
             <label className="block text-xs text-ink-500 mb-1">Symbol</label>
             <input required value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
@@ -109,37 +109,37 @@ export default function PortfolioPage() {
 
       {summary && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-spring-up stagger-1">
-            <div className="card-layer rounded-xl p-5 card-gradient-border">
-              <div className="section-eyebrow">Total Invested</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 anim-up delay-1">
+            <div className="card-box p-5">
+              <div className="eyebrow">Total Invested</div>
               <PriceDisplay price={summary.total_invested} size="xl" color="default" />
             </div>
-            <div className="card-accent-top emerald card-layer rounded-xl p-5">
-              <div className="section-eyebrow">Current Value</div>
+            <div className="card-accent emerald card-surface2 p-5">
+              <div className="eyebrow">Current Value</div>
               <PriceDisplay price={summary.total_value} size="xl" color="brand" animate />
             </div>
-            <div className={`card-layer rounded-xl p-5 ${summary.total_gain_loss >= 0 ? 'card-accent-left emerald' : 'card-accent-left rose'}`}>
-              <div className="section-eyebrow">Total Gain/Loss</div>
+            <div className={`card p-5 ${summary.total_gain_loss >= 0 ? 'card-accent-left emerald' : 'card-accent-left rose'}`}>
+              <div className="eyebrow">Total Gain/Loss</div>
               <PriceDisplay price={summary.total_gain_loss} size="xl" color={summary.total_gain_loss >= 0 ? 'gains' : 'losses'} showSign />
               <p className={`text-sm mt-0.5 ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.total_gain_loss_percent.toFixed(2)}%
               </p>
             </div>
-            <div className={`card-layer rounded-xl p-5 ${summary.today_profit_loss >= 0 ? 'card-accent-left emerald' : 'card-accent-left rose'}`}>
-              <div className="section-eyebrow">Today's P/L</div>
+            <div className={`card-surface3 p-5 ${summary.today_profit_loss >= 0 ? 'card-accent-left emerald' : 'card-accent-left rose'}`}>
+              <div className="eyebrow">Today's P/L</div>
               <PriceDisplay price={summary.today_profit_loss} size="xl" color={summary.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-spring-up stagger-2">
-            <div className="card-accent-top purple card-layer rounded-xl p-5">
-              <div className="section-eyebrow">Allocation</div>
-              <h2 className="text-base font-bold text-ink-800 font-display tracking-tight mb-4">Asset Allocation</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 anim-up delay-2">
+            <div className="card-accent purple card-surface2 p-5">
+              <div className="eyebrow">Allocation</div>
+              <h2 className="section-rule emerald">Asset Allocation</h2>
               <PortfolioChart data={summary.allocation} />
             </div>
-            <div className="card-accent-top purple card-layer rounded-xl p-5">
-              <div className="section-eyebrow">Breakdown</div>
-              <h2 className="text-base font-bold text-ink-800 font-display tracking-tight mb-4">Allocation Breakdown</h2>
+            <div className="card-accent purple card-surface2 p-5">
+              <div className="eyebrow">Breakdown</div>
+              <h2 className="section-rule emerald">Allocation Breakdown</h2>
               {summary.allocation.length === 0 ? (
                 <div className="text-ink-500 text-sm">No holdings yet</div>
               ) : (
@@ -158,14 +158,14 @@ export default function PortfolioPage() {
             </div>
           </div>
 
-          <div className="card-layer rounded-xl p-5 animate-spring-up stagger-3">
-            <div className="section-eyebrow">Holdings</div>
-            <h2 className="text-base font-bold text-ink-800 font-display tracking-tight mb-4">Holdings</h2>
+          <div className="card p-5 anim-up delay-3">
+            <div className="eyebrow">Holdings</div>
+            <h2 className="section-rule emerald">Holdings</h2>
             {summary.holdings.length === 0 ? (
               <div className="text-ink-500 text-sm py-6 text-center">No holdings. Click "Add Holding" to start.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="table-base">
+                <table className="tbl">
                   <thead>
                     <tr>
                       <th>Symbol</th>

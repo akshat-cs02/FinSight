@@ -55,7 +55,7 @@ export default function PredictionsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
-      <div className="flex justify-between items-center flex-wrap gap-3 animate-spring-up stagger-0">
+      <div className="flex justify-between items-center flex-wrap gap-3 anim-up delay-0">
         <div>
           <h1 className="text-3xl font-bold text-ink-800 flex items-center gap-2 font-display">
             <Brain size={28} className="text-purple-400" /> AI Predictions
@@ -65,7 +65,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Symbol selector */}
-      <div className="p-1 card-layer rounded-xl animate-spring-up stagger-1">
+      <div className="card p-2 anim-up delay-1">
         <div className="flex flex-wrap gap-2">
           {(models || []).map((m) => (
             <button
@@ -88,7 +88,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Live TradingView chart */}
-      <div className="card-layer card-flat p-3 animate-spring-up stagger-2">
+      <div className="card-surface2 p-3 anim-up delay-2">
         <div className="flex items-center justify-between px-1 pb-2">
           <h2 className="text-sm font-semibold text-ink-600">Live Chart — <span className="text-ink-800">{selected}</span></h2>
           <span className="text-xs text-ink-500">TradingView</span>
@@ -100,7 +100,7 @@ export default function PredictionsPage() {
       <PredictionCard symbol={selected} />
 
       {/* Model management */}
-      <div className="card-layer rounded-xl p-5 animate-spring-up stagger-3">
+      <div className="card-accent purple card p-5 anim-up delay-3">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-[3px] h-5 rounded-full bg-purple-400/60" />
           <h2 className="text-base font-bold text-ink-800 font-display tracking-tight flex items-center gap-2"><Cpu size={18} /> Model Status</h2>
@@ -108,7 +108,7 @@ export default function PredictionsPage() {
         {models === null && <div className="text-ink-500 text-sm">Loading…</div>}
         {models && (
           <div className="overflow-x-auto">
-            <table className="table-base">
+            <table className="tbl table-base">
               <thead>
                 <tr>
                   <th>Symbol</th>
@@ -133,7 +133,7 @@ export default function PredictionsPage() {
                       <button
                         onClick={() => startTrain(m.symbol)}
                         disabled={training === m.symbol}
-                        className="btn-purple text-xs px-3 py-1 disabled:opacity-50 inline-flex items-center gap-1"
+                        className="btn-accent purple text-xs px-3 py-1 disabled:opacity-50 inline-flex items-center gap-1"
                       >
                         <PlayCircle size={12} /> {training === m.symbol ? 'Started…' : 'Retrain'}
                       </button>
@@ -154,16 +154,16 @@ export default function PredictionsPage() {
                    className="input-glow w-40 text-sm" />
           </div>
           <button onClick={() => startTrain(trainSym)} disabled={!trainSym || !!training}
-                  className="btn-purple text-sm px-4 py-2 disabled:opacity-50">
+                  className="btn-accent purple text-sm px-4 py-2 disabled:opacity-50">
             Train
           </button>
         </div>
       </div>
 
       {/* History */}
-      <div className="card-layer rounded-xl p-5 animate-spring-up stagger-4">
+      <div className="card-accent cyan card-surface2 p-5 anim-up delay-4">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-[3px] h-5 rounded-full bg-purple-400/60" />
+          <div className="w-[3px] h-5 rounded-full bg-cyan-400/60" />
           <h2 className="text-base font-bold text-ink-800 font-display tracking-tight">Prediction History — {selected}</h2>
         </div>
         {history.length === 0 ? (
