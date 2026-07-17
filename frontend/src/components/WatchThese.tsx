@@ -61,7 +61,7 @@ export default function WatchThese() {
       {!loading && candidates.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {candidates.map((c) => (
-            <div key={c.symbol} className="glass-card p-3 space-y-2">
+            <div key={c.symbol} className="card-layer rounded-xl p-3 space-y-2">
               {/* Symbol + price */}
               <div className="flex items-start justify-between">
                 <span className="font-bold text-white text-sm">{c.symbol}</span>

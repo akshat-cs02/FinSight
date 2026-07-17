@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Activity, Wallet, TrendingUp, AlertCircle, ArrowUp, ArrowDown, ExternalLink, Sparkles } from 'lucide-react'
+import {
+  Activity, Wallet, TrendingUp, AlertCircle, ArrowUp, ArrowDown, ExternalLink,
+  BarChart3, LineChart, Globe, Zap,
+} from 'lucide-react'
 import { dashboardService, MarketIndex, MarketStatus, MarketKey } from '@/services/dashboardService'
 import { portfolioService, PortfolioSummary } from '@/services/portfolioService'
 import { newsService, NewsArticle } from '@/services/newsService'
@@ -18,26 +21,32 @@ import PriceDisplay from '@/components/PriceDisplay'
 import { formatPrice, guessCurrency } from '@/utils/currency'
 import { MARKET_ORDER, MARKET_LABELS, tickerSymbolsForMarket } from '@/utils/markets'
 
-function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`glass-card p-5 ${className}`}>{children}</div>
+/* ─── Loading Skeleton ─── */
+function Skeleton({ className = '' }: { className?: string }) {
+  return <div className={`skeleton ${className}`} />
 }
 
-function ElevatedCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`card-elevated p-5 ${className}`}>{children}</div>
+/* ─── Section Heading ─── */
+const headingAccents: Record<string, string> = {
+  blue:    'bg-blue-400/60',
+  purple:  'bg-purple-400/60',
+  emerald: 'bg-emerald-400/60',
+  cyan:    'bg-cyan-400/60',
+  rose:    'bg-rose-400/60',
+  amber:   'bg-amber-400/60',
 }
 
-function Loading({ label }: { label: string }) {
-  return <div className="h-5 w-24 skeleton-glow" />
+function SectionHeading({ accent = 'blue', children }: { accent?: string; children: React.ReactNode }) {
+  const bar = headingAccents[accent] || headingAccents.blue
+  return (
+    <div className="flex items-center gap-3 mb-5">
+      <div className={`w-[3px] h-5 rounded-full ${bar}`} />
+      <h2 className="text-base font-bold text-ink-800 font-display tracking-tight">{children}</h2>
+    </div>
+  )
 }
 
-function ErrorMsg({ msg }: { msg: string }) {
-  return <div className="text-red-400 text-sm">⚠ {msg}</div>
-}
-
-function SectionHeader({ color = 'cyan', children }: { color?: string; children: React.ReactNode }) {
-  return <div className={`section-header ${color}`}><h2 className="section-header-title text-white">{children}</h2></div>
-}
-
+/* ─── StockCard (reusable) ─── */
 function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
   const up = s.change_percent >= 0
   return (
@@ -46,7 +55,7 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick() }}
-      className="group relative glass-card p-4 pr-12 text-left w-full transition cursor-pointer card-border-gradient"
+      className="group relative card-layer rounded-xl p-4 pr-12 text-left w-full transition-all duration-300 cursor-pointer card-gradient-border hover:border-blue-400/20 hover:shadow-lg hover:-translate-y-0.5"
     >
       <a
         href={getTradingViewUrl(s.symbol)}
@@ -54,29 +63,32 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
         title="Open in TradingView"
-        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black text-white/70 hover:text-white p-1.5 rounded-lg backdrop-blur-sm"
+        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-all bg-black/40 hover:bg-black/60 text-ink-600 hover:text-ink-700 p-1.5 rounded-lg backdrop-blur-sm"
       >
-        <ExternalLink size={13} />
+        <ExternalLink size={12} />
       </a>
 
-      <div className="flex justify-between items-start mb-2 gap-2">
+      <div className="flex items-center justify-between mb-2.5 gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-white text-lg font-display truncate">{s.symbol}</h3>
-          <p className="text-xs text-gray-500 truncate">{s.name}</p>
+          <h3 className="font-bold text-ink-800 text-base font-display truncate">{s.symbol}</h3>
+          <p className="text-[11px] text-ink-500 truncate leading-tight mt-0.5">{s.name}</p>
         </div>
-        <span className={`inline-flex items-center gap-1 text-sm font-semibold flex-shrink-0 ${up ? 'change-up' : 'change-down'}`}>
-          {up ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-          {Math.abs(s.change_percent).toFixed(2)}%
+        <span className={`inline-flex items-center gap-1 text-xs font-semibold flex-shrink-0 px-1.5 py-0.5 rounded-md ${
+          up ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+        }`}>
+          {up ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
+          {Math.abs(s.change_percent).toFixed(1)}%
         </span>
       </div>
       <PriceDisplay price={s.price} currency={s.currency || guessCurrency(s.symbol)} size="lg" />
-      <p className={`text-sm mt-0.5 ${up ? 'change-up' : 'change-down'}`}>
-        {up ? '+' : ''}{s.change.toFixed(2)}
+      <p className={`text-xs mt-1 ${up ? 'text-emerald-400/70' : 'text-rose-400/70'}`}>
+        {up ? '+' : ''}{s.change.toFixed(2)} ({Math.abs(s.change_percent).toFixed(2)}%)
       </p>
     </div>
   )
 }
 
+/* ─── Main Dashboard Page ─── */
 export default function DashboardPage() {
   const navigate = useNavigate()
   const [status, setStatus] = useState<MarketStatus | null>(null)
@@ -102,7 +114,6 @@ export default function DashboardPage() {
     dashboardService.getMarketSummary().then((d) => setIndices(d.indices)).catch((e) => setErrors((p) => ({ ...p, indices: e.message })))
     portfolioService.getSummary().then(setPortfolio).catch((e) => setErrors((p) => ({ ...p, portfolio: e.message })))
     newsService.getNews(6).then(setNews).catch((e) => setErrors((p) => ({ ...p, news: e.message })))
-
     const liveId = setInterval(() => {
       dashboardService.getMarketStatus().then(setStatus).catch(() => {})
       dashboardService.getMarketSummary().then((d) => setIndices(d.indices)).catch(() => {})
@@ -113,25 +124,25 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setTrending(null); setGainers(null); setLosers(null)
-    const loadMovers = () => {
+    const load = () => {
       dashboardService.getTrending(market).then(setTrending).catch((e) => setErrors((p) => ({ ...p, trending: e.message })))
       dashboardService.getGainers(5, market).then(setGainers).catch((e) => setErrors((p) => ({ ...p, gainers: e.message })))
       dashboardService.getLosers(5, market).then(setLosers).catch((e) => setErrors((p) => ({ ...p, losers: e.message })))
     }
-    loadMovers()
-    const id = setInterval(loadMovers, 30000)
+    load()
+    const id = setInterval(load, 30000)
     return () => clearInterval(id)
   }, [market])
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-spring-in">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-5 lg:space-y-6 max-w-[1600px] mx-auto">
+      {/* ── Header ── */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-spring-up">
         <div>
-          <h1 className="text-3xl font-bold text-white font-display">Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Live market overview</p>
+          <div className="section-eyebrow">Overview</div>
+          <h1 className="text-display-sm text-white font-display">Dashboard</h1>
         </div>
-        <div className="flex flex-nowrap sm:flex-wrap gap-1.5 glass-card p-1.5 overflow-x-auto rounded-xl">
+        <div className="flex flex-nowrap gap-1 p-1 card-layer rounded-xl overflow-x-auto">
           {MARKET_ORDER.map((k) => {
             const openMarket = status?.markets?.find((m) => m.key === k)
             const isOpen = k === 'ALL' ? status?.is_open : openMarket?.is_open
@@ -139,12 +150,14 @@ export default function DashboardPage() {
               <button
                 key={k}
                 onClick={() => setMarket(k)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
-                   market === k ? 'bg-gradient-to-r from-[#00D4FF]/20 to-[#7C3AED]/10 text-white border border-[#00D4FF]/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 whitespace-nowrap ${
+                  market === k
+                    ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20 shadow-sm'
+                    : 'text-ink-500 hover:text-ink-700 hover:bg-white/[0.03]'
                 }`}
               >
                 {k !== 'ALL' && (
-                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-[#00D4FF] animate-pulse' : 'bg-gray-600'}`} />
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-ink-400'}`} />
                 )}
                 {MARKET_LABELS[k]}
               </button>
@@ -153,6 +166,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Market closed banner */}
       {status && (() => {
         const sel = market === 'ALL'
           ? status.markets?.find((m) => !m.is_open && m.next_open === status.next_open)
@@ -162,204 +176,233 @@ export default function DashboardPage() {
         if (sel.key === 'CRYPTO') return null
         return (
           <div className="animate-spring-up stagger-1">
-            <MarketClosedBanner
-              marketName={sel.name}
-              isOpen={sel.is_open}
-              nextOpen={sel.next_open}
-              nextOpenLocal={sel.next_open_local}
-            />
+            <MarketClosedBanner marketName={sel.name} isOpen={sel.is_open} nextOpen={sel.next_open} nextOpenLocal={sel.next_open_local} />
           </div>
         )
       })()}
 
-      {/* Metrics row — elevated cards with hierarchy */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="animate-spring-up stagger-1">
-          <ElevatedCard>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-[#00D4FF]/10 border border-[#00D4FF]/20"><Wallet className="text-[#00D4FF]" size={18} /></div>
-            </div>
-            <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Portfolio Value</h3>
-            {portfolio === null ? <Loading label="portfolio" /> : <>
+      {/* ── Metrics Row ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Portfolio Value — emerald accent */}
+        <div className="card-accent-top emerald card-layer rounded-xl p-5 animate-spring-up stagger-1">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="p-2 rounded-lg bg-emerald-500/10"><Wallet size={16} className="text-emerald-400" /></div>
+          </div>
+          <div className="section-eyebrow">Portfolio Value</div>
+          {portfolio === null ? (
+            <div className="mt-2 space-y-2"><Skeleton className="h-8 w-36" /><Skeleton className="h-3 w-20" /></div>
+          ) : (
+            <>
               <PriceDisplay price={portfolio.total_value} size="xl" color="default" animate />
-              <p className={`text-sm mt-1 ${portfolio.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <p className={`text-xs mt-1.5 ${portfolio.total_gain_loss >= 0 ? 'text-emerald-400/70' : 'text-rose-400/70'}`}>
                 {portfolio.total_gain_loss >= 0 ? '+' : ''}{portfolio.total_gain_loss.toFixed(2)}% all-time
               </p>
-            </>}
-          </ElevatedCard>
+            </>
+          )}
         </div>
 
-        <div className="animate-spring-up stagger-2">
-          {(() => {
-            const plUp = portfolio != null && portfolio.today_profit_loss >= 0
+        {/* Today's P/L — dynamic accent based on value */}
+        <div className={`bg-card border border-white/[0.04] rounded-xl p-5 animate-spring-up stagger-2 ${
+          portfolio?.today_profit_loss != null ? (portfolio.today_profit_loss >= 0 ? 'card-accent-left emerald' : 'card-accent-left rose') : ''
+        }`}>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className={`p-2 rounded-lg ${
+              portfolio?.today_profit_loss != null
+                ? portfolio.today_profit_loss >= 0 ? 'bg-emerald-500/10' : 'bg-rose-500/10'
+                : 'bg-ink-300/10'
+            }`}>
+              <TrendingUp size={16} className={
+                portfolio?.today_profit_loss != null
+                  ? portfolio.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                  : 'text-ink-500'
+              } />
+            </div>
+          </div>
+          <div className="section-eyebrow">Today's P/L</div>
+          {portfolio === null ? (
+            <div className="mt-2 space-y-2"><Skeleton className="h-8 w-28" /></div>
+          ) : (
+            <PriceDisplay
+              price={portfolio.today_profit_loss}
+              size="xl"
+              color={portfolio.today_profit_loss >= 0 ? 'gains' : 'losses'}
+              showSign
+              animate
+            />
+          )}
+        </div>
+
+        {/* Market Status — cyan accent */}
+        <div className="card-accent-top cyan card-layer rounded-xl p-5 animate-spring-up stagger-3">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="p-2 rounded-lg bg-cyan-500/10"><Activity size={16} className="text-cyan-400" /></div>
+          </div>
+          <div className="section-eyebrow">Market Status</div>
+          {status === null ? (
+            <div className="mt-2 space-y-2"><Skeleton className="h-8 w-24" /></div>
+          ) : (() => {
+            const open = (status.markets || []).filter((m) => m.is_open)
+            if (open.length === 0) return <div className="text-xl font-bold font-mono text-ink-400 mt-2">CLOSED</div>
             return (
-              <div className={`${plUp ? 'card-accent-green' : 'card-accent-rose'} p-5`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2.5 rounded-xl ${plUp ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20'}`}>
-                    <TrendingUp className={`${plUp ? 'text-emerald-400' : 'text-rose-400'}`} size={18} />
+              <div className="space-y-1.5 mt-1">
+                {open.map((m) => (
+                  <div key={m.name} className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-sm text-ink-600">
+                      <span className="pulse-dot cyan" />{m.name}
+                    </span>
+                    <span className="text-[11px] font-semibold text-cyan-400">OPEN</span>
                   </div>
-                </div>
-                <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Today's P/L</h3>
-                {portfolio === null ? <Loading label="P/L" /> :
-                  <PriceDisplay
-                    price={portfolio.today_profit_loss}
-                    size="xl"
-                    color={plUp ? 'gains' : 'losses'}
-                    showSign
-                    animate
-                  />
-                }
+                ))}
               </div>
             )
           })()}
         </div>
 
-        <div className="animate-spring-up stagger-3">
-          <div className="card-accent-purple p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/20"><Activity className="text-[#7C3AED]" size={18} /></div>
-            </div>
-            <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Market Status</h3>
-            {status === null ? <Loading label="status" /> : (() => {
-              const open = (status.markets || []).filter((m) => m.is_open)
-              if (open.length === 0) return <p className="text-2xl font-bold text-gray-600 font-mono tabular-nums">CLOSED</p>
-              return (
-                <div className="space-y-1.5">
-                  {open.map((m) => (
-                    <div key={m.name} className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-sm text-gray-300">
-                        <span className="relative"><span className="inline-block w-2 h-2 rounded-full bg-[#00D4FF] pulse-dot active" /></span>
-                        {m.name}
-                      </span>
-                          <span className="text-sm font-semibold text-[#00D4FF]">OPEN</span>
-                    </div>
-                  ))}
-                </div>
-              )
-            })()}
+        {/* Holdings — amber accent */}
+        <div className="card-accent-top amber card-layer rounded-xl p-5 animate-spring-up stagger-4">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="p-2 rounded-lg bg-amber-500/10"><BarChart3 size={16} className="text-amber-400" /></div>
           </div>
-        </div>
-
-        <div className="animate-spring-up stagger-4">
-          <div className="card-accent-amber p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20"><AlertCircle className="text-amber-500" size={18} /></div>
-            </div>
-            <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Holdings</h3>
-            {portfolio === null ? <Loading label="holdings" /> :
-              <p className="text-[32px] font-extrabold gradient-text font-mono tabular-nums">{portfolio.holdings_count}</p>
-            }
-          </div>
+          <div className="section-eyebrow">Holdings</div>
+          {portfolio === null ? (
+            <div className="mt-2"><Skeleton className="h-8 w-16" /></div>
+          ) : (
+            <div className="text-3xl font-extrabold font-mono gradient-text-emerald mt-2">{portfolio.holdings_count}</div>
+          )}
         </div>
       </div>
 
-      {/* Live ticker */}
-      <div className="animate-fade-slide-up stagger-5">
+      {/* ── Live Ticker ── */}
+      <div className="card-layer rounded-xl p-4 animate-fade-slide stagger-5">
         <LiveTicker symbols={tickerSymbolsForMarket(market)} />
       </div>
 
-      <div className="animate-fade-slide-up stagger-6">
-        <IntradaySignals market={market} />
+      {/* ── Signals row ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-5 animate-fade-slide stagger-6">
+        <div className="card-layer rounded-xl overflow-hidden"><IntradaySignals market={market} /></div>
+        <div className="card-layer rounded-xl overflow-hidden"><WatchlistPanel onSearch={(sym) => navigate(`/stocks/${sym}`)} /></div>
       </div>
 
-      <div className="animate-spring-up stagger-7">
-        <WatchlistPanel onSearch={(sym) => navigate(`/stocks/${sym}`)} />
-      </div>
-
-      <div className="animate-fade-slide-up stagger-8">
+      {/* ── Signal Performance ── */}
+      <div className="animate-fade-slide stagger-7">
         <SignalPerformance />
       </div>
 
+      {/* ── Components ── */}
       <WatchThese />
       <AIOutlook />
 
-      {/* Indices — flat card (data dense) */}
-      <div className="card-flat p-5">
-        <SectionHeader color="purple">Market Indices</SectionHeader>
-        {errors.indices && <ErrorMsg msg={errors.indices} />}
-        {indices === null && !errors.indices && <Loading label="indices" />}
+      {/* ── Market Indices — purple accent ── */}
+      <div className="card-accent-top purple card-layer rounded-xl p-5 animate-spring-up stagger-2">
+        <SectionHeading accent="purple">Market Indices</SectionHeading>
+        {errors.indices && <div className="text-rose-400 text-sm">⚠ {errors.indices}</div>}
+        {indices === null && !errors.indices && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[1,2,3,4].map((i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
+          </div>
+        )}
         {indices && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {indices.map((i, idx) => (
-              <div key={i.symbol} className={`glass-card p-3 card-border-gradient animate-spring-up stagger-${idx + 1}`}>
-                <p className="text-xs text-gray-500 font-medium">{i.name}</p>
-                <p className="text-lg font-bold text-white font-mono tabular-nums mt-1">{i.price.toFixed(2)}</p>
-                <p className={`text-xs mt-0.5 ${i.change_percent >= 0 ? 'change-up' : 'change-down'}`}>
+              <div key={i.symbol} className="bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 animate-spring-up" style={{ animationDelay: `${idx * 0.04}s` }}>
+                <div className="text-[11px] text-ink-500 font-medium truncate">{i.name}</div>
+                <div className="text-lg font-bold text-ink-800 font-mono tabular-nums mt-0.5">{i.price.toFixed(2)}</div>
+                <div className={`text-[11px] mt-0.5 font-medium ${i.change_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {i.change_percent >= 0 ? '+' : ''}{i.change_percent.toFixed(2)}%
-                </p>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Trending */}
-      <Card>
-        <SectionHeader color="cyan">
+      {/* ── Trending ── */}
+      <div className="card-layer rounded-xl p-5 animate-spring-up stagger-3">
+        <SectionHeading accent="blue">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
-        </SectionHeader>
-        {errors.trending && <ErrorMsg msg={errors.trending} />}
-        {trending === null && !errors.trending && <Loading label="trending" />}
+        </SectionHeading>
+        {errors.trending && <div className="text-rose-400 text-sm">⚠ {errors.trending}</div>}
+        {trending === null && !errors.trending && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {[1,2,3,4].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}
+          </div>
+        )}
         {trending && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {trending.map((s, idx) => (
-              <div key={s.symbol} className={`animate-spring-up stagger-${idx + 1}`}>
+              <div key={s.symbol} className="animate-spring-up" style={{ animationDelay: `${idx * 0.04}s` }}>
                 <StockCard s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
-      {/* Gainers & Losers — different card styles */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="card-accent-green p-5">
-          <SectionHeader color="green">
+      {/* ── Gainers & Losers ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-5 animate-spring-up stagger-4">
+        {/* Gainers — emerald */}
+        <div className="card-accent-top emerald card-layer rounded-xl p-5">
+          <SectionHeading accent="emerald">
             Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}
-          </SectionHeader>
-          {gainers === null && !errors.gainers && <Loading label="gainers" />}
-          {gainers && gainers.length === 0 && <p className="text-sm text-gray-600 py-6 text-center">No active gainers right now</p>}
+          </SectionHeading>
+          {errors.gainers && <div className="text-rose-400 text-sm">⚠ {errors.gainers}</div>}
+          {gainers === null && !errors.gainers && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}
+            </div>
+          )}
+          {gainers && gainers.length === 0 && <div className="text-sm text-ink-500 py-6 text-center">No active gainers right now</div>}
           {gainers && gainers.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {gainers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
         </div>
-        <div className="card-accent-rose p-5">
-          <SectionHeader color="rose">
+
+        {/* Losers — rose */}
+        <div className="card-accent-top rose card-layer rounded-xl p-5">
+          <SectionHeading accent="rose">
             Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}
-          </SectionHeader>
-          {losers === null && !errors.losers && <Loading label="losers" />}
-          {losers && losers.length === 0 && <p className="text-sm text-gray-600 py-6 text-center">No active losers right now</p>}
+          </SectionHeading>
+          {errors.losers && <div className="text-rose-400 text-sm">⚠ {errors.losers}</div>}
+          {losers === null && !errors.losers && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}
+            </div>
+          )}
+          {losers && losers.length === 0 && <div className="text-sm text-ink-500 py-6 text-center">No active losers right now</div>}
           {losers && losers.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {losers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
         </div>
       </div>
 
+      {/* ── Forex Calendar ── */}
       <ForexCalendar />
 
-      {/* News */}
-      <div className="card-accent-cyan p-5">
-        <SectionHeader color="cyan">Latest Financial News</SectionHeader>
-        {errors.news && <ErrorMsg msg={errors.news} />}
-        {news === null && !errors.news && <Loading label="news" />}
+      {/* ── News — cyan accent ── */}
+      <div className="card-accent-top cyan card-layer rounded-xl p-5 animate-spring-up stagger-5">
+        <SectionHeading accent="cyan">Latest Financial News</SectionHeading>
+        {errors.news && <div className="text-rose-400 text-sm">⚠ {errors.news}</div>}
+        {news === null && !errors.news && (
+          <div className="space-y-3">{[1,2,3].map((i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>
+        )}
         {news && (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {news.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                 className="block pb-3 border-b border-white/5 last:border-b-0 glass-card p-3 -m-3 mb-2 transition">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-white font-medium flex-1 font-display">{a.title}</h3>
-                  <span className={`ml-3 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                    a.sentiment === 'POSITIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                    a.sentiment === 'NEGATIVE' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                    'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                  }`}>{a.sentiment}</span>
+                 className="flex items-start justify-between gap-3 py-3 px-3 -mx-3 rounded-xl transition-colors hover:bg-white/[0.02]">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-ink-800 font-display leading-snug">{a.title}</h3>
+                  <p className="text-[11px] text-ink-500 mt-1">{a.source}</p>
                 </div>
-                <p className="text-gray-500 text-sm">{a.source}</p>
+                <span className={`flex-shrink-0 px-2 py-0.5 rounded text-[11px] font-semibold ${
+                  a.sentiment === 'POSITIVE' ? 'bg-emerald-500/10 text-emerald-400' :
+                  a.sentiment === 'NEGATIVE' ? 'bg-rose-500/10 text-rose-400' :
+                  'bg-white/[0.04] text-ink-500'
+                }`}>{a.sentiment}</span>
               </a>
             ))}
           </div>

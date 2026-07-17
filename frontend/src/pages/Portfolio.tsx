@@ -56,99 +56,101 @@ export default function PortfolioPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
-      <div className="flex justify-between items-center flex-wrap gap-3 animate-spring-in">
+      <div className="flex justify-between items-center flex-wrap gap-3 animate-spring-up">
         <div>
-          <h1 className="text-3xl font-bold text-white font-display">Portfolio</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Track your holdings and performance</p>
+          <div className="section-eyebrow">Portfolio Overview</div>
+          <h1 className="text-3xl font-bold text-ink-800 font-display">Portfolio</h1>
+          <p className="text-ink-500 text-sm mt-0.5">Track your holdings and performance</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowForm(!showForm)}
-                  className="btn-glow text-sm px-4 py-2">
+                  className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-sm px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-1.5">
             <Plus size={16} /> Add Holding
           </button>
           <a href={`${API_URL}/api/reports/portfolio/pdf`} target="_blank" rel="noopener"
-             className="btn-ghost text-sm px-4 py-2">
+             className="text-ink-500 hover:text-ink-700 border border-white/5 hover:border-white/10 text-sm px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-1.5">
             <Download size={16} /> PDF
           </a>
           <a href={`${API_URL}/api/reports/portfolio/csv`} target="_blank" rel="noopener"
-             className="btn-ghost text-sm px-4 py-2">
+             className="text-ink-500 hover:text-ink-700 border border-white/5 hover:border-white/10 text-sm px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-1.5">
             <Download size={16} /> CSV
           </a>
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={add} className="card-accent-cyan p-4 flex flex-wrap gap-3 items-end animate-spring-up stagger-1">
+        <form onSubmit={add} className="card-accent-top emerald card-layer rounded-xl p-4 flex flex-wrap gap-3 items-end animate-spring-up stagger-1">
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Symbol</label>
+            <label className="block text-xs text-ink-500 mb-1">Symbol</label>
             <input required value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
-                   placeholder="AAPL" className="input-glow w-32 uppercase" />
+                   placeholder="AAPL" className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-ink-800 placeholder-ink-400 w-32 uppercase focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all" />
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Quantity</label>
+            <label className="block text-xs text-ink-500 mb-1">Quantity</label>
             <input type="number" step="any" required value={form.quantity}
                    onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                   className="input-glow w-32" />
+                   className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-ink-800 placeholder-ink-400 w-32 focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all" />
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Purchase Price</label>
+            <label className="block text-xs text-ink-500 mb-1">Purchase Price</label>
             <input type="number" step="any" required value={form.purchase_price}
                    onChange={(e) => setForm({ ...form, purchase_price: e.target.value })}
-                   className="input-glow w-32" />
+                   className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-ink-800 placeholder-ink-400 w-32 focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all" />
           </div>
           <button disabled={busy} type="submit"
-                  className="btn-glow text-sm px-4 py-2 disabled:opacity-50">
+                  className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 text-sm px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-1.5">
             {busy ? 'Adding…' : 'Save'}
           </button>
         </form>
       )}
 
       {err && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300">{err}</div>}
-      {summary === null && !err && <div className="text-gray-500">Loading portfolio…</div>}
+      {summary === null && !err && <div className="text-ink-500">Loading portfolio…</div>}
 
       {summary && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-spring-up stagger-1">
-            <div className="card-elevated p-5">
-              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Total Invested</p>
+            <div className="card-layer rounded-xl p-5 card-gradient-border">
+              <div className="section-eyebrow">Total Invested</div>
               <PriceDisplay price={summary.total_invested} size="xl" color="default" />
             </div>
-            <div className="card-elevated p-5">
-              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Current Value</p>
+            <div className="card-accent-top emerald card-layer rounded-xl p-5">
+              <div className="section-eyebrow">Current Value</div>
               <PriceDisplay price={summary.total_value} size="xl" color="brand" animate />
             </div>
-            <div className={`p-5 ${summary.total_gain_loss >= 0 ? 'card-accent-green' : 'card-accent-rose'}`}>
-              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Total Gain/Loss</p>
+            <div className={`card-layer rounded-xl p-5 ${summary.total_gain_loss >= 0 ? 'card-accent-left emerald' : 'card-accent-left rose'}`}>
+              <div className="section-eyebrow">Total Gain/Loss</div>
               <PriceDisplay price={summary.total_gain_loss} size="xl" color={summary.total_gain_loss >= 0 ? 'gains' : 'losses'} showSign />
               <p className={`text-sm mt-0.5 ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.total_gain_loss_percent.toFixed(2)}%
               </p>
             </div>
-            <div className={`p-5 ${summary.today_profit_loss >= 0 ? 'card-accent-green' : 'card-accent-rose'}`}>
-              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Today's P/L</p>
+            <div className={`card-layer rounded-xl p-5 ${summary.today_profit_loss >= 0 ? 'card-accent-left emerald' : 'card-accent-left rose'}`}>
+              <div className="section-eyebrow">Today's P/L</div>
               <PriceDisplay price={summary.today_profit_loss} size="xl" color={summary.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-spring-up stagger-2">
-            <div className="card-flat p-6">
-              <div className="section-header cyan">
-                <h2 className="section-header-title text-white">Asset Allocation</h2>
-              </div>
+            <div className="card-accent-top purple card-layer rounded-xl p-5">
+              <div className="section-eyebrow">Allocation</div>
+              <h2 className="text-base font-bold text-ink-800 font-display tracking-tight mb-4">Asset Allocation</h2>
               <PortfolioChart data={summary.allocation} />
             </div>
-            <div className="card-flat p-6">
-              <div className="section-header purple">
-                <h2 className="section-header-title text-white">Allocation Breakdown</h2>
-              </div>
+            <div className="card-accent-top purple card-layer rounded-xl p-5">
+              <div className="section-eyebrow">Breakdown</div>
+              <h2 className="text-base font-bold text-ink-800 font-display tracking-tight mb-4">Allocation Breakdown</h2>
               {summary.allocation.length === 0 ? (
-                <div className="text-gray-500 text-sm">No holdings yet</div>
+                <div className="text-ink-500 text-sm">No holdings yet</div>
               ) : (
                 <div className="space-y-2">
                   {summary.allocation.map((a) => (
                     <div key={a.symbol} className="flex justify-between text-sm">
-                      <span className="text-white font-medium">{a.symbol}</span>
-                      <span className="text-gray-300">{formatPrice(a.value, guessCurrency(a.symbol), 2)} ({a.percentage.toFixed(1)}%)</span>
+                      <span className="text-ink-800 font-medium">{a.symbol}</span>
+                      <span className="text-ink-600">
+                        <PriceDisplay price={a.value} currency={guessCurrency(a.symbol)} size="sm" />
+                        {' '}({a.percentage.toFixed(1)}%)
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -156,52 +158,51 @@ export default function PortfolioPage() {
             </div>
           </div>
 
-          <div className="glass-card p-6 animate-spring-up stagger-3">
-            <div className="section-header cyan">
-              <h2 className="section-header-title text-white">Holdings</h2>
-            </div>
+          <div className="card-layer rounded-xl p-5 animate-spring-up stagger-3">
+            <div className="section-eyebrow">Holdings</div>
+            <h2 className="text-base font-bold text-ink-800 font-display tracking-tight mb-4">Holdings</h2>
             {summary.holdings.length === 0 ? (
-              <div className="text-gray-500 text-sm py-6 text-center">No holdings. Click "Add Holding" to start.</div>
+              <div className="text-ink-500 text-sm py-6 text-center">No holdings. Click "Add Holding" to start.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="table-base">
                   <thead>
-                    <tr className="text-gray-400 border-b border-white/5">
-                      <th className="text-left py-2 px-2">Symbol</th>
-                      <th className="text-right py-2 px-2">Qty</th>
-                      <th className="text-right py-2 px-2">Buy</th>
-                      <th className="text-right py-2 px-2">Current</th>
-                      <th className="text-right py-2 px-2">Value</th>
-                      <th className="text-right py-2 px-2">P/L</th>
-                      <th className="text-right py-2 px-2">P/L %</th>
-                      <th className="py-2 px-2"></th>
+                    <tr>
+                      <th>Symbol</th>
+                      <th className="text-right">Qty</th>
+                      <th className="text-right">Buy</th>
+                      <th className="text-right">Current</th>
+                      <th className="text-right">Value</th>
+                      <th className="text-right">P/L</th>
+                      <th className="text-right">P/L %</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
                     {summary.holdings.map((h) => (
                       <React.Fragment key={h.id}>
-                        <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                          <td className="py-2 px-2 text-white font-medium">
+                        <tr>
+                          <td className="font-medium">
                             <button
                               onClick={() => setExpanded(expanded === h.id ? null : h.id)}
-                              className="flex items-center gap-1 hover:text-blue-300 transition-colors"
+                              className="flex items-center gap-1 text-ink-800 hover:text-emerald-300 transition-colors"
                               title="Show live chart"
                             >
                               {expanded === h.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                               {h.symbol}
                             </button>
                           </td>
-                          <td className="py-2 px-2 text-right text-gray-300 font-mono tabular-nums">{h.quantity.toFixed(2)}</td>
-                          <td className="py-2 px-2 text-right"><PriceDisplay price={h.purchase_price} currency={guessCurrency(h.symbol)} size="sm" /></td>
-                          <td className="py-2 px-2 text-right"><PriceDisplay price={h.current_price} currency={guessCurrency(h.symbol)} size="sm" color="default" animate /></td>
-                          <td className="py-2 px-2 text-right"><PriceDisplay price={h.current_value} currency={guessCurrency(h.symbol)} size="md" color="default" /></td>
-                          <td className={`py-2 px-2 text-right`}>
+                          <td className="text-right font-mono tabular-nums">{h.quantity.toFixed(2)}</td>
+                          <td className="text-right"><PriceDisplay price={h.purchase_price} currency={guessCurrency(h.symbol)} size="sm" /></td>
+                          <td className="text-right"><PriceDisplay price={h.current_price} currency={guessCurrency(h.symbol)} size="sm" color="default" animate /></td>
+                          <td className="text-right"><PriceDisplay price={h.current_value} currency={guessCurrency(h.symbol)} size="md" color="default" /></td>
+                          <td className="text-right">
                             <PriceDisplay price={h.gain_loss} currency={guessCurrency(h.symbol)} size="sm" color={h.gain_loss >= 0 ? 'gains' : 'losses'} showSign />
                           </td>
-                          <td className={`py-2 px-2 text-right font-mono tabular-nums ${h.gain_loss_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          <td className={`text-right font-mono tabular-nums ${h.gain_loss_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {h.gain_loss_percent.toFixed(2)}%
                           </td>
-                          <td className="py-2 px-2 text-right">
+                          <td className="text-right">
                             <button onClick={() => remove(h.id, h.symbol)} className="text-rose-400 hover:text-rose-300 transition-colors">
                               <Trash2 size={14} />
                             </button>

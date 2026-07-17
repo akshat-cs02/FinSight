@@ -30,13 +30,9 @@ export default function StockDetailsPage() {
 function StockDetailsContent() {
   const { symbol = 'AAPL' } = useParams()
   const SYMBOL = symbol.toUpperCase()
-  // Optional pre-resolved TV symbol from search (e.g. "NSE:RELIANCE"). When set,
-  // passed directly to the chart so it works for symbols the yfinance→TV mapping
-  // would fail for (NIFTY/SENSEX indices, some less common tickers).
   const [searchParams] = useSearchParams()
   const TV_SYMBOL = searchParams.get('tv') || undefined
 
-  // Cache-backed data — shows instantly if cached, fetches in background if stale.
   const quoteEntry = useQuote(SYMBOL)
   const indicatorsEntry = useIndicators(SYMBOL)
   const newsEntry = useNews(SYMBOL)
@@ -55,13 +51,9 @@ function StockDetailsContent() {
   } | null>(null)
   const [inWatchlist, setInWatchlist] = useState(false)
 
-  // Derive currency from quote (most accurate — from yfinance info) or guess from symbol suffix
   const currency = quote?.currency || guessCurrency(SYMBOL)
   const sym = getCurrencySymbol(currency)
 
-  // Spot metals/energy have no Yahoo spot feed, so data comes from futures.
-  // Gold & silver are spot-adjusted back onto the spot scale (label: "spot-adjusted");
-  // the rest are shown as their futures contract (label: "futures").
   const SPOT_ADJUSTED: Record<string, string> = {
     'XAUUSD=X': 'gold', 'XAUUSD': 'gold',
     'XAGUSD=X': 'silver', 'XAGUSD': 'silver',
@@ -78,15 +70,12 @@ function StockDetailsContent() {
 
   const cache = useStockCache.getState
   useEffect(() => {
-    // Cancellation guard — when SYMBOL changes mid-fetch, ignore results from
-    // the old SYMBOL so stale data doesn't overwrite the new stock's data.
     let cancelled = false
     let liveId: ReturnType<typeof setInterval> | null = null
 
     setErr(null)
     setInWatchlist(false)
 
-    // Kick off background fetches. Cache hooks already show cached data instantly.
     const fetchAll = () => {
       cache().getQuote(SYMBOL).catch((e) => { if (!cancelled) !quote && setErr(e.response?.data?.detail || e.message) })
       cache().getIndicators(SYMBOL, '6mo').catch(() => {})
@@ -100,7 +89,6 @@ function StockDetailsContent() {
       .then((items) => { if (!cancelled) setInWatchlist(items.some((i) => i.symbol === SYMBOL)) })
       .catch(() => {})
 
-    // Live price refresh every 6 seconds (uses cache to dedupe)
     liveId = setInterval(() => {
       cache().prefetchQuote(SYMBOL).catch(() => {})
     }, 6000)
@@ -147,20 +135,21 @@ function StockDetailsContent() {
   const up = quote ? quote.change_percent >= 0 : false
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-spring-up stagger-0">
         <div>
-          <h1 className="text-3xl font-bold text-white font-display">{SYMBOL}</h1>
+          <div className="section-eyebrow">Stock Details</div>
+          <h1 className="text-3xl font-bold text-ink-900 font-display">{SYMBOL}</h1>
           {quote ? (
-            <p className="text-gray-400">
+            <p className="text-ink-600">
               {quote.name} · {quote.exchange || ''} ·{' '}
               <span className="text-blue-400 font-semibold">{currency}</span>
             </p>
           ) : !err ? (
-            <p className="text-gray-500 text-sm animate-pulse">Loading {SYMBOL}…</p>
+            <p className="text-ink-500 text-sm animate-pulse">Loading {SYMBOL}…</p>
           ) : (
-            <p className="text-gray-500 text-sm">Symbol not found</p>
+            <p className="text-ink-500 text-sm">Symbol not found</p>
           )}
         </div>
         {quote ? (
@@ -173,31 +162,31 @@ function StockDetailsContent() {
           </div>
         ) : !err ? (
           <div className="text-right">
-            <div className="h-10 w-32 bg-gray-700 rounded animate-pulse mb-2" />
-            <div className="h-4 w-24 bg-gray-700 rounded animate-pulse ml-auto" />
+            <div className="skeleton h-10 w-32 rounded mb-2" />
+            <div className="skeleton h-4 w-24 rounded ml-auto" />
           </div>
         ) : null}
       </div>
 
-      {/* Spot-adjusted note: gold/silver futures data converted to spot scale */}
+      {/* Spot-adjusted note */}
       {spotAdjusted && (
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-2.5 text-blue-200/90 text-sm flex items-start gap-2">
-          <span className="text-blue-400 mt-0.5">ⓘ</span>
+        <div className="card-accent-top blue card-layer rounded-xl px-4 py-2.5 text-ink-600 text-sm flex items-start gap-2 animate-spring-up stagger-1">
+          <span className="text-blue-400 mt-0.5 shrink-0">ⓘ</span>
           <span>
-            Showing <strong className="text-blue-100">spot {spotAdjusted}</strong> prices. Yahoo only carries
+            Showing <strong className="text-ink-800 font-medium">spot {spotAdjusted}</strong> prices. Yahoo only carries
             {' '}{spotAdjusted} as a futures contract, so we convert it to the spot scale (anchored to the
             {' '}{spotAdjusted === 'gold' ? 'GLD' : 'SLV'} ETF). Signals, entries, SL/TP and targets are all on the spot scale.
           </span>
         </div>
       )}
 
-      {/* Futures-only note: platinum/oil/gas shown as their futures contract */}
+      {/* Futures-only note */}
       {futuresNote && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2.5 text-amber-200/90 text-sm flex items-start gap-2">
-          <span className="text-amber-400 mt-0.5">ⓘ</span>
+        <div className="card-accent-top amber card-layer rounded-xl px-4 py-2.5 text-ink-600 text-sm flex items-start gap-2 animate-spring-up stagger-1">
+          <span className="text-amber-400 mt-0.5 shrink-0">ⓘ</span>
           <span>
             Spot {SYMBOL.replace('=X', '')} has no live data feed, so prices, chart, and signals here use{' '}
-            <strong className="text-amber-100">{futuresNote}</strong> — which trades slightly above/below spot.
+            <strong className="text-ink-800 font-medium">{futuresNote}</strong> — which trades slightly above/below spot.
             The direction and % moves track spot closely.
           </span>
         </div>
@@ -205,98 +194,99 @@ function StockDetailsContent() {
 
       {/* Action buttons */}
       <div className="flex flex-wrap gap-3 animate-spring-up stagger-1">
-        <button onClick={() => setShowAdd(!showAdd)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm">
+        <button onClick={() => setShowAdd(!showAdd)} className="btn btn-primary">
           <Plus size={16} /> Add to Portfolio
         </button>
         <button
           onClick={toggleWatchlist}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
+          className={`btn ${
             inWatchlist
               ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 hover:bg-yellow-500/30'
-              : 'bg-gray-700 hover:bg-gray-600 text-white border border-gray-600'
+              : 'btn-ghost'
           }`}
         >
           <Star size={16} fill={inWatchlist ? 'currentColor' : 'none'} />
           {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
         </button>
         <a href={`${API_URL}/api/reports/stock/${SYMBOL}/pdf`} target="_blank" rel="noopener"
-           className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm">
+           className="btn btn-ghost">
           <Download size={16} /> PDF Report
         </a>
         <a href={`${API_URL}/api/reports/stock/${SYMBOL}/csv?period=1y`} target="_blank" rel="noopener"
-           className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm">
+           className="btn btn-ghost">
           <Download size={16} /> CSV Data
         </a>
       </div>
 
       {showAdd && (
-        <form onSubmit={addToPortfolio} className="glass-card p-4 flex flex-wrap gap-3 items-end">
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Quantity</label>
-            <input type="number" step="any" required value={addForm.quantity}
-                   onChange={(e) => setAddForm({ ...addForm, quantity: e.target.value })}
-                   className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white w-32" />
+        <form onSubmit={addToPortfolio} className="card-layer rounded-xl p-4 animate-spring-up stagger-2">
+          <div className="flex flex-wrap gap-3 items-end">
+            <div>
+              <label className="block section-eyebrow mb-1">Quantity</label>
+              <input type="number" step="any" required value={addForm.quantity}
+                     onChange={(e) => setAddForm({ ...addForm, quantity: e.target.value })}
+                     className="input-glow w-32" />
+            </div>
+            <div>
+              <label className="block section-eyebrow mb-1">Buy Price ({sym})</label>
+              <input type="number" step="any" required value={addForm.purchase_price}
+                     onChange={(e) => setAddForm({ ...addForm, purchase_price: e.target.value })}
+                     placeholder={quote?.price.toFixed(2) || '0.00'}
+                     className="input-glow w-32" />
+            </div>
+            <button type="submit" className="btn btn-emerald">Save</button>
           </div>
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Buy Price ({sym})</label>
-            <input type="number" step="any" required value={addForm.purchase_price}
-                   onChange={(e) => setAddForm({ ...addForm, purchase_price: e.target.value })}
-                   placeholder={quote?.price.toFixed(2) || '0.00'}
-                   className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white w-32" />
-          </div>
-          <button type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded text-white">Save</button>
         </form>
       )}
 
       {/* Quote details */}
       {quote && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="glass-card p-3 card-flat">
-            <p className="text-xs text-gray-400">Open</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 animate-spring-up stagger-1">
+          <div className="card-flat card-layer rounded-xl p-3">
+            <p className="section-eyebrow">Open</p>
             <PriceDisplay price={quote.open} currency={currency} size="md" color="default" />
           </div>
-          <div className="glass-card p-3 card-flat">
-            <p className="text-xs text-gray-400">High</p>
+          <div className="card-flat card-layer rounded-xl p-3">
+            <p className="section-eyebrow">High</p>
             <PriceDisplay price={quote.high} currency={currency} size="md" color="default" />
           </div>
-          <div className="glass-card p-3 card-flat">
-            <p className="text-xs text-gray-400">Low</p>
+          <div className="card-flat card-layer rounded-xl p-3">
+            <p className="section-eyebrow">Low</p>
             <PriceDisplay price={quote.low} currency={currency} size="md" color="default" />
           </div>
-          <div className="glass-card p-3 card-flat">
-            <p className="text-xs text-gray-400">Volume</p>
-            <p className="text-white font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
+          <div className="card-flat card-layer rounded-xl p-3">
+            <p className="section-eyebrow">Volume</p>
+            <p className="text-ink-900 font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
           </div>
           {quote.fifty_two_week_high && (
-            <div className="glass-card p-3 card-flat">
-              <p className="text-xs text-gray-400">52w High</p>
+            <div className="card-flat card-layer rounded-xl p-3">
+              <p className="section-eyebrow">52w High</p>
               <PriceDisplay price={quote.fifty_two_week_high} currency={currency} size="md" color="default" />
             </div>
           )}
           {quote.fifty_two_week_low && (
-            <div className="glass-card p-3 card-flat">
-              <p className="text-xs text-gray-400">52w Low</p>
+            <div className="card-flat card-layer rounded-xl p-3">
+              <p className="section-eyebrow">52w Low</p>
               <PriceDisplay price={quote.fifty_two_week_low} currency={currency} size="md" color="default" />
             </div>
           )}
           {quote.market_cap && (
-            <div className="glass-card p-3 card-flat">
-              <p className="text-xs text-gray-400">Market Cap</p>
-              <p className="text-white font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
+            <div className="card-flat card-layer rounded-xl p-3">
+              <p className="section-eyebrow">Market Cap</p>
+              <p className="text-ink-900 font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
             </div>
           )}
           {quote.pe_ratio && (
-            <div className="glass-card p-3 card-flat">
-              <p className="text-xs text-gray-400">P/E</p>
-              <p className="text-white font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
+            <div className="card-flat card-layer rounded-xl p-3">
+              <p className="section-eyebrow">P/E</p>
+              <p className="text-ink-900 font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
             </div>
           )}
         </div>
       )}
 
-      {/* TradingView Chart — full feature set with all drawing tools + indicators */}
-      <div className="glass-card p-3">
+      {/* TradingView Chart */}
+      <div className="card-layer rounded-xl p-3 animate-spring-up stagger-2">
         <TradingViewWidget symbol={SYMBOL} tvSymbol={TV_SYMBOL} height={680} />
       </div>
 
@@ -310,14 +300,12 @@ function StockDetailsContent() {
       />
       <StockTermSignals symbol={SYMBOL} masterSignal={consensus?.master_signal} />
 
-      {/* AI Prediction · ICT signals · Paper trading */}
+      {/* AI Prediction · ICT Signals · Paper trading */}
       <PredictionCard symbol={SYMBOL} currency={currency} />
-
       <ICTSignals symbol={SYMBOL} currency={currency} onTrade={(t) => {
         setPaperTrade(t)
         document.getElementById('paper-trading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }} />
-
       <div id="paper-trading">
         <PaperTrading
           symbol={SYMBOL}
@@ -329,59 +317,61 @@ function StockDetailsContent() {
         />
       </div>
 
-      {/* Technical Indicators */}
+      {/* Technical Indicators — purple accent */}
       {indicators && (
-        <div className="card-flat p-6">
-          <div className="section-header purple">
-            <h2 className="section-header-title text-white text-lg">Technical Indicators</h2>
-          </div>
+        <div className="card-accent-top purple card-layer rounded-xl p-5 animate-spring-up stagger-3">
+          <div className="section-eyebrow">Analysis</div>
+          <h2 className="accent-heading text-purple-400 text-lg mb-4">
+            <span className="text-ink-900">Technical Indicators</span>
+          </h2>
           <div className="flex justify-between items-center mb-4">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-ink-500">
               This bias comes from RSI / MACD / Bollinger only. The <strong className="text-blue-400">AI Prediction</strong> above
               is the authoritative recommendation — it combines these indicators with the LSTM+XGBoost forecast.
             </p>
             <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-              <span className="text-xs text-gray-500">Technical-only bias:</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-                indicators.signal === 'BUY' ? 'bg-emerald-500/20 text-emerald-300' :
-                indicators.signal === 'SELL' ? 'bg-rose-500/20 text-rose-300' :
-                'bg-gray-500/20 text-gray-300'
+              <span className="text-xs text-ink-500">Technical-only bias:</span>
+              <span className={`tag ${
+                indicators.signal === 'BUY' ? 'tag-emerald' :
+                indicators.signal === 'SELL' ? 'tag-rose' :
+                'tag-gray'
               }`}>{indicators.signal}</span>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.entries(indicators.latest).map(([k, v]) => (
-              <div key={k} className="glass-card p-3">
-                <p className="text-xs text-gray-400 uppercase">{k.replace(/_/g, ' ')}</p>
-                <p className="text-white font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
+              <div key={k} className="card-flat card-layer rounded-xl p-3">
+                <p className="section-eyebrow">{k.replace(/_/g, ' ')}</p>
+                <p className="text-ink-900 font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* News */}
-      <div className="card-accent-cyan p-6">
-        <div className="section-header cyan">
-          <h2 className="section-header-title text-white text-lg">Recent News</h2>
-        </div>
-        {news === null && <div className="text-gray-500 text-sm">Loading news…</div>}
-        {news && news.length === 0 && <div className="text-gray-500 text-sm">No recent news</div>}
+      {/* News — cyan accent */}
+      <div className="card-accent-top cyan card-layer rounded-xl p-5 animate-spring-up stagger-4">
+        <div className="section-eyebrow">Latest</div>
+        <h2 className="accent-heading text-cyan-400 text-lg mb-4">
+          <span className="text-ink-900">Recent News</span>
+        </h2>
+        {news === null && <div className="text-ink-500 text-sm">Loading news…</div>}
+        {news && news.length === 0 && <div className="text-ink-500 text-sm">No recent news</div>}
         {news && news.length > 0 && (
           <div className="space-y-3">
             {news.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                 className="block pb-3 border-b border-gray-700 last:border-b-0 hover:bg-gray-700/30 rounded p-2 -m-2">
+                 className="block pb-3 border-b border-white/[0.04] last:border-b-0 hover:bg-white/[0.02] rounded p-2 -m-2 transition-colors">
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-white font-medium flex-1">{a.title}</h3>
-                  <span className={`ml-3 px-2 py-1 rounded text-xs font-semibold ${
-                    a.sentiment === 'POSITIVE' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' :
-                    a.sentiment === 'NEGATIVE' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20' :
-                    'bg-gray-500/20 text-gray-300'
+                  <h3 className="text-ink-900 font-medium flex-1">{a.title}</h3>
+                  <span className={`ml-3 tag ${
+                    a.sentiment === 'POSITIVE' ? 'tag-emerald' :
+                    a.sentiment === 'NEGATIVE' ? 'tag-rose' :
+                    'tag-gray'
                   }`}>{a.sentiment}</span>
                 </div>
-                {a.summary && <p className="text-gray-400 text-sm line-clamp-2">{a.summary}</p>}
-                <p className="text-gray-500 text-xs mt-1">{a.source}</p>
+                {a.summary && <p className="text-ink-600 text-sm line-clamp-2">{a.summary}</p>}
+                <p className="text-ink-500 text-xs mt-1">{a.source}</p>
               </a>
             ))}
           </div>

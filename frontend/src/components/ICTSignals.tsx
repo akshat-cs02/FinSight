@@ -78,7 +78,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
     : 'bg-gray-700/50 border-gray-600'
 
   return (
-    <div className="glass-card p-6">
+    <div className="card-layer rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2 font-display">

@@ -268,7 +268,7 @@ export default function SearchBar() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute z-50 mt-1 w-full glass-card shadow-xl max-h-80 overflow-auto">
+        <div className="absolute z-50 mt-1 w-full card-layer rounded-xl shadow-xl max-h-80 overflow-auto">
           {/* Mobile market filter row */}
           <div className="flex sm:hidden gap-1 p-2 border-b border-gray-700 flex-wrap">
             {MARKET_LABELS.map((m) => (

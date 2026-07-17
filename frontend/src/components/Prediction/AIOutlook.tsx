@@ -47,7 +47,7 @@ export default function AIOutlook() {
   }, [])
 
   return (
-    <div className="glass-card p-6">
+    <div className="card-layer rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
           <Brain size={18} className="text-blue-400" /> AI Market Outlook

@@ -150,9 +150,9 @@ function MetricCard({ label, value, good, suffix = '', small = false }: {
   label: string; value: string | number; good: boolean; suffix?: string; small?: boolean
 }) {
   return (
-    <div className="glass-card p-4">
-      <p className="text-xs text-gray-400 mb-1">{label}</p>
-      <p className={`font-bold ${small ? 'text-lg' : 'text-2xl'} ${good ? 'text-emerald-400' : 'text-rose-400'}`}>
+    <div className="card-layer rounded-xl p-4">
+      <p className="text-xs text-ink-400 mb-1">{label}</p>
+      <p className={`font-bold tabular-nums ${small ? 'text-lg' : 'text-2xl'} ${good ? 'text-emerald-400' : 'text-rose-400'}`}>
         {value}{suffix}
       </p>
     </div>
@@ -163,10 +163,10 @@ function StrategyTooltip({ desc }: { desc: string }) {
   const [show, setShow] = useState(false)
   return (
     <span className="relative inline-block">
-      <Info size={13} className="text-gray-500 cursor-pointer hover:text-gray-300 ml-1 inline"
+      <Info size={13} className="text-ink-500 cursor-pointer hover:text-ink-300 ml-1 inline"
             onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)} />
       {show && (
-        <div className="absolute z-50 left-0 top-5 w-64 p-3 bg-gray-900 border border-gray-600 rounded-lg text-xs text-gray-300 shadow-xl">
+        <div className="absolute z-50 left-0 top-5 w-64 p-3 bg-gray-900 border border-gray-600 rounded-lg text-xs text-ink-300 shadow-xl">
           {desc}
         </div>
       )}
@@ -252,56 +252,56 @@ export default function BacktestingPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
 
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3 font-display">
-          <BarChart2 size={28} className="text-blue-400" /> ICT/SMC Backtesting Engine
+      <div className="animate-spring-up stagger-0">
+        <h1 className="text-3xl font-bold text-ink-50 flex items-center gap-3 font-display">
+          <BarChart2 size={28} className="text-amber-400" /> ICT/SMC Backtesting Engine
         </h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <p className="text-ink-500 mt-1 text-sm">
           Professional-grade backtesting with ICT & Smart Money Concepts — 8 strategies, news filter, 5-year data
         </p>
       </div>
 
       {/* Controls */}
-      <div className="card-accent-cyan p-6 space-y-5 animate-spring-up stagger-1">
-        <div className="section-header cyan">
-          <h2 className="section-header-title text-white">Configure Backtest</h2>
+      <div className="card-accent-top amber card-layer rounded-xl p-6 space-y-5 animate-spring-up stagger-1">
+        <div className="section-eyebrow amber">
+          <h2 className="font-display text-ink-50">Configure Backtest</h2>
         </div>
 
         <div className="flex flex-wrap gap-4 items-start">
           {/* Symbol */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Symbol</label>
+            <label className="block text-xs text-ink-400 mb-1">Symbol</label>
             <input
               value={symbol}
               onChange={(e) => setSymbol(e.target.value.toUpperCase())}
               placeholder="AAPL"
-              className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white w-32 uppercase"
+              className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-ink-50 w-32 uppercase"
             />
           </div>
 
           {/* Quick picks */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Quick pick</label>
+            <label className="block text-xs text-ink-400 mb-1">Quick pick</label>
             <div className="flex flex-wrap gap-1">
               {QUICK_SYMBOLS.map(({ sym, label, group }) => (
                 <button key={sym} onClick={() => setSymbol(sym)}
                         title={`${sym} · ${group}`}
                         className={`px-2 py-1 text-xs rounded transition ${symbol === sym
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-amber-500 text-white'
                           : group === 'IN'     ? 'bg-orange-900/50 text-orange-300 hover:bg-orange-800/60'
                           : group === 'FX'     ? 'bg-purple-900/50 text-purple-300 hover:bg-purple-800/60'
                           : group === 'Crypto' ? 'bg-yellow-900/50 text-yellow-300 hover:bg-yellow-800/60'
                           : group === 'Commod' ? 'bg-green-900/50 text-green-300 hover:bg-green-800/60'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
+                          : 'bg-gray-700 text-ink-300 hover:bg-gray-600'}`}>
                   {label ?? sym}
                 </button>
               ))}
             </div>
-            <div className="flex gap-3 mt-1 text-xs text-gray-600">
-              <span className="text-gray-400">US</span>
+            <div className="flex gap-3 mt-1 text-xs text-ink-600">
+              <span className="text-ink-400">US</span>
               <span className="text-orange-500">IN</span>
               <span className="text-purple-500">FX</span>
               <span className="text-yellow-500">Crypto</span>
@@ -311,8 +311,8 @@ export default function BacktestingPage() {
 
           {/* Interval */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1">
-              Interval <span className="text-gray-600 font-normal">(ICT/SMC = intraday)</span>
+            <label className="block text-xs text-ink-400 mb-1">
+              Interval <span className="text-ink-600 font-normal">(ICT/SMC = intraday)</span>
             </label>
             <div className="flex gap-1">
               {(['15m', '30m', '1h'] as const).map((iv) => (
@@ -322,8 +322,8 @@ export default function BacktestingPage() {
                   if (!validPeriods.includes(period)) setPeriod(validPeriods[validPeriods.length - 1])
                 }}
                         className={`px-3 py-2 text-xs rounded transition ${interval === iv
-                          ? 'bg-orange-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-gray-700 text-ink-300 hover:bg-gray-600'}`}>
                   {iv.toUpperCase()}
                 </button>
               ))}
@@ -332,13 +332,13 @@ export default function BacktestingPage() {
 
           {/* Period */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Period</label>
+            <label className="block text-xs text-ink-400 mb-1">Period</label>
             <div className="flex gap-1">
               {INTERVAL_PERIODS[interval].map((p) => (
                 <button key={p} onClick={() => setPeriod(p)}
                         className={`px-3 py-2 text-xs rounded transition ${period === p
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-gray-700 text-ink-300 hover:bg-gray-600'}`}>
                   {p.toUpperCase()}
                 </button>
               ))}
@@ -347,23 +347,23 @@ export default function BacktestingPage() {
 
           {/* Capital */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Capital ($)</label>
+            <label className="block text-xs text-ink-400 mb-1">Capital ($)</label>
             <input type="number" value={capital}
                    onChange={(e) => setCapital(e.target.value)}
-                   className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white w-28" />
+                   className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-ink-50 w-28" />
           </div>
 
           {/* Toggles */}
           <div className="flex flex-col gap-2 pt-5">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={allowShort} onChange={(e) => setAllowShort(e.target.checked)}
-                     className="accent-blue-500" />
-              <span className="text-xs text-gray-300">Allow Short</span>
+                     className="accent-amber-500" />
+              <span className="text-xs text-ink-300">Allow Short</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={filterNews} onChange={(e) => setFilterNews(e.target.checked)}
-                     className="accent-orange-500" />
-              <span className="text-xs text-orange-300 flex items-center gap-1">
+                     className="accent-amber-500" />
+              <span className="text-xs text-amber-300 flex items-center gap-1">
                 <Shield size={10} /> News Filter
               </span>
             </label>
@@ -376,7 +376,7 @@ export default function BacktestingPage() {
             <button
               onClick={() => setMode('leaderboard')}
               className={`px-4 py-2 text-sm rounded-lg font-medium transition flex items-center gap-2 ${
-                mode === 'leaderboard' ? 'bg-yellow-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                mode === 'leaderboard' ? 'bg-amber-500 text-white' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
               }`}
             >
               <Trophy size={14} /> Leaderboard (All 8 Strategies)
@@ -384,7 +384,7 @@ export default function BacktestingPage() {
             <button
               onClick={() => setMode('single')}
               className={`px-4 py-2 text-sm rounded-lg font-medium transition flex items-center gap-2 ${
-                mode === 'single' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                mode === 'single' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
               }`}
             >
               <Zap size={14} /> Single Strategy
@@ -392,7 +392,7 @@ export default function BacktestingPage() {
             <button
               onClick={() => setMode('universe')}
               className={`px-4 py-2 text-sm rounded-lg font-medium transition flex items-center gap-2 ${
-                mode === 'universe' ? 'bg-emerald-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                mode === 'universe' ? 'bg-emerald-600 text-white' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
               }`}
             >
               <Shield size={14} /> Universe Rankings
@@ -400,7 +400,7 @@ export default function BacktestingPage() {
           </div>
 
           {mode === 'leaderboard' && (
-            <p className="text-xs text-yellow-400 flex items-center gap-1">
+            <p className="text-xs text-amber-400 flex items-center gap-1">
               <Trophy size={11} /> Runs all 8 ICT/SMC strategies and ranks by Sharpe ratio. May take 20-40s.
             </p>
           )}
@@ -413,8 +413,8 @@ export default function BacktestingPage() {
                   onClick={() => setSelectedStrategy(s.key)}
                   className={`p-3 rounded-lg text-left border transition ${
                     selectedStrategy === s.key
-                      ? 'bg-blue-600/20 border-blue-500 text-blue-300'
-                      : 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                      : 'bg-gray-700 border-gray-600 text-ink-300 hover:bg-gray-600'
                   }`}
                 >
                   <div className="text-base mb-1">{s.icon}</div>
@@ -435,7 +435,7 @@ export default function BacktestingPage() {
           </button>
         ) : (
           <button onClick={run} disabled={loading}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg text-white font-medium transition">
+                  className="flex items-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 rounded-lg text-white font-medium transition">
             {loading ? <RefreshCw size={16} className="animate-spin" /> : <BarChart2 size={16} />}
             {loading ? (mode === 'leaderboard' ? 'Running 8 strategies…' : 'Running backtest…') : 'Run Backtest'}
           </button>
@@ -443,16 +443,16 @@ export default function BacktestingPage() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm animate-spring-up stagger-2">{error}</div>
       )}
 
       {/* ── Leaderboard Results ────────────────────────────────────────────────── */}
       {leaderResult && mode === 'leaderboard' && (
         <>
-          <div className="card-flat p-6 animate-spring-up stagger-2">
-            <div className="section-header amber">
-              <h2 className="section-header-title text-white flex items-center gap-2">
-                <Trophy size={18} className="text-yellow-400" />
+          <div className="card-layer rounded-xl p-6 animate-spring-up stagger-2">
+            <div className="section-eyebrow amber">
+              <h2 className="font-display text-ink-50 flex items-center gap-2">
+                <Trophy size={18} className="text-amber-400" />
                 Strategy Leaderboard — {leaderResult.symbol} ({leaderResult.period})
               </h2>
             </div>
@@ -467,7 +467,7 @@ export default function BacktestingPage() {
                   <div key={item.strategy}
                        className={`rounded-xl border transition overflow-hidden ${
                          isWinner
-                           ? 'border-yellow-500/60 bg-yellow-500/5'
+                           ? 'border-amber-500/40 bg-amber-500/[0.03]'
                            : hasError
                              ? 'border-gray-700 bg-gray-800/50 opacity-60'
                              : 'border-gray-700 bg-gray-800/80'
@@ -479,10 +479,10 @@ export default function BacktestingPage() {
                     >
                       {/* Rank */}
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        isWinner ? 'bg-yellow-500 text-black'
+                        isWinner ? 'bg-amber-500 text-black'
                           : item.rank === 2 ? 'bg-gray-400 text-black'
                           : item.rank === 3 ? 'bg-orange-600 text-white'
-                          : 'bg-gray-700 text-gray-300'
+                          : 'bg-gray-700 text-ink-300'
                       }`}>
                         {item.rank}
                       </div>
@@ -493,10 +493,10 @@ export default function BacktestingPage() {
                           <span className="text-sm">
                             {STRATEGIES.find(s => s.key === item.strategy)?.icon || '📊'}
                           </span>
-                          <span className="font-semibold text-white text-sm">
+                          <span className="font-semibold text-ink-50 text-sm">
                             {STRATEGIES.find(s => s.key === item.strategy)?.label || item.strategy}
                           </span>
-                          {isWinner && <span className="text-yellow-400 text-xs">👑 Best</span>}
+                          {isWinner && <span className="text-amber-400 text-xs">👑 Best</span>}
                         </div>
                       </div>
 
@@ -504,32 +504,32 @@ export default function BacktestingPage() {
                       {!hasError && (
                         <div className="hidden md:flex items-center gap-6 text-xs">
                           <div className="text-center">
-                            <div className="text-gray-500">Return</div>
+                            <div className="text-ink-500">Return</div>
                             <div className={`font-bold ${(item.metrics.total_return_pct || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {(item.metrics.total_return_pct || 0) >= 0 ? '+' : ''}{(item.metrics.total_return_pct || 0).toFixed(1)}%
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500">Sharpe</div>
-                            <div className={`font-bold ${(item.metrics.sharpe_ratio || 0) >= 1 ? 'text-emerald-400' : (item.metrics.sharpe_ratio || 0) >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
+                            <div className="text-ink-500">Sharpe</div>
+                            <div className={`font-bold ${(item.metrics.sharpe_ratio || 0) >= 1 ? 'text-emerald-400' : (item.metrics.sharpe_ratio || 0) >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>
                               {(item.metrics.sharpe_ratio || 0).toFixed(2)}
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500">Win%</div>
+                            <div className="text-ink-500">Win%</div>
                             <div className={`font-bold ${(item.metrics.win_rate_pct || 0) >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {(item.metrics.win_rate_pct || 0).toFixed(1)}%
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500">Drawdown</div>
+                            <div className="text-ink-500">Drawdown</div>
                             <div className={`font-bold ${(item.metrics.max_drawdown_pct || 0) > -20 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {(item.metrics.max_drawdown_pct || 0).toFixed(1)}%
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500">Trades</div>
-                            <div className="font-bold text-white">{item.trade_count}</div>
+                            <div className="text-ink-500">Trades</div>
+                            <div className="font-bold text-ink-50">{item.trade_count}</div>
                           </div>
                         </div>
                       )}
@@ -539,15 +539,15 @@ export default function BacktestingPage() {
 
                       {!hasError && (
                         isExpanded
-                          ? <ChevronUp size={14} className="text-gray-400 flex-shrink-0" />
-                          : <ChevronDown size={14} className="text-gray-400 flex-shrink-0" />
+                          ? <ChevronUp size={14} className="text-ink-400 flex-shrink-0" />
+                          : <ChevronDown size={14} className="text-ink-400 flex-shrink-0" />
                       )}
                     </button>
 
                     {/* Expanded detail */}
                     {isExpanded && !hasError && (
                       <div className="px-4 pb-4 border-t border-gray-700/50 space-y-3">
-                        <p className="text-xs text-gray-400 pt-3">
+                        <p className="text-xs text-ink-400 pt-3">
                           {STRATEGIES.find(s => s.key === item.strategy)?.desc}
                         </p>
 
@@ -577,7 +577,7 @@ export default function BacktestingPage() {
                               />
                               <ReferenceLine y={leaderResult.initial_capital} stroke="#374151" strokeDasharray="3 3" />
                               <Line type="monotone" dataKey="equity"
-                                    stroke={isWinner ? '#fbbf24' : '#3b82f6'} dot={false} strokeWidth={1.5} />
+                                    stroke={isWinner ? '#f59e0b' : '#3b82f6'} dot={false} strokeWidth={1.5} />
                             </LineChart>
                           </ResponsiveContainer>
                         )}
@@ -626,7 +626,7 @@ export default function BacktestingPage() {
               good={singleResult.metrics.total_trades > 0} />
           </div>
 
-          <div className="glass-card p-3 text-sm text-gray-400 flex flex-wrap gap-4">
+          <div className="card-layer rounded-xl p-4 text-sm text-ink-400 flex flex-wrap gap-4 animate-spring-up stagger-4">
             <span>{singleResult.symbol} · {singleResult.strategy} · {singleResult.period}</span>
             <span>{singleResult.data_bars} bars</span>
             <span>Initial: ${singleResult.initial_capital.toLocaleString()} →
@@ -635,7 +635,7 @@ export default function BacktestingPage() {
               </span>
             </span>
             {singleResult.news_filter && (
-              <span className="text-orange-400">
+              <span className="text-amber-400">
                 <Shield size={12} className="inline mr-1" />{singleResult.blackout_days} news days excluded
               </span>
             )}
@@ -655,25 +655,25 @@ export default function BacktestingPage() {
       {mode === 'universe' && universeResult && (
         <>
           {universeResult.status === 'computing' ? (
-            <div className="glass-card p-8 text-center">
+            <div className="card-layer rounded-xl p-8 text-center animate-spring-up stagger-2">
               <RefreshCw size={32} className="animate-spin text-emerald-400 mx-auto mb-3" />
-              <p className="text-white font-semibold">Universe analysis computing in background…</p>
-              <p className="text-gray-400 text-sm mt-1">{universeResult.message}</p>
-              <p className="text-gray-500 text-xs mt-2">Auto-refreshing every 30s</p>
+              <p className="font-semibold text-ink-50">Universe analysis computing in background…</p>
+              <p className="text-ink-400 text-sm mt-1">{universeResult.message}</p>
+              <p className="text-ink-500 text-xs mt-2">Auto-refreshing every 30s</p>
             </div>
           ) : (
             <div className="space-y-4">
               {/* Header */}
-              <div className="glass-card p-6">
+              <div className="card-layer rounded-xl p-6 animate-spring-up stagger-2">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-ink-50 flex items-center gap-2">
                     <Shield size={18} className="text-emerald-400" /> Global Strategy Rankings
                   </h2>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-ink-500">
                     {universeResult.symbols_tested} symbols · {universeResult.period} · computed {formatTradeDate(universeResult.computed_at?.slice(0,10))}
                   </span>
                 </div>
-                <p className="text-sm text-gray-400 mb-4">
+                <p className="text-sm text-ink-400 mb-4">
                   All 8 ICT/SMC strategies tested across US stocks, Indian blue chips, Forex, Crypto, and Commodities.
                   Ranked by average Sharpe ratio across all {universeResult.symbols_tested} symbols.
                 </p>
@@ -683,8 +683,8 @@ export default function BacktestingPage() {
                   <div className="flex flex-wrap gap-3 mb-5">
                     {universeResult.top_strategies.map((s, i) => (
                       <div key={s} className={`px-4 py-2 rounded-xl border flex items-center gap-2 ${
-                        i === 0 ? 'bg-yellow-500/10 border-yellow-500/50 text-yellow-300'
-                        : i === 1 ? 'bg-gray-400/10 border-gray-400/50 text-gray-300'
+                        i === 0 ? 'bg-amber-500/10 border-amber-500/50 text-amber-300'
+                        : i === 1 ? 'bg-gray-400/10 border-gray-400/50 text-ink-300'
                         : 'bg-orange-600/10 border-orange-600/50 text-orange-300'
                       }`}>
                         <span className="font-bold">{['🥇','🥈','🥉'][i]}</span>
@@ -693,7 +693,7 @@ export default function BacktestingPage() {
                         </span>
                       </div>
                     ))}
-                    <div className="text-xs text-gray-500 flex items-center">← Live signals use these strategies</div>
+                    <div className="text-xs text-ink-500 flex items-center">← Live signals use these strategies</div>
                   </div>
                 )}
 
@@ -713,52 +713,52 @@ export default function BacktestingPage() {
                           className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-700/30 transition"
                         >
                           <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                            r.rank === 1 ? 'bg-yellow-500 text-black'
+                            r.rank === 1 ? 'bg-amber-500 text-black'
                             : r.rank === 2 ? 'bg-gray-400 text-black'
                             : r.rank === 3 ? 'bg-orange-600 text-white'
-                            : 'bg-gray-700 text-gray-300'
+                            : 'bg-gray-700 text-ink-300'
                           }`}>{r.rank}</div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span>{strat?.icon || '📊'}</span>
-                              <span className="font-semibold text-white text-sm">{strat?.label || r.strategy}</span>
+                              <span className="font-semibold text-ink-50 text-sm">{strat?.label || r.strategy}</span>
                               {isTop && <span className="text-emerald-400 text-xs px-1.5 py-0.5 bg-emerald-400/10 rounded">Top Strategy</span>}
                             </div>
                           </div>
                           <div className="hidden md:flex items-center gap-6 text-xs">
                             <div className="text-center">
-                              <div className="text-gray-500">Avg Sharpe</div>
-                              <div className={`font-bold ${r.avg_sharpe >= 1 ? 'text-emerald-400' : r.avg_sharpe >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
+                              <div className="text-ink-500">Avg Sharpe</div>
+                              <div className={`font-bold ${r.avg_sharpe >= 1 ? 'text-emerald-400' : r.avg_sharpe >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>
                                 {r.avg_sharpe.toFixed(3)}
                               </div>
                             </div>
                             <div className="text-center">
-                              <div className="text-gray-500">Avg Return</div>
+                              <div className="text-ink-500">Avg Return</div>
                               <div className={`font-bold ${r.avg_return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {r.avg_return_pct >= 0 ? '+' : ''}{r.avg_return_pct.toFixed(1)}%
                               </div>
                             </div>
                             <div className="text-center">
-                              <div className="text-gray-500">Avg Win%</div>
+                              <div className="text-ink-500">Avg Win%</div>
                               <div className={`font-bold ${r.avg_win_rate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {r.avg_win_rate.toFixed(1)}%
                               </div>
                             </div>
                             <div className="text-center">
-                              <div className="text-gray-500">Symbols</div>
-                              <div className="font-bold text-white">{r.symbols_tested}</div>
+                              <div className="text-ink-500">Symbols</div>
+                              <div className="font-bold text-ink-50">{r.symbols_tested}</div>
                             </div>
                           </div>
-                          {isExpanded ? <ChevronUp size={14} className="text-gray-400 flex-shrink-0" /> : <ChevronDown size={14} className="text-gray-400 flex-shrink-0" />}
+                          {isExpanded ? <ChevronUp size={14} className="text-ink-400 flex-shrink-0" /> : <ChevronDown size={14} className="text-ink-400 flex-shrink-0" />}
                         </button>
 
                         {/* Expanded: per-symbol breakdown */}
                         {isExpanded && r.per_symbol && (
                           <div className="px-4 pb-4 border-t border-gray-700/50">
                             <div className="overflow-x-auto mt-3">
-                              <table className="w-full text-xs text-gray-300">
+                              <table className="table-base w-full text-xs text-ink-300">
                                 <thead>
-                                  <tr className="text-gray-500 border-b border-gray-700">
+                                  <tr className="text-ink-500 border-b border-gray-700">
                                     <th className="text-left py-1 px-1">Symbol</th>
                                     <th className="text-left py-1 px-1">Class</th>
                                     <th className="text-right py-1 px-1">Sharpe</th>
@@ -769,15 +769,15 @@ export default function BacktestingPage() {
                                 <tbody>
                                   {[...r.per_symbol].sort((a, b) => b.sharpe - a.sharpe).map((ps) => (
                                     <tr key={ps.symbol} className="border-b border-gray-700/40 hover:bg-gray-700/20">
-                                      <td className="py-1 px-1 font-medium text-white">{ps.symbol}</td>
-                                      <td className="py-1 px-1 text-gray-500">{ps.asset_class}</td>
-                                      <td className={`py-1 px-1 text-right ${ps.sharpe >= 1 ? 'text-emerald-400' : ps.sharpe >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
+                                      <td className="py-1 px-1 font-medium text-ink-50">{ps.symbol}</td>
+                                      <td className="py-1 px-1 text-ink-500">{ps.asset_class}</td>
+                                      <td className={`py-1 px-1 text-right ${ps.sharpe >= 1 ? 'text-emerald-400' : ps.sharpe >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>
                                         {ps.sharpe.toFixed(3)}
                                       </td>
                                       <td className={`py-1 px-1 text-right ${ps.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                         {ps.return_pct >= 0 ? '+' : ''}{ps.return_pct.toFixed(1)}%
                                       </td>
-                                      <td className="py-1 px-1 text-right text-gray-400">
+                                      <td className="py-1 px-1 text-right text-ink-400">
                                         {(ps as any).win_rate?.toFixed(1) ?? '—'}%
                                       </td>
                                     </tr>
@@ -795,12 +795,12 @@ export default function BacktestingPage() {
 
               {/* Per-symbol best strategy table */}
               {universeResult.per_symbol_best?.length > 0 && (
-                <div className="glass-card p-6">
-                  <h3 className="text-base font-bold text-white mb-4">Best Strategy Per Symbol</h3>
+                <div className="card-layer rounded-xl p-6 animate-spring-up stagger-3">
+                  <h3 className="text-base font-bold text-ink-50 mb-4">Best Strategy Per Symbol</h3>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-gray-300">
+                    <table className="table-base w-full text-xs text-ink-300">
                       <thead>
-                        <tr className="text-gray-500 border-b border-gray-700">
+                        <tr className="text-ink-500 border-b border-gray-700">
                           <th className="text-left py-2 px-2">Symbol</th>
                           <th className="text-left py-2 px-2">Class</th>
                           <th className="text-left py-2 px-2">Best Strategy</th>
@@ -812,13 +812,13 @@ export default function BacktestingPage() {
                       <tbody>
                         {universeResult.per_symbol_best.map((pb) => (
                           <tr key={pb.symbol} className="border-b border-gray-700/40 hover:bg-gray-700/20">
-                            <td className="py-2 px-2 font-bold text-white">{pb.symbol}</td>
-                            <td className="py-2 px-2 text-gray-500">{pb.asset_class}</td>
-                            <td className="py-2 px-2 text-blue-300">
+                            <td className="py-2 px-2 font-bold text-ink-50">{pb.symbol}</td>
+                            <td className="py-2 px-2 text-ink-500">{pb.asset_class}</td>
+                            <td className="py-2 px-2 text-amber-300">
                               {STRATEGIES.find(s => s.key === pb.best_strategy)?.icon || '📊'}{' '}
                               {STRATEGIES.find(s => s.key === pb.best_strategy)?.label || pb.best_strategy}
                             </td>
-                            <td className={`py-2 px-2 text-right ${pb.sharpe >= 1 ? 'text-emerald-400' : pb.sharpe >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
+                            <td className={`py-2 px-2 text-right ${pb.sharpe >= 1 ? 'text-emerald-400' : pb.sharpe >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>
                               {pb.sharpe.toFixed(3)}
                             </td>
                             <td className={`py-2 px-2 text-right ${pb.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -827,7 +827,7 @@ export default function BacktestingPage() {
                             <td className="py-2 px-2 text-right">
                               <button
                                 onClick={() => { setSymbol(pb.symbol); setMode('leaderboard'); }}
-                                className="text-xs text-blue-400 hover:text-blue-300 underline"
+                                className="text-xs text-amber-400 hover:text-amber-300 underline"
                               >
                                 Backtest →
                               </button>
@@ -859,10 +859,10 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
   return (
     <>
       {equityCurve.length > 0 && (
-        <div className="card-flat p-6">
-          <div className="section-header cyan">
-            <h2 className="section-header-title text-white flex items-center gap-2">
-              <TrendingUp size={16} className="text-emerald-400" />
+        <div className="card-accent-top purple card-layer rounded-xl p-6 animate-spring-up stagger-4">
+          <div className="section-eyebrow purple">
+            <h2 className="font-display text-ink-50 flex items-center gap-2">
+              <TrendingUp size={16} className="text-purple-400" />
               Equity Curve — {symbol} · {strategyLabel}
             </h2>
           </div>
@@ -883,17 +883,17 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
       )}
 
       {trades.length > 0 && (
-        <div className="card-flat p-6">
-          <div className="section-header purple">
-            <h2 className="section-header-title text-white flex items-center gap-2">
-              <TrendingDown size={16} className="text-blue-400" />
+        <div className="card-accent-top cyan card-layer rounded-xl p-6 animate-spring-up stagger-5">
+          <div className="section-eyebrow cyan">
+            <h2 className="font-display text-ink-50 flex items-center gap-2">
+              <TrendingDown size={16} className="text-cyan-400" />
               Trade Log ({trades.length} trades shown)
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-gray-300">
+            <table className="table-base w-full text-xs text-ink-300">
               <thead>
-                <tr className="border-b border-gray-700 text-gray-500 text-left">
+                <tr className="border-b border-gray-700 text-ink-500 text-left">
                   <th className="pb-2">Entry</th>
                   <th className="pb-2">Exit</th>
                   <th className="pb-2">Side</th>
@@ -922,11 +922,11 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
                     <td className={`py-1.5 text-right ${t.pnl_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {t.pnl_pct >= 0 ? '+' : ''}{t.pnl_pct.toFixed(2)}%
                     </td>
-                    <td className="py-1.5 text-gray-500">
+                    <td className="py-1.5 text-ink-500">
                       <span className={`px-1 rounded text-xs ${
                         t.exit_reason === 'TP' ? 'text-emerald-500' :
                         t.exit_reason === 'SL' ? 'text-rose-500' :
-                        'text-gray-500'
+                        'text-ink-500'
                       }`}>{t.exit_reason}</span>
                     </td>
                   </tr>

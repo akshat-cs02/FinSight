@@ -202,7 +202,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
   )
 
   if (!pred && loading) return (
-    <div className="glass-card p-6">
+    <div className="card-layer rounded-xl p-6">
       <div className="flex items-center gap-2 text-blue-300 animate-pulse">
         <Brain size={18} /> Running ensemble (LSTM + XGBoost)…
       </div>
@@ -210,7 +210,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
   )
 
   if (!pred) return (
-    <div className="glass-card p-6">
+    <div className="card-layer rounded-xl p-6">
       <button onClick={() => fetch()} className="text-blue-400 hover:text-blue-300 text-sm">Load AI prediction</button>
     </div>
   )
