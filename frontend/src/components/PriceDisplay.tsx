@@ -6,16 +6,16 @@ const intSize = { sm: 'font-medium text-sm', md: 'font-semibold text-base', lg: 
 const decSize = { sm: 'text-[10px]', md: 'text-[11px]', lg: 'text-[12px]', xl: 'text-[14px]', hero: 'text-lg' }
 const gapMap = { sm: 'gap-px', md: 'gap-px', lg: 'gap-0.5', xl: 'gap-0.5', hero: 'gap-0.5' }
 
-const colorMap: Record<string, string> = {
-  default: 'pd-default',
-  gains: 'text-green',
-  losses: 'text-loss',
-  brand: 'text-gold',
-  emerald: 'text-emerald',
-  purple: 'text-purple',
-  cyan: 'text-cyan',
-  rose: 'text-rose',
-  amber: 'text-amber',
+const colorMap: Record<string, { color: string }> = {
+  default: { color: 'rgba(255, 255, 255, 0.85)' },
+  gains: { color: '#22C55E' },
+  losses: { color: '#EF4444' },
+  brand: { color: '#D4A853' },
+  emerald: { color: '#10B981' },
+  purple: { color: '#8B5CF6' },
+  cyan: { color: '#22D3EE' },
+  rose: { color: '#F43F5E' },
+  amber: { color: '#F59E0B' },
 }
 
 function autoDecimals(p: number): number {
@@ -79,7 +79,7 @@ export default function PriceDisplay({
   const { int, dec } = splitParts(price, decimals)
   const intComma = withCommas(int)
   const s = { sym: symSize[size], int: intSize[size], dec: decSize[size], gap: gapMap[size] }
-  const c = colorMap[color] || colorMap.default
+  const colorStyle = colorMap[color] || colorMap.default
 
   const prev = useRef(price)
   const [flash, setFlash] = useState<'up' | 'down' | null>(null)
@@ -125,7 +125,7 @@ export default function PriceDisplay({
     const prefix = showSign && price > 0 ? '+' : ''
     const neg = price < 0 ? '-' : ''
     return (
-      <span className={`inline-flex items-baseline font-mono tabular-nums ${s.gap} ${c} ${flashClass} ${className}`}>
+      <span className={`inline-flex items-baseline font-mono tabular-nums ${s.gap} ${flashClass} ${className}`} style={colorStyle}>
         {neg}{prefix}{sym}{intComma}{dec ? <span className="opacity-40">.{dec}</span> : ''}
       </span>
     )
@@ -134,7 +134,8 @@ export default function PriceDisplay({
   return (
     <span
       ref={containerRef}
-      className={`inline-flex items-baseline font-mono tabular-nums ${s.gap} ${c} ${flashClass} ${className}`}
+      className={`inline-flex items-baseline font-mono tabular-nums ${s.gap} ${flashClass} ${className}`}
+      style={colorStyle}
     >
       {showSign && price > 0 && <span className="opacity-50 text-[0.75em]">+</span>}
       {price < 0 && <span className="opacity-50 text-[0.75em]">−</span>}
