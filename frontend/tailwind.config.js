@@ -11,7 +11,6 @@ export default {
       },
       colors: {
         // ─── Warm Monochrome surfaces ───
-        base:    '#0a0a0a',
         surface: '#141414',
         'surface-2': '#1a1a1a',
         'surface-3': '#222222',
