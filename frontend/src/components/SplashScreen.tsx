@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 
 export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
@@ -6,49 +6,42 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const logoRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
   const subtitleRef = useRef<HTMLDivElement>(null)
-  const [hidden, setHidden] = useState(false)
 
   useEffect(() => {
     const tl = gsap.timeline({
       onComplete: () => {
-        // Fade out splash
         gsap.to(containerRef.current, {
           opacity: 0,
           duration: 0.5,
           ease: 'power2.out',
-          onComplete: () => {
-            setHidden(true)
-            onFinish()
-          },
+          onComplete: onFinish,
         })
       },
     })
 
-    // Logo entrance
+    // Logo entrance: scale up + rotate in
     tl.fromTo(
       logoRef.current,
       { scale: 0, opacity: 0, rotation: -20 },
       { scale: 1, opacity: 1, rotation: 0, duration: 0.6, ease: 'back.out(1.7)' }
     )
-    // Text fade in
+    // Brand text fade + slide up
     tl.fromTo(
       textRef.current,
       { y: 20, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' },
       '-=0.2'
     )
-    // Subtitle
+    // Subtitle fade in
     tl.fromTo(
       subtitleRef.current,
       { y: 10, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' },
       '-=0.15'
     )
-    // Hold for a moment
+    // Hold briefly so the user sees the full brand
     tl.to({}, { duration: 0.8 })
   }, [onFinish])
-
-  if (hidden) return null
 
   return (
     <div
@@ -62,13 +55,14 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         </div>
       </div>
 
-      {/* Brand */}
+      {/* Brand name */}
       <div ref={textRef} className="text-center">
         <h1 className="text-3xl font-bold font-display text-white tracking-tight">
           FinSight
         </h1>
       </div>
 
+      {/* Subtitle */}
       <div ref={subtitleRef} className="mt-2">
         <p className="text-sm text-ink-400 font-medium tracking-wider uppercase text-[10px]">
           Market Intelligence

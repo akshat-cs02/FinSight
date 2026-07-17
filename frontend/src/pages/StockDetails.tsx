@@ -216,7 +216,7 @@ function StockDetailsContent() {
           {quote ? (
             <p className="text-white/50">
               {quote.name} · {quote.exchange || ''} ·{' '}
-              <span className="text-green-400 font-semibold">{currency}</span>
+              <span className="text-green font-semibold">{currency}</span>
             </p>
           ) : !err ? (
             <p className="text-white/40 text-sm animate-pulse">Loading {SYMBOL}…</p>
@@ -257,7 +257,7 @@ function StockDetailsContent() {
       {/* Futures-only note */}
       {futuresNote && (
         <div className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
-          <span className="text-amber-400 mt-0.5 shrink-0">ⓘ</span>
+          <span className="text-amber mt-0.5 shrink-0">ⓘ</span>
           <span>
             Spot {SYMBOL.replace('=X', '')} has no live data feed, so prices, chart, and signals here use{' '}
             <strong className="text-white font-medium">{futuresNote}</strong> — which trades slightly above/below spot.

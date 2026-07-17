@@ -263,6 +263,8 @@ h1, h2, h3, h4, .font-display {
   margin-bottom: 0.25rem;
 }
 
+.pd-default { color: rgba(255, 255, 255, 0.85); }
+
 .section-rule {
   display: flex;
   align-items: center;

@@ -7,15 +7,15 @@ const decSize = { sm: 'text-[10px]', md: 'text-[11px]', lg: 'text-[12px]', xl: '
 const gapMap = { sm: 'gap-px', md: 'gap-px', lg: 'gap-0.5', xl: 'gap-0.5', hero: 'gap-0.5' }
 
 const colorMap: Record<string, string> = {
-  default: 'text-ink-100',
-  gains: 'text-green-400',
-  losses: 'text-red-400',
+  default: 'pd-default',
+  gains: 'text-green',
+  losses: 'text-loss',
   brand: 'text-gold',
-  emerald: 'text-emerald-400',
-  purple: 'text-purple-400',
-  cyan: 'text-cyan-400',
-  rose: 'text-rose-400',
-  amber: 'text-amber-400',
+  emerald: 'text-emerald',
+  purple: 'text-purple',
+  cyan: 'text-cyan',
+  rose: 'text-rose',
+  amber: 'text-amber',
 }
 
 function autoDecimals(p: number): number {
