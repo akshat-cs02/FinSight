@@ -265,8 +265,10 @@ export default function BacktestingPage() {
       </div>
 
       {/* Controls */}
-      <div className="glass-card p-6 space-y-5 animate-spring-up stagger-1">
-        <h2 className="text-base font-bold text-white font-display">Configure Backtest</h2>
+      <div className="card-accent-cyan p-6 space-y-5 animate-spring-up stagger-1">
+        <div className="section-header cyan">
+          <h2 className="section-header-title text-white">Configure Backtest</h2>
+        </div>
 
         <div className="flex flex-wrap gap-4 items-start">
           {/* Symbol */}
@@ -447,20 +449,12 @@ export default function BacktestingPage() {
       {/* ── Leaderboard Results ────────────────────────────────────────────────── */}
       {leaderResult && mode === 'leaderboard' && (
         <>
-          <div className="glass-card p-6 animate-spring-up stagger-2">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <div className="card-flat p-6 animate-spring-up stagger-2">
+            <div className="section-header amber">
+              <h2 className="section-header-title text-white flex items-center gap-2">
                 <Trophy size={18} className="text-yellow-400" />
                 Strategy Leaderboard — {leaderResult.symbol} ({leaderResult.period})
               </h2>
-              <div className="text-xs text-gray-400 space-x-3">
-                <span>{leaderResult.data_bars} bars</span>
-                {leaderResult.news_filter && (
-                  <span className="text-orange-400">
-                    <Shield size={10} className="inline mr-1" />{leaderResult.blackout_days} news days filtered
-                  </span>
-                )}
-              </div>
             </div>
 
             <div className="space-y-2">
@@ -865,11 +859,13 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
   return (
     <>
       {equityCurve.length > 0 && (
-        <div className="glass-card p-6">
-          <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-            <TrendingUp size={16} className="text-emerald-400" />
-            Equity Curve — {symbol} · {strategyLabel}
-          </h2>
+        <div className="card-flat p-6">
+          <div className="section-header cyan">
+            <h2 className="section-header-title text-white flex items-center gap-2">
+              <TrendingUp size={16} className="text-emerald-400" />
+              Equity Curve — {symbol} · {strategyLabel}
+            </h2>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={equityCurve}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(55,65,81,0.4)" />
@@ -887,11 +883,13 @@ function EquityAndTrades({ symbol, strategyLabel, initialCapital, equityCurve, t
       )}
 
       {trades.length > 0 && (
-        <div className="glass-card p-6">
-          <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-            <TrendingDown size={16} className="text-blue-400" />
-            Trade Log ({trades.length} trades shown)
-          </h2>
+        <div className="card-flat p-6">
+          <div className="section-header purple">
+            <h2 className="section-header-title text-white flex items-center gap-2">
+              <TrendingDown size={16} className="text-blue-400" />
+              Trade Log ({trades.length} trades shown)
+            </h2>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-gray-300">
               <thead>

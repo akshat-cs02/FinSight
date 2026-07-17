@@ -40,25 +40,41 @@ export function getCurrencySymbol(code: string): string {
   return CURRENCY_SYMBOLS[code] ?? '$'
 }
 
-/**
- * Pick a sensible number of decimals based on price magnitude.
- * Critical for forex (EUR/USD must show 1.1304, not 1.13) and small-cap crypto.
- */
 function autoDecimals(price: number): number {
   const p = Math.abs(price)
   if (p === 0)     return 2
-  if (p < 0.0001)  return 8     // sub-penny crypto (SHIB-style)
+  if (p < 0.0001)  return 8
   if (p < 0.01)    return 6
-  if (p < 1)       return 5     // small forex / penny stocks
-  if (p < 10)      return 4     // most forex majors (EURUSD, GBPUSD)
-  if (p < 100)     return 3     // JPY pairs, some indices
+  if (p < 1)       return 5
+  if (p < 10)      return 4
+  if (p < 100)     return 3
   return 2
 }
 
 export function formatPrice(price: number, currency = 'USD', decimals?: number): string {
   const sym = getCurrencySymbol(currency)
   const d   = decimals ?? autoDecimals(price)
-  return `${sym}${price.toFixed(d)}`
+  const formatted = Math.abs(price).toFixed(d)
+  const parts = formatted.split('.')
+  const intPart = parts[0]
+  const decPart = parts.length > 1 ? parts[1] : ''
+  const sign = price >= 0 ? '' : '-'
+  return `${sign}${sym}${withCommas(intPart)}${decPart ? `.${decPart}` : ''}`
+}
+
+function withCommas(n: string): string {
+  return n.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+export function formatCompact(price: number, currency = 'USD'): string {
+  const sym = getCurrencySymbol(currency)
+  const sign = price >= 0 ? '' : '-'
+  const p = Math.abs(price)
+  if (p >= 1e12) return `${sign}${sym}${(p / 1e12).toFixed(2)}T`
+  if (p >= 1e9) return `${sign}${sym}${(p / 1e9).toFixed(2)}B`
+  if (p >= 1e6) return `${sign}${sym}${(p / 1e6).toFixed(2)}M`
+  if (p >= 1e3) return `${sign}${sym}${(p / 1e3).toFixed(1)}K`
+  return formatPrice(price, currency)
 }
 
 export function formatMarketCap(cap: number, currency = 'USD'): string {
@@ -67,4 +83,15 @@ export function formatMarketCap(cap: number, currency = 'USD'): string {
   if (cap >= 1e9) return `${sym}${(cap / 1e9).toFixed(2)}B`
   if (cap >= 1e6) return `${sym}${(cap / 1e6).toFixed(2)}M`
   return `${sym}${cap.toFixed(0)}`
+}
+
+export function splitPrice(price: number, decimals?: number): { int: string; dec: string; sign: string } {
+  const d = decimals ?? autoDecimals(price)
+  const formatted = Math.abs(price).toFixed(d)
+  const dotIdx = formatted.indexOf('.')
+  return {
+    int: dotIdx >= 0 ? formatted.slice(0, dotIdx) : formatted,
+    dec: dotIdx >= 0 ? formatted.slice(dotIdx + 1) : '',
+    sign: price < 0 ? '-' : '',
+  }
 }

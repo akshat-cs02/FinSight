@@ -14,11 +14,16 @@ import IntradaySignals from '@/components/IntradaySignals'
 import SignalPerformance from '@/components/SignalPerformance'
 import WatchlistPanel from '@/components/WatchlistPanel'
 import WatchThese from '@/components/WatchThese'
+import PriceDisplay from '@/components/PriceDisplay'
 import { formatPrice, guessCurrency } from '@/utils/currency'
 import { MARKET_ORDER, MARKET_LABELS, tickerSymbolsForMarket } from '@/utils/markets'
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`glass-card p-6 ${className}`}>{children}</div>
+  return <div className={`glass-card p-5 ${className}`}>{children}</div>
+}
+
+function ElevatedCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <div className={`card-elevated p-5 ${className}`}>{children}</div>
 }
 
 function Loading({ label }: { label: string }) {
@@ -27,6 +32,10 @@ function Loading({ label }: { label: string }) {
 
 function ErrorMsg({ msg }: { msg: string }) {
   return <div className="text-red-400 text-sm">⚠ {msg}</div>
+}
+
+function SectionHeader({ color = 'cyan', children }: { color?: string; children: React.ReactNode }) {
+  return <div className={`section-header ${color}`}><h2 className="section-header-title text-white">{children}</h2></div>
 }
 
 function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
@@ -60,10 +69,8 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
           {Math.abs(s.change_percent).toFixed(2)}%
         </span>
       </div>
-      <p className="text-2xl font-bold gradient-text number-ticker font-mono">
-        {formatPrice(s.price, s.currency || guessCurrency(s.symbol))}
-      </p>
-      <p className={`text-sm ${up ? 'change-up' : 'change-down'}`}>
+      <PriceDisplay price={s.price} currency={s.currency || guessCurrency(s.symbol)} size="lg" />
+      <p className={`text-sm mt-0.5 ${up ? 'change-up' : 'change-down'}`}>
         {up ? '+' : ''}{s.change.toFixed(2)}
       </p>
     </div>
@@ -165,46 +172,57 @@ export default function DashboardPage() {
         )
       })()}
 
-      {/* Metrics row */}
+      {/* Metrics row — elevated cards with hierarchy */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="animate-spring-up stagger-1">
-          <Card>
+          <ElevatedCard>
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 rounded-xl bg-[#00D4FF]/10 border border-[#00D4FF]/20"><Wallet className="text-[#00D4FF]" size={18} /></div>
             </div>
             <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Portfolio Value</h3>
             {portfolio === null ? <Loading label="portfolio" /> : <>
-              <p className="text-2xl font-bold text-white font-mono">{formatPrice(portfolio.total_value, 'USD', 2)}</p>
-                                <p className={`text-sm mt-1 ${portfolio.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <PriceDisplay price={portfolio.total_value} size="xl" color="default" animate />
+              <p className={`text-sm mt-1 ${portfolio.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {portfolio.total_gain_loss >= 0 ? '+' : ''}{portfolio.total_gain_loss.toFixed(2)}% all-time
               </p>
             </>}
-          </Card>
+          </ElevatedCard>
         </div>
 
         <div className="animate-spring-up stagger-2">
-          <Card>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-[#00D4FF]/10 border border-[#00D4FF]/20"><TrendingUp className="text-[#00D4FF]" size={18} /></div>
-            </div>
-            <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Today's P/L</h3>
-            {portfolio === null ? <Loading label="P/L" /> :
-              <p className={`text-2xl font-bold font-mono ${portfolio.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {portfolio.today_profit_loss >= 0 ? '+' : ''}{formatPrice(portfolio.today_profit_loss, 'USD', 2)}
-              </p>
-            }
-          </Card>
+          {(() => {
+            const plUp = portfolio != null && portfolio.today_profit_loss >= 0
+            return (
+              <div className={`${plUp ? 'card-accent-green' : 'card-accent-rose'} p-5`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2.5 rounded-xl ${plUp ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20'}`}>
+                    <TrendingUp className={`${plUp ? 'text-emerald-400' : 'text-rose-400'}`} size={18} />
+                  </div>
+                </div>
+                <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Today's P/L</h3>
+                {portfolio === null ? <Loading label="P/L" /> :
+                  <PriceDisplay
+                    price={portfolio.today_profit_loss}
+                    size="xl"
+                    color={plUp ? 'gains' : 'losses'}
+                    showSign
+                    animate
+                  />
+                }
+              </div>
+            )
+          })()}
         </div>
 
         <div className="animate-spring-up stagger-3">
-          <Card>
+          <div className="card-accent-purple p-5">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/20"><Activity className="text-[#7C3AED]" size={18} /></div>
             </div>
             <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Market Status</h3>
             {status === null ? <Loading label="status" /> : (() => {
               const open = (status.markets || []).filter((m) => m.is_open)
-              if (open.length === 0) return <p className="text-2xl font-bold text-gray-600 font-mono">CLOSED</p>
+              if (open.length === 0) return <p className="text-2xl font-bold text-gray-600 font-mono tabular-nums">CLOSED</p>
               return (
                 <div className="space-y-1.5">
                   {open.map((m) => (
@@ -219,19 +237,19 @@ export default function DashboardPage() {
                 </div>
               )
             })()}
-          </Card>
+          </div>
         </div>
 
         <div className="animate-spring-up stagger-4">
-          <Card>
+          <div className="card-accent-amber p-5">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20"><AlertCircle className="text-amber-500" size={18} /></div>
             </div>
             <h3 className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">Holdings</h3>
             {portfolio === null ? <Loading label="holdings" /> :
-              <p className="text-3xl font-bold gradient-text font-mono">{portfolio.holdings_count}</p>
+              <p className="text-[32px] font-extrabold gradient-text font-mono tabular-nums">{portfolio.holdings_count}</p>
             }
-          </Card>
+          </div>
         </div>
       </div>
 
@@ -255,9 +273,9 @@ export default function DashboardPage() {
       <WatchThese />
       <AIOutlook />
 
-      {/* Indices */}
-      <Card>
-        <h2 className="text-lg font-bold text-white font-display mb-4">Market Indices</h2>
+      {/* Indices — flat card (data dense) */}
+      <div className="card-flat p-5">
+        <SectionHeader color="purple">Market Indices</SectionHeader>
         {errors.indices && <ErrorMsg msg={errors.indices} />}
         {indices === null && !errors.indices && <Loading label="indices" />}
         {indices && (
@@ -265,7 +283,7 @@ export default function DashboardPage() {
             {indices.map((i, idx) => (
               <div key={i.symbol} className={`glass-card p-3 card-border-gradient animate-spring-up stagger-${idx + 1}`}>
                 <p className="text-xs text-gray-500 font-medium">{i.name}</p>
-                <p className="text-lg font-bold text-white font-mono mt-1">{i.price.toFixed(2)}</p>
+                <p className="text-lg font-bold text-white font-mono tabular-nums mt-1">{i.price.toFixed(2)}</p>
                 <p className={`text-xs mt-0.5 ${i.change_percent >= 0 ? 'change-up' : 'change-down'}`}>
                   {i.change_percent >= 0 ? '+' : ''}{i.change_percent.toFixed(2)}%
                 </p>
@@ -273,13 +291,13 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Trending */}
       <Card>
-        <h2 className="text-lg font-bold text-white font-display mb-4">
+        <SectionHeader color="cyan">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
-        </h2>
+        </SectionHeader>
         {errors.trending && <ErrorMsg msg={errors.trending} />}
         {trending === null && !errors.trending && <Loading label="trending" />}
         {trending && (
@@ -293,12 +311,12 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      {/* Gainers & Losers */}
+      {/* Gainers & Losers — different card styles */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <Card>
-          <h2 className="text-lg font-bold text-[#00F5A0] font-display mb-4">
+        <div className="card-accent-green p-5">
+          <SectionHeader color="green">
             Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}
-          </h2>
+          </SectionHeader>
           {gainers === null && !errors.gainers && <Loading label="gainers" />}
           {gainers && gainers.length === 0 && <p className="text-sm text-gray-600 py-6 text-center">No active gainers right now</p>}
           {gainers && gainers.length > 0 && (
@@ -306,11 +324,11 @@ export default function DashboardPage() {
               {gainers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
-        </Card>
-        <Card>
-          <h2 className="text-lg font-bold text-rose-400 font-display mb-4">
+        </div>
+        <div className="card-accent-rose p-5">
+          <SectionHeader color="rose">
             Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}
-          </h2>
+          </SectionHeader>
           {losers === null && !errors.losers && <Loading label="losers" />}
           {losers && losers.length === 0 && <p className="text-sm text-gray-600 py-6 text-center">No active losers right now</p>}
           {losers && losers.length > 0 && (
@@ -318,14 +336,14 @@ export default function DashboardPage() {
               {losers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
             </div>
           )}
-        </Card>
+        </div>
       </div>
 
       <ForexCalendar />
 
       {/* News */}
-      <Card>
-        <h2 className="text-lg font-bold text-white font-display mb-4">Latest Financial News</h2>
+      <div className="card-accent-cyan p-5">
+        <SectionHeader color="cyan">Latest Financial News</SectionHeader>
         {errors.news && <ErrorMsg msg={errors.news} />}
         {news === null && !errors.news && <Loading label="news" />}
         {news && (
@@ -346,7 +364,7 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </Card>
+      </div>
     </div>
   )
 }

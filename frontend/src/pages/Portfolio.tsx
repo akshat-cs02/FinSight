@@ -3,6 +3,7 @@ import { Plus, Trash2, Download, ChevronDown, ChevronRight } from 'lucide-react'
 import { portfolioService, PortfolioSummary } from '@/services/portfolioService'
 import PortfolioChart from '@/components/charts/PortfolioChart'
 import TradingViewWidget from '@/components/charts/TradingViewWidget'
+import PriceDisplay from '@/components/PriceDisplay'
 import { formatPrice, guessCurrency } from '@/utils/currency'
 import { API_URL } from '@/services/api'
 import toast from 'react-hot-toast'
@@ -13,7 +14,7 @@ export default function PortfolioPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ symbol: '', quantity: '', purchase_price: '' })
   const [busy, setBusy] = useState(false)
-  const [expanded, setExpanded] = useState<number | null>(null)  // holding id whose chart is open
+  const [expanded, setExpanded] = useState<number | null>(null)
 
   const load = () => {
     setErr(null)
@@ -54,46 +55,49 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
-      <div className="flex justify-between items-center flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-white font-display">Portfolio</h1>
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
+      <div className="flex justify-between items-center flex-wrap gap-3 animate-spring-in">
+        <div>
+          <h1 className="text-3xl font-bold text-white font-display">Portfolio</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Track your holdings and performance</p>
+        </div>
         <div className="flex gap-2">
           <button onClick={() => setShowForm(!showForm)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm">
+                  className="btn-glow text-sm px-4 py-2">
             <Plus size={16} /> Add Holding
           </button>
           <a href={`${API_URL}/api/reports/portfolio/pdf`} target="_blank" rel="noopener"
-             className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm">
+             className="btn-ghost text-sm px-4 py-2">
             <Download size={16} /> PDF
           </a>
           <a href={`${API_URL}/api/reports/portfolio/csv`} target="_blank" rel="noopener"
-             className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm">
+             className="btn-ghost text-sm px-4 py-2">
             <Download size={16} /> CSV
           </a>
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={add} className="glass-card p-4 flex flex-wrap gap-3 items-end">
+        <form onSubmit={add} className="card-accent-cyan p-4 flex flex-wrap gap-3 items-end animate-spring-up stagger-1">
           <div>
             <label className="block text-xs text-gray-400 mb-1">Symbol</label>
             <input required value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
-                   placeholder="AAPL" className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white w-32 uppercase" />
+                   placeholder="AAPL" className="input-glow w-32 uppercase" />
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1">Quantity</label>
             <input type="number" step="any" required value={form.quantity}
                    onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                   className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white w-32" />
+                   className="input-glow w-32" />
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1">Purchase Price</label>
             <input type="number" step="any" required value={form.purchase_price}
                    onChange={(e) => setForm({ ...form, purchase_price: e.target.value })}
-                   className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white w-32" />
+                   className="input-glow w-32" />
           </div>
           <button disabled={busy} type="submit"
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded text-white">
+                  className="btn-glow text-sm px-4 py-2 disabled:opacity-50">
             {busy ? 'Adding…' : 'Save'}
           </button>
         </form>
@@ -105,38 +109,38 @@ export default function PortfolioPage() {
       {summary && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-spring-up stagger-1">
-            <div className="glass-card p-5">
-              <p className="text-gray-400 text-sm">Total Invested</p>
-              <p className="text-2xl font-bold text-white font-mono">{formatPrice(summary.total_invested, 'USD', 2)}</p>
+            <div className="card-elevated p-5">
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Total Invested</p>
+              <PriceDisplay price={summary.total_invested} size="xl" color="default" />
             </div>
-            <div className="glass-card p-5">
-              <p className="text-gray-400 text-sm">Current Value</p>
-              <p className="text-2xl font-bold text-white font-mono">{formatPrice(summary.total_value, 'USD', 2)}</p>
+            <div className="card-elevated p-5">
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Current Value</p>
+              <PriceDisplay price={summary.total_value} size="xl" color="brand" animate />
             </div>
-            <div className="glass-card p-5">
-              <p className="text-gray-400 text-sm">Total Gain/Loss</p>
-              <p className={`text-2xl font-bold ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {summary.total_gain_loss >= 0 ? '+' : ''}{formatPrice(summary.total_gain_loss, 'USD', 2)}
-              </p>
-              <p className={`text-sm ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className={`p-5 ${summary.total_gain_loss >= 0 ? 'card-accent-green' : 'card-accent-rose'}`}>
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Total Gain/Loss</p>
+              <PriceDisplay price={summary.total_gain_loss} size="xl" color={summary.total_gain_loss >= 0 ? 'gains' : 'losses'} showSign />
+              <p className={`text-sm mt-0.5 ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.total_gain_loss_percent.toFixed(2)}%
               </p>
             </div>
-            <div className="glass-card p-5">
-              <p className="text-gray-400 text-sm">Today's P/L</p>
-              <p className={`text-2xl font-bold ${summary.today_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {summary.today_profit_loss >= 0 ? '+' : ''}{formatPrice(summary.today_profit_loss, 'USD', 2)}
-              </p>
+            <div className={`p-5 ${summary.today_profit_loss >= 0 ? 'card-accent-green' : 'card-accent-rose'}`}>
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Today's P/L</p>
+              <PriceDisplay price={summary.today_profit_loss} size="xl" color={summary.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="glass-card p-6">
-              <h2 className="text-lg font-bold text-white mb-4">Asset Allocation</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-spring-up stagger-2">
+            <div className="card-flat p-6">
+              <div className="section-header cyan">
+                <h2 className="section-header-title text-white">Asset Allocation</h2>
+              </div>
               <PortfolioChart data={summary.allocation} />
             </div>
-            <div className="glass-card p-6">
-              <h2 className="text-lg font-bold text-white mb-4">Allocation Breakdown</h2>
+            <div className="card-flat p-6">
+              <div className="section-header purple">
+                <h2 className="section-header-title text-white">Allocation Breakdown</h2>
+              </div>
               {summary.allocation.length === 0 ? (
                 <div className="text-gray-500 text-sm">No holdings yet</div>
               ) : (
@@ -152,15 +156,17 @@ export default function PortfolioPage() {
             </div>
           </div>
 
-          <div className="glass-card p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Holdings</h2>
+          <div className="glass-card p-6 animate-spring-up stagger-3">
+            <div className="section-header cyan">
+              <h2 className="section-header-title text-white">Holdings</h2>
+            </div>
             {summary.holdings.length === 0 ? (
               <div className="text-gray-500 text-sm py-6 text-center">No holdings. Click "Add Holding" to start.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-gray-400 border-b border-gray-700">
+                    <tr className="text-gray-400 border-b border-white/5">
                       <th className="text-left py-2 px-2">Symbol</th>
                       <th className="text-right py-2 px-2">Qty</th>
                       <th className="text-right py-2 px-2">Buy</th>
@@ -174,7 +180,7 @@ export default function PortfolioPage() {
                   <tbody>
                     {summary.holdings.map((h) => (
                       <React.Fragment key={h.id}>
-                        <tr className="border-b border-gray-700 hover:bg-gray-700/30">
+                        <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
                           <td className="py-2 px-2 text-white font-medium">
                             <button
                               onClick={() => setExpanded(expanded === h.id ? null : h.id)}
@@ -185,24 +191,24 @@ export default function PortfolioPage() {
                               {h.symbol}
                             </button>
                           </td>
-                          <td className="py-2 px-2 text-right text-gray-300">{h.quantity.toFixed(2)}</td>
-                          <td className="py-2 px-2 text-right text-gray-300">{formatPrice(h.purchase_price, guessCurrency(h.symbol), 2)}</td>
-                          <td className="py-2 px-2 text-right text-gray-300">{formatPrice(h.current_price, guessCurrency(h.symbol), 2)}</td>
-                          <td className="py-2 px-2 text-right text-white">{formatPrice(h.current_value, guessCurrency(h.symbol), 2)}</td>
-                          <td className={`py-2 px-2 text-right ${h.gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {h.gain_loss >= 0 ? '+' : ''}{formatPrice(h.gain_loss, guessCurrency(h.symbol), 2)}
+                          <td className="py-2 px-2 text-right text-gray-300 font-mono tabular-nums">{h.quantity.toFixed(2)}</td>
+                          <td className="py-2 px-2 text-right"><PriceDisplay price={h.purchase_price} currency={guessCurrency(h.symbol)} size="sm" /></td>
+                          <td className="py-2 px-2 text-right"><PriceDisplay price={h.current_price} currency={guessCurrency(h.symbol)} size="sm" color="default" animate /></td>
+                          <td className="py-2 px-2 text-right"><PriceDisplay price={h.current_value} currency={guessCurrency(h.symbol)} size="md" color="default" /></td>
+                          <td className={`py-2 px-2 text-right`}>
+                            <PriceDisplay price={h.gain_loss} currency={guessCurrency(h.symbol)} size="sm" color={h.gain_loss >= 0 ? 'gains' : 'losses'} showSign />
                           </td>
-                          <td className={`py-2 px-2 text-right ${h.gain_loss_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          <td className={`py-2 px-2 text-right font-mono tabular-nums ${h.gain_loss_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {h.gain_loss_percent.toFixed(2)}%
                           </td>
                           <td className="py-2 px-2 text-right">
-                            <button onClick={() => remove(h.id, h.symbol)} className="text-red-400 hover:text-red-300">
+                            <button onClick={() => remove(h.id, h.symbol)} className="text-rose-400 hover:text-rose-300 transition-colors">
                               <Trash2 size={14} />
                             </button>
                           </td>
                         </tr>
                         {expanded === h.id && (
-                          <tr className="bg-gray-900/40">
+                          <tr className="bg-black/20">
                             <td colSpan={8} className="p-3">
                               <TradingViewWidget symbol={h.symbol} height={340} compact />
                             </td>

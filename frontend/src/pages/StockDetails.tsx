@@ -13,6 +13,7 @@ import SignalConsensus from '@/components/SignalConsensus'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { API_URL } from '@/services/api'
 import { formatPrice, formatMarketCap, guessCurrency, getCurrencySymbol } from '@/utils/currency'
+import PriceDisplay from '@/components/PriceDisplay'
 import watchlistService from '@/services/watchlistService'
 import type { ConsensusResult } from '@/services/signalService'
 import { useStockCache, useQuote, useIndicators, useNews, useConsensus } from '@/store/stockCache'
@@ -164,7 +165,7 @@ function StockDetailsContent() {
         </div>
         {quote ? (
           <div className="text-right">
-            <p className="text-4xl font-bold text-white font-mono">{formatPrice(quote.price, currency)}</p>
+            <PriceDisplay price={quote.price} currency={currency} size="hero" color="default" />
             <p className={`flex items-center gap-1 justify-end ${up ? 'text-emerald-400' : 'text-rose-400'}`}>
               {up ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
               {sym}{Math.abs(quote.change).toFixed(2)} ({quote.change_percent.toFixed(2)}%)
@@ -251,44 +252,44 @@ function StockDetailsContent() {
       {/* Quote details */}
       {quote && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="glass-card p-3">
+          <div className="glass-card p-3 card-flat">
             <p className="text-xs text-gray-400">Open</p>
-            <p className="text-white font-semibold">{formatPrice(quote.open, currency)}</p>
+            <PriceDisplay price={quote.open} currency={currency} size="md" color="default" />
           </div>
-          <div className="glass-card p-3">
+          <div className="glass-card p-3 card-flat">
             <p className="text-xs text-gray-400">High</p>
-            <p className="text-white font-semibold">{formatPrice(quote.high, currency)}</p>
+            <PriceDisplay price={quote.high} currency={currency} size="md" color="default" />
           </div>
-          <div className="glass-card p-3">
+          <div className="glass-card p-3 card-flat">
             <p className="text-xs text-gray-400">Low</p>
-            <p className="text-white font-semibold">{formatPrice(quote.low, currency)}</p>
+            <PriceDisplay price={quote.low} currency={currency} size="md" color="default" />
           </div>
-          <div className="glass-card p-3">
+          <div className="glass-card p-3 card-flat">
             <p className="text-xs text-gray-400">Volume</p>
-            <p className="text-white font-semibold">{quote.volume.toLocaleString()}</p>
+            <p className="text-white font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
           </div>
           {quote.fifty_two_week_high && (
-            <div className="glass-card p-3">
+            <div className="glass-card p-3 card-flat">
               <p className="text-xs text-gray-400">52w High</p>
-              <p className="text-white font-semibold">{formatPrice(quote.fifty_two_week_high, currency)}</p>
+              <PriceDisplay price={quote.fifty_two_week_high} currency={currency} size="md" color="default" />
             </div>
           )}
           {quote.fifty_two_week_low && (
-            <div className="glass-card p-3">
+            <div className="glass-card p-3 card-flat">
               <p className="text-xs text-gray-400">52w Low</p>
-              <p className="text-white font-semibold">{formatPrice(quote.fifty_two_week_low, currency)}</p>
+              <PriceDisplay price={quote.fifty_two_week_low} currency={currency} size="md" color="default" />
             </div>
           )}
           {quote.market_cap && (
-            <div className="glass-card p-3">
+            <div className="glass-card p-3 card-flat">
               <p className="text-xs text-gray-400">Market Cap</p>
-              <p className="text-white font-semibold">{formatMarketCap(quote.market_cap, currency)}</p>
+              <p className="text-white font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
             </div>
           )}
           {quote.pe_ratio && (
-            <div className="glass-card p-3">
+            <div className="glass-card p-3 card-flat">
               <p className="text-xs text-gray-400">P/E</p>
-              <p className="text-white font-semibold">{quote.pe_ratio.toFixed(2)}</p>
+              <p className="text-white font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
             </div>
           )}
         </div>
@@ -330,10 +331,16 @@ function StockDetailsContent() {
 
       {/* Technical Indicators */}
       {indicators && (
-        <div className="glass-card p-6">
+        <div className="card-flat p-6">
+          <div className="section-header purple">
+            <h2 className="section-header-title text-white text-lg">Technical Indicators</h2>
+          </div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-white">Technical Indicators</h2>
-            <div className="flex items-center gap-2">
+            <p className="text-xs text-gray-500">
+              This bias comes from RSI / MACD / Bollinger only. The <strong className="text-blue-400">AI Prediction</strong> above
+              is the authoritative recommendation — it combines these indicators with the LSTM+XGBoost forecast.
+            </p>
+            <div className="flex items-center gap-2 flex-shrink-0 ml-4">
               <span className="text-xs text-gray-500">Technical-only bias:</span>
               <span className={`px-3 py-1 rounded-full text-sm font-bold ${
                 indicators.signal === 'BUY' ? 'bg-emerald-500/20 text-emerald-300' :
@@ -342,15 +349,11 @@ function StockDetailsContent() {
               }`}>{indicators.signal}</span>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mb-3">
-            This bias comes from RSI / MACD / Bollinger only. The <strong className="text-blue-400">AI Prediction</strong> above
-            is the authoritative recommendation — it combines these indicators with the LSTM+XGBoost forecast.
-          </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.entries(indicators.latest).map(([k, v]) => (
-              <div key={k} className="bg-gray-700 rounded-lg p-3 border border-gray-600">
+              <div key={k} className="glass-card p-3">
                 <p className="text-xs text-gray-400 uppercase">{k.replace(/_/g, ' ')}</p>
-                <p className="text-white font-semibold">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
+                <p className="text-white font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
               </div>
             ))}
           </div>
@@ -358,8 +361,10 @@ function StockDetailsContent() {
       )}
 
       {/* News */}
-      <div className="glass-card p-6">
-        <h2 className="text-lg font-bold text-white mb-4">Recent News</h2>
+      <div className="card-accent-cyan p-6">
+        <div className="section-header cyan">
+          <h2 className="section-header-title text-white text-lg">Recent News</h2>
+        </div>
         {news === null && <div className="text-gray-500 text-sm">Loading news…</div>}
         {news && news.length === 0 && <div className="text-gray-500 text-sm">No recent news</div>}
         {news && news.length > 0 && (

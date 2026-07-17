@@ -13,15 +13,22 @@ export default function NewsPage() {
   const list = articles?.filter((a) => filter === 'ALL' || a.sentiment === filter) || null
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-gray-900 min-h-screen">
-      <div className="flex justify-between items-center flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-white font-display">Financial News</h1>
-        <div className="flex gap-2">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
+      <div className="flex justify-between items-center flex-wrap gap-3 animate-spring-in">
+        <div>
+          <h1 className="text-3xl font-bold text-white font-display">Financial News</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Latest market news and analysis</p>
+        </div>
+        <div className="flex gap-2 p-1 glass-card rounded-xl">
           {(['ALL', 'POSITIVE', 'NEGATIVE', 'NEUTRAL'] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
-                    className={`px-3 py-1 rounded text-xs font-semibold ${
-                      filter === f ? 'bg-blue-600 text-white' :
-                      'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      filter === f
+                        ? f === 'POSITIVE' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        : f === 'NEGATIVE' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                        : f === 'NEUTRAL' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                        : 'bg-white/10 text-white border border-white/10'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}>{f}</button>
           ))}
         </div>
@@ -35,11 +42,11 @@ export default function NewsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-spring-up stagger-1">
           {list.map((a, i) => (
             <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-               className="glass-card p-5 hover:border-blue-500/40 transition flex flex-col">
+               className="card-accent-cyan p-5 hover:border-blue-500/40 transition flex flex-col cursor-pointer">
               {a.thumbnail && <img src={a.thumbnail} alt="" className="w-full h-32 object-cover rounded-lg mb-3" />}
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-white font-bold flex-1">{a.title}</h3>
-                <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
+              <div className="flex justify-between items-start mb-2 gap-2">
+                <h3 className="text-white font-bold flex-1 font-display">{a.title}</h3>
+                <span className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-semibold ${
                   a.sentiment === 'POSITIVE' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' :
                   a.sentiment === 'NEGATIVE' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20' :
                   'bg-gray-500/20 text-gray-300'
@@ -48,7 +55,7 @@ export default function NewsPage() {
               {a.summary && <p className="text-gray-400 text-sm line-clamp-3 mb-2">{a.summary}</p>}
               <div className="flex justify-between text-xs text-gray-500 mt-auto">
                 <span>{a.source}</span>
-                {a.symbol && <span className="text-blue-400">{a.symbol}</span>}
+                {a.symbol && <span className="text-blue-400 font-medium">{a.symbol}</span>}
               </div>
             </a>
           ))}
