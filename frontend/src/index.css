@@ -132,6 +132,7 @@ h1, h2, h3, h4, .font-display {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s var(--expo);
+  color: rgba(255, 255, 255, 0.85);
 }
 .card-surface2:hover {
   border-color: rgba(255, 255, 255, 0.1);
@@ -144,6 +145,7 @@ h1, h2, h3, h4, .font-display {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s var(--expo);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .card-layer {
@@ -154,6 +156,7 @@ h1, h2, h3, h4, .font-display {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s var(--expo);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* ─── Card-accent — Gold top border (single accent) ─── */
@@ -167,6 +170,7 @@ h1, h2, h3, h4, .font-display {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s var(--expo);
+  color: rgba(255, 255, 255, 0.85);
 }
 .card-accent::before {
   content: '';
@@ -183,6 +187,7 @@ h1, h2, h3, h4, .font-display {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s var(--expo);
+  color: rgba(255, 255, 255, 0.85);
 }
 .card-box:hover {
   transform: translateY(-2px);
@@ -193,6 +198,7 @@ h1, h2, h3, h4, .font-display {
   background: rgba(20, 20, 20, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* ─── Card glow — Mouse-following ─── */
