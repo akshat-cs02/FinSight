@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Outlet, Link, useLocation, Navigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PageTransition, spring } from '@/components/ui/motion'
@@ -8,22 +8,24 @@ import {
   LayoutDashboard, TrendingUp, Brain, Briefcase, Newspaper,
   ChevronDown, HelpCircle,
 } from 'lucide-react'
-import DashboardPage from '@/pages/Dashboard'
-import StockDetailsPage from '@/pages/StockDetails'
-import PortfolioPage from '@/pages/Portfolio'
-import NewsPage from '@/pages/News'
-import PredictionsPage from '@/pages/Predictions'
-import AdminPage from '@/pages/Admin'
-import BacktestingPage from '@/pages/Backtesting'
 import Navbar from '@/components/Navbar'
 import CanvasParticles from '@/components/CanvasParticles'
 import FloatingOrbs from '@/components/FloatingOrbs'
-import StatsCounter from '@/components/StatsCounter'
-import CTASection from '@/components/CTASection'
-import Footer from '@/components/Footer'
 import CommandPalette from '@/components/CommandPalette'
 import SplashScreen from '@/components/SplashScreen'
 import { pageEnter } from '@/utils/animations'
+
+// ─── Lazy-loaded pages (code-split) ───
+const DashboardPage = lazy(() => import('@/pages/Dashboard'))
+const StockDetailsPage = lazy(() => import('@/pages/StockDetails'))
+const PortfolioPage = lazy(() => import('@/pages/Portfolio'))
+const NewsPage = lazy(() => import('@/pages/News'))
+const PredictionsPage = lazy(() => import('@/pages/Predictions'))
+const AdminPage = lazy(() => import('@/pages/Admin'))
+const BacktestingPage = lazy(() => import('@/pages/Backtesting'))
+const StatsCounter = lazy(() => import('@/components/StatsCounter'))
+const CTASection = lazy(() => import('@/components/CTASection'))
+const Footer = lazy(() => import('@/components/Footer'))
 
 /* ─── Mouse glow effect ─── */
 function MouseGlow() {
@@ -167,15 +169,34 @@ function Layout() {
           <AnimatePresence mode="wait">
             <PageTransition key={sectionKey}>
               <PageContent>
-                <Outlet />
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-64">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+                      <span className="text-xs text-white/30">Loading…</span>
+                    </div>
+                  </div>
+                }>
+                  <Outlet />
+                </Suspense>
               </PageContent>
             </PageTransition>
           </AnimatePresence>
         </main>
 
-        {isDashboard && <StatsCounter />}
-        {isDashboard && <CTASection />}
-        <Footer />
+        {isDashboard && (
+          <Suspense fallback={null}>
+            <StatsCounter />
+          </Suspense>
+        )}
+        {isDashboard && (
+          <Suspense fallback={null}>
+            <CTASection />
+          </Suspense>
+        )}
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
 
       <BottomNav />
@@ -266,9 +287,6 @@ export default function App() {
 
   return (
     <Router>
-      {!splashDone && firstVisit.current && (
-        <SplashScreen onFinish={handleSplashFinish} />
-      )}
       <Toaster position="top-right" toastOptions={toastStyle} />
       <Routes>
         <Route element={<Layout />}>
@@ -284,6 +302,11 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
+
+      {/* Splash overlay fades out while content loads underneath */}
+      {!splashDone && firstVisit.current && (
+        <SplashScreen onFinish={handleSplashFinish} />
+      )}
     </Router>
   )
 }

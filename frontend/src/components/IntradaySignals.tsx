@@ -58,8 +58,8 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
 
   useEffect(() => {
     load(false)
-    // Background refresh every 8s — silent (no spinner, no re-render unless data changed).
-    const id = setInterval(() => load(true), 8000)
+    // Background refresh every 15s — silent (no spinner, no re-render unless data changed).
+    const id = setInterval(() => load(true), 15000)
     return () => clearInterval(id)
   }, [])
 

@@ -93,7 +93,7 @@ function StockDetailsContent() {
 
     liveId = setInterval(() => {
       cache().prefetchQuote(SYMBOL).catch(() => {})
-    }, 6000)
+    }, 15000)
 
     return () => {
       cancelled = true

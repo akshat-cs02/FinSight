@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Activity, Wallet, TrendingUp, ArrowUp, ArrowDown, ExternalLink,
@@ -12,17 +12,20 @@ import { portfolioService, PortfolioSummary } from '@/services/portfolioService'
 import { newsService, NewsArticle } from '@/services/newsService'
 import type { StockQuote } from '@/services/stockService'
 import { getTradingViewUrl } from '@/services/stockService'
-import AIOutlook from '@/components/Prediction/AIOutlook'
 import LiveTicker from '@/components/LiveTicker'
 import MarketClosedBanner from '@/components/MarketClosedBanner'
-import ForexCalendar from '@/components/ForexCalendar'
 import IntradaySignals from '@/components/IntradaySignals'
-import SignalPerformance from '@/components/SignalPerformance'
 import WatchlistPanel from '@/components/WatchlistPanel'
-import WatchThese from '@/components/WatchThese'
 import PriceDisplay from '@/components/PriceDisplay'
 import { formatPrice, guessCurrency } from '@/utils/currency'
+import { requestCache } from '@/utils/requestCache'
 import { MARKET_ORDER, MARKET_LABELS, tickerSymbolsForMarket } from '@/utils/markets'
+
+// ─── Lazy-load below-the-fold components ───
+const AIOutlook = lazy(() => import('@/components/Prediction/AIOutlook'))
+const ForexCalendar = lazy(() => import('@/components/ForexCalendar'))
+const SignalPerformance = lazy(() => import('@/components/SignalPerformance'))
+const WatchThese = lazy(() => import('@/components/WatchThese'))
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -113,7 +116,7 @@ export default function DashboardPage() {
   const losersCardsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    dashboardService.getMarketStatus().then((s) => {
+    requestCache('dashboard.status', () => dashboardService.getMarketStatus(), 60_000).then((s) => {
       setStatus(s)
       if (!autoPicked) {
         const o = s.markets?.find((m) => m.is_open && (m.key === 'INDIA' || m.key === 'US'))
@@ -121,26 +124,26 @@ export default function DashboardPage() {
         setAutoPicked(true)
       }
     }).catch((e) => setErrors((p) => ({ ...p, status: e.message })))
-    dashboardService.getMarketSummary().then((d) => setIndices(d.indices)).catch((e) => setErrors((p) => ({ ...p, indices: e.message })))
+    requestCache('dashboard.indices', () => dashboardService.getMarketSummary().then((d) => d.indices), 60_000).then(setIndices).catch((e) => setErrors((p) => ({ ...p, indices: e.message })))
     portfolioService.getSummary().then(setPortfolio).catch((e) => setErrors((p) => ({ ...p, portfolio: e.message })))
     newsService.getNews(6).then(setNews).catch((e) => setErrors((p) => ({ ...p, news: e.message })))
     const id = setInterval(() => {
-      dashboardService.getMarketStatus().then(setStatus).catch(() => {})
-      dashboardService.getMarketSummary().then((d) => setIndices(d.indices)).catch(() => {})
+      requestCache('dashboard.status', () => dashboardService.getMarketStatus(), 60_000).then(setStatus).catch(() => {})
+      requestCache('dashboard.indices', () => dashboardService.getMarketSummary().then((d) => d.indices), 60_000).then(setIndices).catch(() => {})
       portfolioService.getSummary().then(setPortfolio).catch(() => {})
-    }, 30000)
+    }, 60_000)
     return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
     setTrending(null); setGainers(null); setLosers(null)
     const load = () => {
-      dashboardService.getTrending(market).then(setTrending).catch((e) => setErrors((p) => ({ ...p, trending: e.message })))
-      dashboardService.getGainers(5, market).then(setGainers).catch((e) => setErrors((p) => ({ ...p, gainers: e.message })))
-      dashboardService.getLosers(5, market).then(setLosers).catch((e) => setErrors((p) => ({ ...p, losers: e.message })))
+      requestCache(`dashboard.trending.${market}`, () => dashboardService.getTrending(market), 60_000).then(setTrending).catch((e) => setErrors((p) => ({ ...p, trending: e.message })))
+      requestCache(`dashboard.gainers.${market}`, () => dashboardService.getGainers(5, market), 60_000).then(setGainers).catch((e) => setErrors((p) => ({ ...p, gainers: e.message })))
+      requestCache(`dashboard.losers.${market}`, () => dashboardService.getLosers(5, market), 60_000).then(setLosers).catch((e) => setErrors((p) => ({ ...p, losers: e.message })))
     }
     load()
-    const id = setInterval(load, 30000)
+    const id = setInterval(load, 60_000)
     return () => clearInterval(id)
   }, [market])
 
@@ -363,10 +366,18 @@ export default function DashboardPage() {
         <div className="card overflow-hidden"><WatchlistPanel onSearch={(sym) => navigate(`/stocks/${sym}`)} /></div>
       </div>
 
-      <div ref={scrollAnimRefs.performance as React.RefObject<HTMLDivElement>} className="scroll-reveal"><SignalPerformance /></div>
+      <div ref={scrollAnimRefs.performance as React.RefObject<HTMLDivElement>} className="scroll-reveal">
+        <Suspense fallback={<div className="skeleton h-40 rounded-xl" />}>
+          <SignalPerformance />
+        </Suspense>
+      </div>
 
-      <WatchThese />
-      <AIOutlook />
+      <Suspense fallback={<div className="skeleton h-48 rounded-xl" />}>
+        <WatchThese />
+      </Suspense>
+      <Suspense fallback={<div className="skeleton h-80 rounded-xl" />}>
+        <AIOutlook />
+      </Suspense>
 
       {/* ── Market Indices ── */}
       <div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
@@ -444,7 +455,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <ForexCalendar />
+      <Suspense fallback={<div className="skeleton h-64 rounded-xl" />}>
+        <ForexCalendar />
+      </Suspense>
 
       {/* ── News ── */}
       <div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
