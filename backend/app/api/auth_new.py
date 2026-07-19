@@ -21,7 +21,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -163,11 +163,34 @@ def _send_welcome_email_bg(email: str, first_name: Optional[str]):
     send_email(email, subject, body, cta)
 
 
-def _issue_tokens(user: UserRecord, request: Optional[Request], verify: bool = True) -> TokenOut:
+def _issue_tokens(user: UserRecord, request: Optional[Request], response: Optional[Response] = None, verify: bool = True) -> TokenOut:
     fp = fingerprint_from_request(request) or None
     access  = create_access_token(user.id, fingerprint=fp)
     refresh = create_refresh_token(user.id)
     user_store.touch_last_login(user.id)
+
+    # Set httpOnly cookies for tokens (XSS-safe: JS cannot read these)
+    if response:
+        is_prod = settings.is_production()
+        response.set_cookie(
+            key="finsight_access",
+            value=access,
+            httponly=True,
+            secure=is_prod,
+            samesite="lax",
+            max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            path="/",
+        )
+        response.set_cookie(
+            key="finsight_refresh",
+            value=refresh,
+            httponly=True,
+            secure=is_prod,
+            samesite="lax",
+            max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
+            path="/api/auth/refresh",
+        )
+
     return TokenOut(
         access_token=access,
         refresh_token=refresh,
@@ -179,7 +202,7 @@ def _issue_tokens(user: UserRecord, request: Optional[Request], verify: bool = T
 # ============ Routes ============
 @router.post("/register", response_model=TokenOut, status_code=201)
 @limiter.limit("5/minute")
-async def register(req: RegisterIn, request: Request, background: BackgroundTasks):
+async def register(req: RegisterIn, request: Request, response: Response, background: BackgroundTasks):
     email_norm = req.email.lower().strip()
     username   = (req.username or email_norm.split("@")[0]).lower().strip()
 
@@ -211,7 +234,7 @@ async def register(req: RegisterIn, request: Request, background: BackgroundTask
                         user=UserOut.from_record(user).model_dump())
 
     background.add_task(_send_welcome_email_bg, email_norm, req.first_name)
-    return _issue_tokens(user, request)
+    return _issue_tokens(user, request, response)
 
 
 async def _make_user_if_enabled():
@@ -221,28 +244,33 @@ async def _make_user_if_enabled():
 
 @router.post("/login", response_model=TokenOut)
 @limiter.limit("5/minute")
-async def login(req: LoginIn, request: Request):
+async def login(req: LoginIn, request: Request, response: Response):
     user = user_store.get_user_by_email(req.email.lower().strip())
     if not user or not pwd_context.verify(req.password[:72], user.hashed_password):
         raise HTTPException(401, "Invalid email or password.")
     if not user.is_active:
         raise HTTPException(403, "This account has been disabled. Please contact support.")
-    return _issue_tokens(user, request)
+    return _issue_tokens(user, request, response)
 
 
 @router.post("/login/form", response_model=TokenOut)
 @limiter.limit("5/minute")
-async def login_form(request: Request, form: OAuth2PasswordRequestForm = Depends()):
+async def login_form(request: Request, response: Response, form: OAuth2PasswordRequestForm = Depends()):
     user = user_store.get_user_by_email(form.username.lower().strip())
     if (not user) and _USERNAME_RE.match(form.username):
         user = user_store.get_user_by_username(form.username.strip())
     if not user or not pwd_context.verify(form.password[:72], user.hashed_password):
         raise HTTPException(401, "Invalid credentials.")
-    return _issue_tokens(user, request)
+    return _issue_tokens(user, request, response)
 
 
 @router.post("/refresh", response_model=TokenOut)
-def refresh(token: str):
+def refresh(request: Request, response: Response, token: Optional[str] = None):
+    # Accept token from body param or httpOnly cookie
+    if not token:
+        token = request.cookies.get("finsight_refresh")
+    if not token:
+        raise HTTPException(401, "Missing refresh token.")
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     except JWTError as e:
@@ -252,9 +280,23 @@ def refresh(token: str):
     user = user_store.get_user_by_id(str(payload.get("sub")))
     if not user or not user.is_active:
         raise HTTPException(401, "Account not found or inactive.")
+    new_access = create_access_token(user.id)
+    new_refresh = create_refresh_token(user.id)
+
+    # Update httpOnly cookies
+    is_prod = settings.is_production()
+    response.set_cookie(
+        key="finsight_access", value=new_access, httponly=True, secure=is_prod,
+        samesite="lax", max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, path="/",
+    )
+    response.set_cookie(
+        key="finsight_refresh", value=new_refresh, httponly=True, secure=is_prod,
+        samesite="lax", max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400, path="/api/auth/refresh",
+    )
+
     return TokenOut(
-        access_token=create_access_token(user.id),
-        refresh_token=create_refresh_token(user.id),
+        access_token=new_access,
+        refresh_token=new_refresh,
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         user=UserOut.from_record(user).model_dump(),
     )
@@ -318,11 +360,16 @@ async def reset_password(req: ResetIn):
 # ----------- Current user -----------
 @router.get("/me")
 async def me(request: Request):
-    """Required auth. Reads JWT, returns the active user record."""
+    """Required auth. Reads JWT from cookie or Authorization header."""
+    # Try Authorization header first, then httpOnly cookie
+    token = None
     creds = request.headers.get("authorization", "")
-    if not creds.lower().startswith("bearer "):
-        raise HTTPException(401, "Missing bearer token")
-    token = creds.split(" ", 1)[1]
+    if creds.lower().startswith("bearer "):
+        token = creds.split(" ", 1)[1]
+    if not token:
+        token = request.cookies.get("finsight_access")
+    if not token:
+        raise HTTPException(401, "Missing authentication token")
     payload = decode_token(token)
     user_id = payload.get("sub")
     user = user_store.get_user_by_id(str(user_id))
@@ -335,6 +382,8 @@ async def me(request: Request):
 
 
 @router.post("/logout")
-async def logout():
-    # Stateless JWT — client discards token. (Future: server-side token blacklist.)
+async def logout(response: Response):
+    # Clear httpOnly cookies
+    response.delete_cookie("finsight_access", path="/")
+    response.delete_cookie("finsight_refresh", path="/api/auth/refresh")
     return {"ok": True}

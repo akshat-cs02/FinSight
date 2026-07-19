@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import SEO from '@/components/SEO'
 import { newsService, NewsArticle } from '@/services/newsService'
 import { pageEnter, staggerItems } from '@/utils/animations'
 import { Lift } from '@/components/ui/motion'
@@ -28,6 +29,16 @@ export default function NewsPage() {
 
   return (
     <div ref={mainRef} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <SEO
+        title="Financial News"
+        description="Latest financial news with AI-powered sentiment analysis. Stay updated on market movements, stock trends, and breaking financial events."
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: 'FinSight Financial News',
+          description: 'Latest financial news with AI-powered sentiment analysis.',
+        }}
+      />
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h1 className="text-[28px] font-bold font-display text-white">Financial News</h1>
@@ -57,7 +68,7 @@ export default function NewsPage() {
           {list.map((a, i) => (
             <Lift><a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
                 className="card-accent card-surface2 p-5 rounded-xl transition flex flex-col cursor-pointer">
-              {a.thumbnail && <img src={a.thumbnail} alt="" className="w-full h-32 object-cover rounded-lg mb-3" />}
+              {a.thumbnail && <img src={a.thumbnail} alt="" loading="lazy" className="w-full h-32 object-cover rounded-lg mb-3" />}
               <div className="flex justify-between items-start mb-2 gap-2">
                 <h3 className="text-white font-bold flex-1 font-display">{a.title}</h3>
                 <span className={`flex-shrink-0 ${

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import api from '@/services/api'
 import { pingVisitor, fetchVisitor, getStoredGuestUsername } from '@/services/visitorService'
 
 export interface User {
@@ -21,7 +22,7 @@ export interface VisitorInfo {
 
 interface AuthState {
   user: User | null
-  token: string | null
+  token: string | null  // kept for backward compat but no longer the primary auth mechanism
   loading: boolean
   initialized: boolean
   visitor: VisitorInfo | null
@@ -52,7 +53,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   visitor: null,
 
   bootstrap: async () => {
-    set({ user: GUEST_USER, initialized: true })
+    // Try to recover session from httpOnly cookie via /me endpoint
+    try {
+      const { data } = await api.get('/auth/me')
+      if (data && data.id) {
+        set({ user: data as User, token: 'cookie', initialized: true })
+      } else {
+        set({ user: GUEST_USER, initialized: true })
+      }
+    } catch {
+      set({ user: GUEST_USER, initialized: true })
+    }
     // Try fetching visitor info from backend
     const visitor = await fetchVisitor()
     if (visitor) {
@@ -81,15 +92,57 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  login: async () => {
-    return GUEST_USER
+  login: async (email: string, password: string) => {
+    set({ loading: true })
+    try {
+      // Backend sets httpOnly cookies on success; we still get tokens + user in body
+      // for backward compat, but the cookie is the authoritative auth mechanism.
+      const { data } = await api.post('/auth/login', { email, password })
+      const user = (data.user || GUEST_USER) as User
+      set({ user, token: 'cookie', loading: false })
+      return user
+    } catch (err) {
+      set({ loading: false })
+      throw err
+    }
   },
 
-  register: async () => {},
+  register: async (formData) => {
+    set({ loading: true })
+    try {
+      const { data } = await api.post('/auth/register', formData)
+      const user = (data.user || GUEST_USER) as User
+      set({ user, token: 'cookie', loading: false })
+    } catch (err) {
+      set({ loading: false })
+      throw err
+    }
+  },
 
-  logout: () => {
+  logout: async () => {
+    try {
+      await api.post('/auth/logout')
+    } catch {
+      // Even if server call fails, clear local state
+    }
     set({ user: GUEST_USER, token: null })
   },
 
-  refresh: async () => true,
+  refresh: async () => {
+    try {
+      const { data } = await api.post('/auth/refresh')
+      if (data && data.access_token) {
+        // Cookie was updated server-side; re-fetch user
+        const meRes = await api.get('/auth/me')
+        if (meRes.data && meRes.data.id) {
+          set({ user: meRes.data as User, token: 'cookie' })
+        }
+        return true
+      }
+      return false
+    } catch {
+      set({ user: GUEST_USER, token: null })
+      return false
+    }
+  },
 }))

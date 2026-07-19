@@ -1,0 +1,10 @@
+# FinSight — AI-Powered Stock Market Analysis
+# https://fin-sight-blush.vercel.app
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://fin-sight-blush.vercel.app/sitemap.xml

@@ -18,6 +18,7 @@ import watchlistService from '@/services/watchlistService'
 import type { ConsensusResult } from '@/services/signalService'
 import { useStockCache, useQuote, useIndicators, useNews, useConsensus } from '@/store/stockCache'
 import toast from 'react-hot-toast'
+import SEO from '@/components/SEO'
 import { Lift } from '@/components/ui/motion'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -209,6 +210,17 @@ function StockDetailsContent() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <SEO
+        title={`${SYMBOL} — Stock Details & Analysis`}
+        description={`${quote?.name || SYMBOL} stock analysis with live price, AI predictions, ICT/SMC signals, technical indicators, and recent news.`}
+        url={`https://fin-sight-blush.vercel.app/stocks/${SYMBOL}`}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: `${SYMBOL} Stock Analysis`,
+          description: `Detailed analysis for ${quote?.name || SYMBOL} stock with AI predictions and technical indicators.`,
+        }}
+      />
       {/* Header */}
       <div ref={headerRef} className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>

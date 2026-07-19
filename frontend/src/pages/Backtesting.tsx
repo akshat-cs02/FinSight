@@ -7,6 +7,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine,
 } from 'recharts'
+import SEO from '@/components/SEO'
 import api from '@/services/api'
 import { formatTradeDate } from '@/utils/timezone'
 
@@ -253,6 +254,16 @@ export default function BacktestingPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <SEO
+        title="ICT/SMC Backtesting Engine"
+        description="Professional-grade ICT & Smart Money Concepts backtesting engine with 8 strategies, news filter, and multi-symbol universe rankings."
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'FinSight ICT/SMC Backtesting',
+          description: 'Backtest ICT trading strategies with real market data.',
+        }}
+      />
 
       {/* Header */}
       <div className="anim-up delay-0">

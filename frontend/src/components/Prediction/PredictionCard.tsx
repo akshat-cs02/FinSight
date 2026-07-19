@@ -7,6 +7,7 @@ import {
 import { formatPrice, guessCurrency } from '@/utils/currency'
 import { predCache } from '@/utils/predictionCache'
 import { formatLocalTime } from '@/utils/timezone'
+import { useNavigate } from 'react-router-dom'
 import SignalBadge from './SignalBadge'
 import ConfidenceMeter from './ConfidenceMeter'
 import ForecastChart from './ForecastChart'
@@ -161,6 +162,7 @@ function HorizonTabs({ horizons, overall, regime, cur }: {
 }
 
 export default function PredictionCard({ symbol, autoLoad = true, currency }: Props) {
+  const navigate = useNavigate()
   const [pred, setPred] = useState<Prediction | null>(null)
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -240,7 +242,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
           <div className="text-xs text-yellow-300">
             <span className="font-semibold">Stale model detected: </span>
             {pred.stale_models.join(', ')} — predictions may not reflect recent price levels.{' '}
-            <span className="text-yellow-400 underline cursor-pointer" onClick={() => window.location.href = '/predictions'}>
+            <span className="text-yellow-400 underline cursor-pointer" onClick={() => navigate('/predictions')}>
               Retrain on the AI panel →
             </span>
           </div>

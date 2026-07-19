@@ -5,6 +5,7 @@ import { pageEnter, staggerItems } from '@/utils/animations'
 import {
   adminService, AdminUser, ModelOverview, SystemStats,
 } from '@/services/adminService'
+import SEO from '@/components/SEO'
 import { formatTradeDate, formatLocalDate } from '@/utils/timezone'
 
 function Section({ title, icon, className, children }: { title: string; icon?: React.ReactNode; className?: string; children: React.ReactNode }) {
@@ -96,6 +97,16 @@ export default function AdminPage() {
 
   return (
     <div ref={mainRef} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <SEO
+        title="Admin Dashboard"
+        description="FinSight admin panel for managing users, ML models, and system performance."
+        noindex
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'FinSight Admin Dashboard',
+        }}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-ink-100 flex items-center gap-2 font-display">
           <Shield size={28} className="text-gold" /> Admin Dashboard

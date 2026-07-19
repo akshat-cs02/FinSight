@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 
@@ -7,46 +7,53 @@ interface ProtectedRouteProps {
   adminOnly?: boolean
 }
 
-/** Decode a JWT payload without a library. Returns null if malformed. */
-function decodeJwt(token: string): { exp?: number; sub?: string } | null {
-  try {
-    const payload = token.split('.')[1]
-    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
-    return JSON.parse(json)
-  } catch {
-    return null
-  }
-}
-
-/** Seconds until the token expires (negative if already expired). */
-function secondsToExpiry(token: string | null): number {
-  if (!token) return -1
-  const claims = decodeJwt(token)
-  if (!claims?.exp) return -1
-  return claims.exp - Math.floor(Date.now() / 1000)
-}
-
+/**
+ * Protected route that checks authentication via httpOnly cookie.
+ * On mount, it calls /auth/me to verify the session is still valid.
+ * Shows a loading spinner while checking, redirects to /login if not authenticated.
+ */
 export default function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
-  const { token, user, refresh, logout } = useAuthStore()
-  const ttl = secondsToExpiry(token)
-  const expired = !!token && ttl <= 0
+  const { user, initialized, bootstrap } = useAuthStore()
+  const [checking, setChecking] = useState(true)
+  const [authenticated, setAuthenticated] = useState(false)
 
-  // Refresh the access token shortly before it expires (and immediately if
-  // it's already expired) so the session doesn't drop mid-use.
   useEffect(() => {
-    if (!token) return
-    if (expired) {
-      // Try one refresh; if it fails the store clears the token → redirect.
-      refresh().then((ok) => { if (!ok) logout() })
-      return
+    let cancelled = false
+    const checkAuth = async () => {
+      try {
+        // bootstrap calls /auth/me which validates the httpOnly cookie
+        if (!initialized || !user || user.id === 0) {
+          await bootstrap()
+        }
+        if (!cancelled) {
+          // After bootstrap, check if we got a real user
+          const currentUser = useAuthStore.getState().user
+          setAuthenticated(!!currentUser && currentUser.id !== 0)
+          setChecking(false)
+        }
+      } catch {
+        if (!cancelled) {
+          setAuthenticated(false)
+          setChecking(false)
+        }
+      }
     }
-    // Schedule a refresh ~60s before expiry (min 5s from now).
-    const delayMs = Math.max((ttl - 60) * 1000, 5000)
-    const id = setTimeout(() => { refresh() }, delayMs)
-    return () => clearTimeout(id)
-  }, [token, ttl, expired, refresh, logout])
+    checkAuth()
+    return () => { cancelled = true }
+  }, [initialized, user, bootstrap])
 
-  if (!token || expired) {
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400 text-sm">Verifying session…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!authenticated) {
     return <Navigate to="/login" replace />
   }
 

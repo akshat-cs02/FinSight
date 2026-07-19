@@ -10,6 +10,20 @@ import SearchBar from '@/components/SearchBar'
 import { slideDown } from '@/utils/animations'
 import watchlistService from '@/services/watchlistService'
 
+/** Prefetch route chunks on hover */
+function prefetchRoute(path: string) {
+  const map: Record<string, () => Promise<any>> = {
+    '/dashboard': () => import('@/pages/Dashboard'),
+    '/stocks': () => import('@/pages/StockDetails'),
+    '/predictions': () => import('@/pages/Predictions'),
+    '/backtesting': () => import('@/pages/Backtesting'),
+    '/portfolio': () => import('@/pages/Portfolio'),
+    '/news': () => import('@/pages/News'),
+    '/admin': () => import('@/pages/Admin'),
+  }
+  map[path]?.()
+}
+
 /* ─── Nav items ─── */
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard',  path: '/dashboard' },
@@ -163,6 +177,7 @@ export default function Navbar() {
                   key={item.path}
                   ref={(el) => { linksRef.current[idx] = el }}
                   to={item.path}
+                  onMouseEnter={() => prefetchRoute(item.path)}
                   className={`desktop-nav-link relative flex items-center gap-3 px-6 py-2.5 rounded-xl text-base font-display font-semibold transition-all duration-300 whitespace-nowrap ${
                     active
                       ? 'text-gold bg-gold/10 shadow-sm shadow-gold/5'

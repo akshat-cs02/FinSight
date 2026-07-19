@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Outlet, Link, useLocation, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PageTransition, spring } from '@/components/ui/motion'
 import { Toaster } from 'react-hot-toast'
@@ -13,6 +13,8 @@ import CanvasParticles from '@/components/CanvasParticles'
 import FloatingOrbs from '@/components/FloatingOrbs'
 import CommandPalette from '@/components/CommandPalette'
 import SplashScreen from '@/components/SplashScreen'
+import ErrorBoundary from '@/components/ErrorBoundary'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import { pageEnter } from '@/utils/animations'
 import { useAuthStore } from '@/store/authStore'
 
@@ -27,6 +29,8 @@ const BacktestingPage = lazy(() => import('@/pages/Backtesting'))
 const StatsCounter = lazy(() => import('@/components/StatsCounter'))
 const CTASection = lazy(() => import('@/components/CTASection'))
 const Footer = lazy(() => import('@/components/Footer'))
+const LoginPage = lazy(() => import('@/pages/auth/Login'))
+const RegisterPage = lazy(() => import('@/pages/auth/Register'))
 
 /* ─── Mouse glow effect ─── */
 function MouseGlow() {
@@ -56,6 +60,20 @@ function MouseGlow() {
   )
 }
 
+/* ─── Global SPA navigation listener (for api.ts 401 redirects) ─── */
+function GlobalNavigateListener() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const path = (e as CustomEvent).detail
+      if (typeof path === 'string') navigate(path)
+    }
+    window.addEventListener('finsight:navigate', handler)
+    return () => window.removeEventListener('finsight:navigate', handler)
+  }, [navigate])
+  return null
+}
+
 /* ─── Page transition wrapper ─── */
 function PageContent({ children }: { children: React.ReactNode }) {
   const location = useLocation()
@@ -66,6 +84,21 @@ function PageContent({ children }: { children: React.ReactNode }) {
   }, [location.pathname])
 
   return <div ref={containerRef}>{children}</div>
+}
+
+/* ─── Route prefetch map (shared with BottomNav) ─── */
+const routeImportMap: Record<string, () => Promise<any>> = {
+  '/dashboard': () => import('@/pages/Dashboard'),
+  '/stocks': () => import('@/pages/StockDetails'),
+  '/predictions': () => import('@/pages/Predictions'),
+  '/backtesting': () => import('@/pages/Backtesting'),
+  '/portfolio': () => import('@/pages/Portfolio'),
+  '/news': () => import('@/pages/News'),
+  '/admin': () => import('@/pages/Admin'),
+}
+
+function prefetchRoute(path: string) {
+  routeImportMap[path]?.()
 }
 
 /* ─── Bottom Nav (mobile) ─── */
@@ -86,7 +119,7 @@ function BottomNav() {
           const Icon = item.icon
           const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
           return (
-            <Link key={item.path} to={item.path}
+            <Link key={item.path} to={item.path} onMouseEnter={() => prefetchRoute(item.path)}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all duration-300 ${
                 active ? 'text-gold' : 'text-white/40 hover:text-white/60'
               }`}
@@ -271,7 +304,9 @@ function KeyboardShortcutsHint({ show }: { show: boolean }) {
       </div>
     </div>
   )
-}const toastStyle = {
+}
+
+const toastStyle = {
   style: {
     background: 'rgba(20,20,20,0.9)',
     backdropFilter: 'blur(20px)',
@@ -294,21 +329,27 @@ export default function App() {
 
   return (
     <Router>
+      <GlobalNavigateListener />
       <Toaster position="top-right" toastOptions={toastStyle} />
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/dashboard"   element={<DashboardPage />} />
-          <Route path="/stocks"      element={<StockDetailsPage />} />
-          <Route path="/stocks/:symbol" element={<StockDetailsPage />} />
-          <Route path="/predictions" element={<PredictionsPage />} />
-          <Route path="/backtesting" element={<BacktestingPage />} />
-          <Route path="/portfolio"   element={<PortfolioPage />} />
-          <Route path="/news"        element={<NewsPage />} />
-          <Route path="/admin"       element={<AdminPage />} />
+          <Route path="/dashboard"   element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+          <Route path="/stocks"      element={<ErrorBoundary><StockDetailsPage /></ErrorBoundary>} />
+          <Route path="/stocks/:symbol" element={<ErrorBoundary><StockDetailsPage /></ErrorBoundary>} />
+          <Route path="/predictions" element={<ErrorBoundary><PredictionsPage /></ErrorBoundary>} />
+          <Route path="/backtesting" element={<ErrorBoundary><BacktestingPage /></ErrorBoundary>} />
+          <Route path="/portfolio"   element={<ErrorBoundary><PortfolioPage /></ErrorBoundary>} />
+          <Route path="/news"        element={<ErrorBoundary><NewsPage /></ErrorBoundary>} />
+          <Route path="/admin"       element={<ErrorBoundary><AdminPage /></ErrorBoundary>} />
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<ErrorBoundary><LoginPage /></ErrorBoundary>} />
+        <Route path="/register" element={<ErrorBoundary><RegisterPage /></ErrorBoundary>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
 
       {/* Splash overlay fades out while content loads underneath */}
       {!splashDone && firstVisit.current && (

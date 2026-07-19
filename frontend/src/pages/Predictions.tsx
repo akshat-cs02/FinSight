@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { predictionService, ModelStatus, PredictionHistoryRow } from '@/services/predictionService'
 import { predCache } from '@/utils/predictionCache'
 import { formatLocalDateTime } from '@/utils/timezone'
+import SEO from '@/components/SEO'
 import PredictionCard from '@/components/Prediction/PredictionCard'
 import SignalBadge from '@/components/Prediction/SignalBadge'
 import TradingViewWidget from '@/components/charts/TradingViewWidget'
@@ -144,6 +145,16 @@ export default function PredictionsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
+      <SEO
+        title="AI Predictions"
+        description="LSTM + XGBoost ensemble AI predictions for stock markets. Train models, view prediction history, and get buy/sell signals with confidence scores."
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'FinSight AI Predictions',
+          description: 'AI-powered stock market predictions using LSTM and XGBoost models.',
+        }}
+      />
       <div ref={mainRef} className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-2 font-display">

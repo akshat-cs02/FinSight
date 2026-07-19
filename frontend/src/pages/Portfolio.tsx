@@ -5,6 +5,7 @@ import { Plus, Trash2, Download, ChevronDown, ChevronRight } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { portfolioService, PortfolioSummary } from '@/services/portfolioService'
+import SEO from '@/components/SEO'
 import PortfolioChart from '@/components/charts/PortfolioChart'
 import TradingViewWidget from '@/components/charts/TradingViewWidget'
 import PriceDisplay from '@/components/PriceDisplay'
@@ -105,6 +106,16 @@ export default function PortfolioPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
+      <SEO
+        title="Portfolio"
+        description="Track your stock holdings, view allocation breakdown, monitor gains and losses, and manage your investment portfolio."
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'FinSight Portfolio',
+          description: 'Track and manage your investment portfolio with real-time market data.',
+        }}
+      />
       <div ref={headerRef} className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <div className="eyebrow">Portfolio Overview</div>

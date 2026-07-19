@@ -49,6 +49,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=Fals
 oauth2_scheme_required = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 
+def _extract_token(request: Request, header_token: Optional[str]) -> Optional[str]:
+    """Extract JWT from Authorization header, then fall back to httpOnly cookie."""
+    if header_token:
+        return header_token
+    return request.cookies.get("finsight_access")
+
+
 # ============ password hashing ============
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -141,6 +148,7 @@ def get_current_user(
     visitor in as a guest so the dashboard, watchlist (per-guest scope) and
     portfolio all work without a login flow."""
     import os
+    token = _extract_token(request, token)
     if os.environ.get("REQUIRE_AUTH", "0") == "1":
         if not token:
             raise HTTPException(status_code=401, detail="Missing bearer token")
@@ -161,6 +169,7 @@ def get_optional_user(
 ) -> Optional[UserRecord]:
     """OPTIONAL auth. Returns None if no token. Same demo-mode policy."""
     import os
+    token = _extract_token(request, token)
     if os.environ.get("REQUIRE_AUTH", "0") == "1":
         if not token:
             return None

@@ -12,6 +12,7 @@ import { portfolioService, PortfolioSummary } from '@/services/portfolioService'
 import { newsService, NewsArticle } from '@/services/newsService'
 import type { StockQuote } from '@/services/stockService'
 import { getTradingViewUrl } from '@/services/stockService'
+import SEO from '@/components/SEO'
 import LiveTicker from '@/components/LiveTicker'
 import MarketClosedBanner from '@/components/MarketClosedBanner'
 import IntradaySignals from '@/components/IntradaySignals'
@@ -238,6 +239,16 @@ export default function DashboardPage() {
 
   return (
     <div ref={mainRef} className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1600px] mx-auto">
+      <SEO
+        title="Dashboard"
+        description="Real-time stock market overview with live prices, trending stocks, top gainers and losers, market indices, ICT/SMC signals, AI predictions, and portfolio summary."
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'FinSight Dashboard',
+          description: 'Real-time stock market overview with AI-powered predictions and analysis.',
+        }}
+      />
       {/* Header */}
       <div>
         <div className="eyebrow">OVERVIEW</div>

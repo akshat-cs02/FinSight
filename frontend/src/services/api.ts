@@ -5,16 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || ''
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   timeout: 180000,
-})
-
-// Attach JWT token if present
-api.interceptors.request.use((config) => {
-  const tok = localStorage.getItem('finsight_token')
-  if (tok) {
-    config.headers = config.headers || {}
-    config.headers.Authorization = `Bearer ${tok}`
-  }
-  return config
+  withCredentials: true, // send httpOnly cookies cross-origin
 })
 
 // Auto-redirect on 401 (token expired/missing)
@@ -24,10 +15,18 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       const path = window.location.pathname
       if (!['/login', '/register'].includes(path)) {
-        // Soft-fail — let component handle the message; only auto-redirect for protected pages
         if (['/portfolio', '/predictions', '/admin'].some((p) => path.startsWith(p))) {
-          localStorage.removeItem('finsight_token')
-          window.location.href = '/login'
+          // Prefer React Router SPA navigation; fallback to full reload if listener not mounted
+          let handled = false
+          const onHandled = () => { handled = true }
+          window.addEventListener('finsight:navigate', onHandled, { once: true })
+          window.dispatchEvent(new CustomEvent('finsight:navigate', { detail: '/login' }))
+          setTimeout(() => {
+            window.removeEventListener('finsight:navigate', onHandled)
+            if (!handled && window.location.pathname !== '/login') {
+              window.location.href = '/login'
+            }
+          }, 100)
         }
       }
     }
