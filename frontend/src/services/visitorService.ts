@@ -1,35 +1,32 @@
-/**
- * Visitor tracking service — used on app boot to register the anonymous
- * guest user with the backend so we know how many people are using the app.
- */
+import { API_URL } from '@/services/api'
 import axios from 'axios'
 
-const STORAGE_KEY_TOKEN = 'fs_visitor_token'
-const STORAGE_KEY_NAME = 'fs_guest_username'
+const TOKEN_KEY = 'fs_vt'
+const NAME_KEY = 'fs_gn'
 
-let _cachedToken: string | null = null
-let _cachedName: string | null = null
+let _token: string | null = null
+let _name: string | null = null
 
 function getToken(): string | null {
-  if (_cachedToken) return _cachedToken
-  _cachedToken = localStorage.getItem(STORAGE_KEY_TOKEN)
-  return _cachedToken
+  if (_token) return _token
+  try { _token = sessionStorage.getItem(TOKEN_KEY) } catch {}
+  return _token
 }
 
 function setToken(t: string) {
-  _cachedToken = t
-  localStorage.setItem(STORAGE_KEY_TOKEN, t)
+  _token = t
+  try { sessionStorage.setItem(TOKEN_KEY, t) } catch {}
 }
 
 function getName(): string | null {
-  if (_cachedName) return _cachedName
-  _cachedName = localStorage.getItem(STORAGE_KEY_NAME)
-  return _cachedName
+  if (_name) return _name
+  try { _name = sessionStorage.getItem(NAME_KEY) } catch {}
+  return _name
 }
 
 function setName(n: string) {
-  _cachedName = n
-  localStorage.setItem(STORAGE_KEY_NAME, n)
+  _name = n
+  try { sessionStorage.setItem(NAME_KEY, n) } catch {}
 }
 
 export interface VisitorInfo {
@@ -41,22 +38,16 @@ export interface VisitorInfo {
   page_views?: number
 }
 
-const BASE = import.meta.env.VITE_API_URL || ''
-
-/**
- * Ping the backend to register / update this visitor.
- * Called on every page navigation (App.tsx route change).
- */
 export async function pingVisitor(path?: string): Promise<VisitorInfo | null> {
   try {
+    const params: Record<string, string> = {}
     const token = getToken()
     const name = getName()
-    const params: Record<string, string> = {}
     if (token) params.token = token
     if (name) params.guest_username = name
     if (path) params.path = path
 
-    const { data } = await axios.post<VisitorInfo>(`${BASE}/api/visitor/ping`, null, { params })
+    const { data } = await axios.post<VisitorInfo>(`${API_URL}/api/visitor/ping`, null, { params })
     setToken(data.visitor_token)
     setName(data.guest_username)
     return data
@@ -65,14 +56,11 @@ export async function pingVisitor(path?: string): Promise<VisitorInfo | null> {
   }
 }
 
-/**
- * Fetch the current visitor details from the backend.
- */
 export async function fetchVisitor(): Promise<VisitorInfo | null> {
   const token = getToken()
   if (!token) return null
   try {
-    const { data } = await axios.get<VisitorInfo>(`${BASE}/api/visitor/me`, { params: { token } })
+    const { data } = await axios.get<VisitorInfo>(`${API_URL}/api/visitor/me`, { params: { token } })
     return data
   } catch {
     return null

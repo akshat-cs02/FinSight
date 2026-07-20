@@ -3,12 +3,9 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion'
 
 /* Spring used everywhere — snappy but organic (Linear/Vercel feel). */
 export const spring = { type: 'spring', stiffness: 380, damping: 30, mass: 0.7 } as const
-export const springLoose = { type: 'spring', stiffness: 300, damping: 25, mass: 0.8 } as const
-export const springStiff = { type: 'spring', stiffness: 500, damping: 35, mass: 0.5 } as const
 
 /* Easing curve matching Apple/Linear premium feel */
 const easePremium = [0.22, 1, 0.36, 1] as const
-const easeSnap = [0.34, 1.56, 0.64, 1] as const
 
 /* ─── Page transition: fade + subtle rise with scale ─── */
 export function PageTransition({ children }: { children: React.ReactNode }) {
@@ -55,23 +52,13 @@ export function Item({ children, className = '' }: { children: React.ReactNode; 
   )
 }
 
-/* ─── Hover lift wrapper for cards ─── */
+/* ─── Hover lift — CSS-only, no framer-motion needed ─── */
 export function Lift({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  const reduced = useReducedMotion()
   return (
-    <motion.div
-      className={className}
-      whileHover={reduced ? undefined : { y: -4, scale: 1.005, transition: springLoose }}
-      whileTap={reduced ? undefined : { scale: 0.985, transition: { duration: 0.1 } }}
+    <div
+      className={`${className} transition-all duration-300 ease-out hover:-translate-y-[3px] hover:scale-[1.005] active:scale-[0.99]`}
     >
       {children}
-    </motion.div>
+    </div>
   )
-}
-
-/* ─── Scale-in entrance for modals/popups ─── */
-export const scaleInVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.96, y: -8, transformOrigin: 'top right' },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.2, ease: easeSnap } },
-  exit: { opacity: 0, scale: 0.96, y: -4, transition: { duration: 0.12, ease: 'easeIn' } },
 }
