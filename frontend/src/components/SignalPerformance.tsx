@@ -69,7 +69,7 @@ export default function SignalPerformance() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-5">
             <StatCard
               label="Win Rate"
               value={`${stats.win_rate}%`}
@@ -78,7 +78,7 @@ export default function SignalPerformance() {
             <StatCard
               label="Total Signals"
               value={stats.total_signals}
-              sub={`${stats.expired} expired`}
+              sub={`${stats.pending} pending`}
             />
             <StatCard
               label="TP Hit"
@@ -90,9 +90,14 @@ export default function SignalPerformance() {
               value={stats.avg_pnl_r >= 0 ? `+${stats.avg_pnl_r}R` : `${stats.avg_pnl_r}R`}
               sub="per signal"
             />
+            <StatCard
+              label="Active Now"
+              value={stats.pending}
+              sub="in market"
+            />
           </div>
 
-          {stats.daily_pnl.length > 1 && (
+          {stats.total_signals > 0 && stats.daily_pnl.length > 1 && (
             <div className="mb-4">
               <div className="text-xs text-white/40 mb-2 flex items-center gap-1">
                 <TrendingUp size={11} /> Cumulative P&L (R-multiples)

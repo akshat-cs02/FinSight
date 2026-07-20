@@ -32,6 +32,7 @@ export interface WinRateTrend {
 
 export interface PerformanceStats {
   total_signals: number
+  pending: number
   tp_hit: number
   sl_hit: number
   expired: number

@@ -427,29 +427,30 @@ def cleanup_old_signals(db: Session, keep_days: int = 30) -> int:
 
 # ─── Performance stats ────────────────────────────────────────────────────────
 def get_performance_stats(days: int, db: Session) -> dict:
-    """Aggregate stats from RESOLVED intraday_signals only (TP/SL/EXPIRED)."""
+    """Aggregate stats from all signals in the window, including PENDING."""
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-    rows = (
+
+    # All signals (including PENDING) for total count
+    all_rows = (
         db.query(IntradaySignal)
         .filter(IntradaySignal.generated_at >= cutoff)
-        .filter(IntradaySignal.outcome.in_(["TP_HIT", "SL_HIT", "EXPIRED"]))
         .all()
     )
 
-    tp_hit   = sum(1 for r in rows if r.outcome == "TP_HIT")
-    sl_hit   = sum(1 for r in rows if r.outcome == "SL_HIT")
-    expired  = sum(1 for r in rows if r.outcome == "EXPIRED")
+    total   = len(all_rows)
+    pending = sum(1 for r in all_rows if r.outcome == "PENDING")
+    # Only resolved for win/loss stats
+    resolved = [r for r in all_rows if r.outcome in ("TP_HIT", "SL_HIT", "EXPIRED")]
+    tp_hit   = sum(1 for r in resolved if r.outcome == "TP_HIT")
+    sl_hit   = sum(1 for r in resolved if r.outcome == "SL_HIT")
+    expired  = sum(1 for r in resolved if r.outcome == "EXPIRED")
     closed   = tp_hit + sl_hit
-    # "Total" = signals that actually reached a target/stop. Expired setups (never
-    # triggered) are reported separately, not lumped into the headline count — a
-    # flood of expired rows previously made "Total Signals" meaningless.
-    total    = closed
     win_rate = round(tp_hit / closed * 100, 1) if closed > 0 else 0.0
-    pnl_vals = [r.pnl_r for r in rows if r.pnl_r is not None and r.outcome in ("TP_HIT", "SL_HIT")]
+    pnl_vals = [r.pnl_r for r in resolved if r.pnl_r is not None and r.outcome in ("TP_HIT", "SL_HIT")]
     avg_pnl_r = round(sum(pnl_vals) / len(pnl_vals), 2) if pnl_vals else 0.0
 
     daily: dict[str, dict] = {}
-    for r in rows:
+    for r in resolved:
         day = r.generated_at.date().isoformat()
         if day not in daily:
             daily[day] = {"wins": 0, "losses": 0, "pnl": 0.0}
@@ -484,6 +485,7 @@ def get_performance_stats(days: int, db: Session) -> dict:
 
     return {
         "total_signals":  total,
+        "pending":        pending,
         "tp_hit":         tp_hit,
         "sl_hit":         sl_hit,
         "expired":        expired,
