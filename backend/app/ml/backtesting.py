@@ -18,6 +18,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from app.config import settings
 from app.ml.lstm_model import load_lstm, predict_next_lstm
 from app.ml.xgboost_model import load_xgb, predict_next_xgb
 from app.training.dataset_builder import FEATURE_COLS, build_dataset, clean_dataset
@@ -138,8 +139,9 @@ def run_ml_backtest(
     if len(df) < SEQ_LEN + 50:
         raise ValueError(f"Need at least {SEQ_LEN + 50} bars, got {len(df)}")
 
-    lstm_bundle = load_lstm("", symbol)
-    xgb_bundle = load_xgb("", symbol)
+    model_dir = settings.MODEL_PATH
+    lstm_bundle = load_lstm(model_dir, symbol)
+    xgb_bundle = load_xgb(model_dir, symbol)
 
     n = len(df)
     windows = _walk_forward_indices(n, walk_forward_windows)
