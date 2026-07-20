@@ -4,14 +4,16 @@ Signals API — Intraday ICT signals, performance stats, stock term signals, bre
 Endpoints:
   GET /api/signals/intraday                   — live signals for universe
   GET /api/signals/intraday/{symbol}          — signals for one symbol
+  GET /api/signals/activity?limit=20          — recent PENDING + resolved signals
   GET /api/signals/performance?days=7|30|90  — personal stats
   GET /api/signals/stock/{symbol}/terms       — short/mid/long term signals
   GET /api/signals/breakouts                  — Watch These Stocks
 """
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
+from datetime import datetime, timedelta, timezone
 
-from app.database import get_db
+from app.database import get_db, IntradaySignal
 from app.services.signal_service import (
     get_cached_signals,
     generate_intraday_signals,
@@ -44,6 +46,36 @@ def get_intraday_signal_for_symbol(symbol: str, db: Session = Depends(get_db)):
     return matching[0]
 
 
+@router.get("/activity")
+def get_signal_activity(limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)):
+    """Recent signals (PENDING + resolved) — gives the dashboard a live feel.
+
+    Merges the in-memory cache with the last N resolved DB rows so users
+    always see something happening.
+    """
+    from app.services.signal_service import _signal_row_to_dict
+
+    pending = get_cached_signals()
+
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
+    resolved = (
+        db.query(IntradaySignal)
+        .filter(IntradaySignal.generated_at >= cutoff)
+        .filter(IntradaySignal.outcome.in_(["TP_HIT", "SL_HIT", "EXPIRED"]))
+        .order_by(IntradaySignal.outcome_at.desc())
+        .limit(limit)
+        .all()
+    )
+    resolved_dicts = [_signal_row_to_dict(r) for r in resolved]
+
+    return {
+        "pending": pending,
+        "resolved": resolved_dicts,
+        "pending_count": len(pending),
+        "resolved_count": len(resolved_dicts),
+    }
+
+
 @router.get("/performance")
 def get_signal_performance(
     days: int = Query(7, ge=1, le=90, description="Look-back window: 7, 30, or 90"),
@@ -59,7 +91,6 @@ def get_stock_terms(symbol: str):
     """Return short, mid, and long term signals for a stock symbol."""
     try:
         result = get_stock_term_signal(symbol.upper())
-        # Spot metals proxied to futures → present price levels on the spot scale.
         return scale_terms(symbol.upper(), result)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))

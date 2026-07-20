@@ -114,6 +114,11 @@ const signalService = {
     return res.data
   },
 
+  async getActivity(limit = 20): Promise<{ pending: IntradaySignal[]; resolved: IntradaySignal[] }> {
+    const res = await api.get('/signals/activity', { params: { limit } })
+    return { pending: res.data.pending ?? [], resolved: res.data.resolved ?? [] }
+  },
+
   async getPerformance(days: 7 | 30 | 90 = 7): Promise<PerformanceStats> {
     const res = await api.get('/signals/performance', { params: { days } })
     return res.data

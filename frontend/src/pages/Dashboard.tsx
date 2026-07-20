@@ -28,6 +28,7 @@ const AIOutlook = lazy(() => import('@/components/Prediction/AIOutlook'))
 const ForexCalendar = lazy(() => import('@/components/ForexCalendar'))
 const SignalPerformance = lazy(() => import('@/components/SignalPerformance'))
 const WatchThese = lazy(() => import('@/components/WatchThese'))
+const SignalActivity = lazy(() => import('@/components/SignalActivity'))
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -387,6 +388,9 @@ export default function DashboardPage() {
 
       <Suspense fallback={<div className="skeleton h-48 rounded-xl" />}>
         <WatchThese />
+      </Suspense>
+      <Suspense fallback={<div className="skeleton h-40 rounded-xl" />}>
+        <SignalActivity />
       </Suspense>
       <Suspense fallback={<div className="skeleton h-80 rounded-xl" />}>
         <AIOutlook />
