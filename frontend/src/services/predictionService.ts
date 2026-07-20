@@ -45,6 +45,12 @@ export interface MultiHorizon {
   generated_at: string
 }
 
+export interface ConfidenceInterval {
+  lower: number
+  upper: number
+  level: number
+}
+
 export interface Prediction {
   id?: number
   symbol: string
@@ -69,6 +75,8 @@ export interface Prediction {
   stale_models?: string[]
   model_predictions_raw?: Record<string, number>
   generated_at: string
+  model_version?: string
+  confidence_interval?: [number, number, number] | { lower: number; upper: number; level: number }
   // Multi-horizon outlook (added alongside the flat AI fields).
   horizons?: Record<HorizonKey, HorizonPrediction> | null
   overall?: HorizonOverall
@@ -91,6 +99,69 @@ export interface ModelStatus {
   symbol: string
   lstm: boolean
   xgb: boolean
+}
+
+export interface BacktestMetrics {
+  rmse: number
+  mae: number
+  mape: number
+  r2: number
+  directional_accuracy: number
+  signal_accuracy: number
+  strategy_return: number
+  benchmark_return: number
+  max_drawdown: number
+  win_rate: number
+}
+
+export interface BaselineMetrics {
+  rmse: number
+  mae: number
+  mape: number
+  r2: number
+}
+
+export interface EquityPoint {
+  date: string
+  strategy: number
+  benchmark: number
+}
+
+export interface PredictedVsActual {
+  date: string
+  predicted: number
+  actual: number
+}
+
+export interface SignalEntry {
+  date: string
+  signal: string
+  confidence: number
+}
+
+export interface BacktestSummary {
+  total_trades: number
+  winning_trades: number
+  losing_trades: number
+  total_return_pct: number
+  benchmark_return_pct: number
+  max_drawdown_pct: number
+  sharpe_ratio: number
+  calmar_ratio: number
+}
+
+export interface BacktestResult {
+  symbol: string
+  period: string
+  status: string
+  cached: boolean
+  generated_at: string
+  model: BacktestMetrics
+  baselines: Record<string, BaselineMetrics>
+  equity_curve: EquityPoint[]
+  predictions_vs_actuals: PredictedVsActual[]
+  signals: SignalEntry[]
+  summary: BacktestSummary
 }
 
 export const predictionService = {
@@ -118,4 +189,9 @@ export const predictionService = {
 
   trainModel: (symbol: string, lstm_epochs = 8) =>
     api.post('/prediction/train', { symbol, lstm_epochs }).then((r) => r.data),
+
+  getBacktest: (symbol: string, period = '2y', walkForwardWindows = 5, retrain = false) =>
+    api.get<BacktestResult>(`/backtest/ml/${symbol}`, {
+      params: { period, walk_forward_windows: walkForwardWindows, retrain },
+    }).then((r) => r.data),
 }

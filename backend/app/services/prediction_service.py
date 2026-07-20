@@ -22,6 +22,8 @@ import numpy as np
 from app.config import settings
 from app.ml.lstm_model import load_lstm, predict_next_lstm, predict_next_lstm_multi_horizon
 from app.ml.xgboost_model import load_xgb, predict_next_xgb, load_xgb_multi_horizon, predict_next_xgb_multi_horizon
+from app.ml.ensemble import ensemble_weighted_average
+from app.ml.inference import get_model_version, _estimate_uncertainty
 from app.services import market_data_service as mds
 from app.training.dataset_builder import FEATURE_COLS, EXTENDED_FEATURE_COLS, build_dataset
 
@@ -397,35 +399,8 @@ def predict_stock(symbol: str, auto_train: bool = True, forecast_days: int = 7) 
         raise RuntimeError(f"All models failed to produce predictions for {symbol}")
 
     # ── Ensemble: MAPE-weighted mean with outlier clipping ─────────────────────
-    # Any model predicting >15% away from current price is an outlier (stale model).
-    # Clip such predictions to ±15% before blending to prevent one bad model from
-    # dominating the signal.
-    MAX_PCT_DEVIATION = 0.15  # 15% ceiling
-    clipped: list[tuple[str, float]] = []
-    for name, p in predictions:
-        deviation = abs(p - current_price) / max(current_price, 1e-6)
-        if deviation > MAX_PCT_DEVIATION:
-            clipped_p = current_price * (1 + MAX_PCT_DEVIATION * (1 if p > current_price else -1))
-            logger.info(
-                f"[{symbol}] {name} prediction {p:.2f} clipped to {clipped_p:.2f} "
-                f"(was {deviation*100:.1f}% from current {current_price:.2f})"
-            )
-            clipped.append((name, clipped_p))
-        else:
-            clipped.append((name, p))
-
-    # Weight by inverse MAPE when available (better models get more weight)
-    weights: list[float] = []
-    for i, (_, _p) in enumerate(clipped):
-        m = model_metrics_list[i] if i < len(model_metrics_list) else {}
-        mape = m.get("mape", 5.0) if m else 5.0
-        weights.append(1.0 / max(mape, 0.1))
-
-    total_w = sum(weights)
-    if total_w > 0:
-        ensemble = sum(w * p for w, (_, p) in zip(weights, clipped)) / total_w
-    else:
-        ensemble = float(np.mean([p for _, p in clipped]))
+    ensemble_result = ensemble_weighted_average(predictions, model_metrics_list, current_price)
+    ensemble = ensemble_result["ensemble_price"]
 
     change_pct = (ensemble - current_price) / current_price * 100
 
@@ -608,6 +583,8 @@ def predict_stock(symbol: str, auto_train: bool = True, forecast_days: int = 7) 
         "horizons": horizons,
         "overall": overall,
         "currency": mds.guess_currency(symbol),
+        "model_version": get_model_version(),
+        "confidence_interval": _estimate_uncertainty(ensemble, model_metrics_list, current_price),
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 

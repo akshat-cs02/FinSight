@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { portfolioService } from '@/services/portfolioService'
 import TradingViewWidget from '@/components/charts/TradingViewWidget'
 import PredictionCard from '@/components/Prediction/PredictionCard'
+import BacktestPanel from '@/components/BacktestPanel'
 import ICTSignals from '@/components/ICTSignals'
 import PaperTrading from '@/components/PaperTrading'
 import StockTermSignals from '@/components/StockTermSignals'
@@ -392,6 +393,7 @@ function StockDetailsContent() {
       {/* AI Prediction · ICT Signals · Paper trading */}
       <div ref={predictionRef}>
         <PredictionCard symbol={SYMBOL} currency={currency} />
+        <BacktestPanel symbol={SYMBOL} />
         <ICTSignals symbol={SYMBOL} currency={currency} onTrade={(t) => {
           setPaperTrade(t)
           document.getElementById('paper-trading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })

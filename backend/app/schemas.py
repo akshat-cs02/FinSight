@@ -47,6 +47,87 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# ==================== Backtest Schemas ====================
+class BaselineMetrics(BaseModel):
+    rmse: float = 0.0
+    mae: float = 0.0
+    mape: float = 0.0
+    r2: float = 0.0
+
+class ModelMetrics(BaseModel):
+    rmse: float
+    mae: float
+    mape: float
+    r2: float
+    directional_accuracy: float = 0.0
+    signal_accuracy: float = 0.0
+    strategy_return: float = 0.0
+    benchmark_return: float = 0.0
+    max_drawdown: float = 0.0
+    win_rate: float = 0.0
+
+class EquityPoint(BaseModel):
+    date: str
+    strategy: float
+    benchmark: float
+
+class PredictedVsActual(BaseModel):
+    date: str
+    predicted: float
+    actual: float
+
+class SignalEntry(BaseModel):
+    date: str
+    signal: str
+    confidence: float
+
+class BacktestSummary(BaseModel):
+    total_trades: int = 0
+    winning_trades: int = 0
+    losing_trades: int = 0
+    total_return_pct: float = 0.0
+    benchmark_return_pct: float = 0.0
+    max_drawdown_pct: float = 0.0
+    sharpe_ratio: float = 0.0
+    calmar_ratio: float = 0.0
+
+class BacktestRequest(BaseModel):
+    symbol: str
+    period: str = "2y"
+    walk_forward_windows: int = Field(5, ge=2, le=20)
+    retrain_on_each_window: bool = False
+
+class BacktestResponse(BaseModel):
+    symbol: str
+    period: str
+    status: str = "success"
+    cached: bool = False
+    generated_at: str = ""
+    model: ModelMetrics
+    baselines: dict[str, BaselineMetrics] = {}
+    equity_curve: list[EquityPoint] = []
+    predictions_vs_actuals: list[PredictedVsActual] = []
+    signals: list[SignalEntry] = []
+    summary: BacktestSummary
+
+class ConfidenceInterval(BaseModel):
+    lower: float
+    upper: float
+    level: float = 0.90
+
+class PredictionResponseV2(BaseModel):
+    symbol: str
+    current_price: float
+    predicted_price: float
+    predicted_direction: str
+    signal: str
+    confidence: float
+    confidence_interval: ConfidenceInterval
+    model_version: str = "1.0.0"
+    model_name: str = "lstm_xgb_ensemble"
+    features_used: list[str] = []
+    generated_at: str = ""
+
 # ==================== Market Data Schemas ====================
 class StockQuote(BaseModel):
     """Stock quote data"""

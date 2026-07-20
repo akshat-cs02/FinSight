@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ArrowDown, ArrowUp, Brain, RefreshCw, AlertTriangle, TrendingUp, TrendingDown, Minus, Activity } from 'lucide-react'
+import { ArrowDown, ArrowUp, Brain, RefreshCw, AlertTriangle, TrendingUp, TrendingDown, Minus, Activity, Gauge } from 'lucide-react'
 import {
   predictionService, Prediction,
   HorizonKey, HorizonPrediction, MarketRegime, HorizonOverall,
@@ -361,6 +361,37 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
               </span>
             )
           })}
+        </div>
+      )}
+
+      {/* Confidence interval + Model version */}
+      {pred.confidence_interval && (
+        <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-3">
+          <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+            <Gauge size={14} className="text-blue-400" /> Uncertainty estimate
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-400">90% CI:</span>
+            <span className="text-white font-mono">
+              {formatPrice(
+                Array.isArray(pred.confidence_interval)
+                  ? pred.confidence_interval[0]
+                  : pred.confidence_interval.lower,
+                cur
+              )} – {formatPrice(
+                Array.isArray(pred.confidence_interval)
+                  ? pred.confidence_interval[1]
+                  : pred.confidence_interval.upper,
+                cur
+              )}
+            </span>
+          </div>
+          {pred.model_version && (
+            <div className="flex items-center justify-between text-xs mt-1">
+              <span className="text-gray-400">Model version:</span>
+              <span className="text-blue-300 font-mono">{pred.model_version}</span>
+            </div>
+          )}
         </div>
       )}
 

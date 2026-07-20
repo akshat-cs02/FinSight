@@ -1,0 +1,9 @@
+{
+  "version": "1.1.0",
+  "updated_at": null,
+  "description": "FinSight ML ensemble (LSTM + XGBoost) with MAPE-weighted averaging, outlier clipping, and scipy-based confidence intervals",
+  "models": ["lstm", "xgb", "lstm_multi_horizon", "xgb_multi"],
+  "ensemble_method": "mape_weighted_average",
+  "confidence_interval_method": "scipy_norm_cdf",
+  "max_outlier_clip_pct": 15
+}
