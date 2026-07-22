@@ -16,8 +16,20 @@
         if (t === "light" || (!t && window.matchMedia("(prefers-color-scheme: light)").matches)) {
           document.documentElement.setAttribute("data-theme", "light");
         }
+        var p = location.pathname;
+        if (p === "/login" || p === "/register") {
+          document.documentElement.classList.add("auth-only");
+        }
       })();
     </script>
+    <style>
+      .auth-only #top { display: none; }
+      .auth-only #foot { display: none; }
+      .auth-only #nav { display: none; }
+      .auth-only #mmenu { display: none !important; }
+      .auth-only .auth-screen { display: flex !important; }
+      .auth-only .auth-screen::before { opacity: 1 !important; }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -3370,9 +3382,6 @@
           <a href="#">News</a><a href="#">API Docs</a><a href="#">Support</a>
         </div>
       </div>
-      <div class="wrap">
-        <div class="foot-wordmark" id="footWm">FINSIGHT</div>
-      </div>
       <div class="wrap foot-bot clip">
         <span>© 2026 FinSight · MIT License</span
         ><span>Markets involve risk. Nothing here is financial advice.</span>
@@ -4438,7 +4447,6 @@
       const showcase = $("#showcase"),
         hscroll = $("#caps"),
         capTrack = $("#capTrack"),
-        footWm = $("#footWm"),
         heroRight = $("#heroRight");
       const scStates = $$(".sc-state"),
         scIndex = $$("#scIndex .it");
@@ -4507,8 +4515,7 @@
             hTotal = hscroll.offsetHeight - innerHeight;
           capTrack.style.transform = `translate3d(${-clamp(-hr.top / hTotal, 0, 1) * capW}px,0,0)`;
         }
-        const fr = footWm.getBoundingClientRect();
-        footWm.style.transform = `translateX(${(0.5 - clamp((innerHeight - fr.top) / (innerHeight + fr.height), 0, 1)) * -120}px)`;
+
         heroRight.style.transform = `translateY(${clamp(scrollY * 0.05, 0, 90)}px)`;
         caps.forEach((cap) => {
           if (cap._in) return;
@@ -5002,6 +5009,7 @@
       const toast = $("#toast");
       let toastT = null;
       function guest() {
+        sessionStorage.setItem('finsight_splash', 'true');
         window.location.href = "/dashboard";
       }
       $$("[data-guest]").forEach((b) =>
@@ -5209,6 +5217,17 @@
       if (document.fonts && document.fonts.ready)
         document.fonts.ready.then(boot);
       else addEventListener("load", boot);
+      if (location.pathname === "/login" || location.pathname === "/register") {
+        var autoTab = location.pathname === "/register" ? "create" : "signin";
+        var autoOpen = function() {
+          var btn = document.querySelector('[data-open-auth][data-tab="' + autoTab + '"]');
+          if (btn) btn.click();
+        };
+        if (document.fonts && document.fonts.ready)
+          document.fonts.ready.then(autoOpen);
+        else
+          addEventListener("load", autoOpen);
+      }
     </script>
   </body>
 </html>

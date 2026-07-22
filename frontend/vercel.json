@@ -3,11 +3,11 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "redirects": [
-    { "source": "/login", "destination": "/" },
-    { "source": "/register", "destination": "/" },
     { "source": "/landing.html", "destination": "/" }
   ],
   "rewrites": [
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/register", "destination": "/index.html" },
     { "source": "/dashboard(.*)", "destination": "/app.html" },
     { "source": "/stocks(.*)", "destination": "/app.html" },
     { "source": "/predictions(.*)", "destination": "/app.html" },
