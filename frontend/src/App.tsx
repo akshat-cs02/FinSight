@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PageTransition, spring } from '@/components/ui/motion'
 import { Toaster } from 'react-hot-toast'
@@ -33,7 +33,6 @@ const CTASection = lazy(() => import('@/components/CTASection'))
 const Footer = lazy(() => import('@/components/Footer'))
 const LoginPage = lazy(() => import('@/pages/auth/Login'))
 const RegisterPage = lazy(() => import('@/pages/auth/Register'))
-const LandingPage = lazy(() => import('@/pages/Landing'))
 
 /* ─── Mouse glow effect ─── */
 function MouseGlow() {
@@ -320,6 +319,16 @@ const toastStyle = {
   },
 }
 
+/* ─── Landing Redirect (full page reload to static landing.html) ─── */
+function LandingRedirect() {
+  useEffect(() => { window.location.href = '/' }, [])
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+    </div>
+  )
+}
+
 /* ─── App ─── */
 export default function App() {
   const [splashDone, setSplashDone] = useState(false)
@@ -348,10 +357,9 @@ export default function App() {
           <Route path="/news"        element={<ProtectedRoute><ErrorBoundary><NewsPage /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/admin"       element={<ProtectedRoute adminOnly><ErrorBoundary><AdminPage /></ErrorBoundary></ProtectedRoute>} />
         </Route>
-        <Route path="/" element={<Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" /></div>}><LandingPage /></Suspense>} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<LandingRedirect />} />
       </Routes>
 
       {/* PWA Install Prompt */}

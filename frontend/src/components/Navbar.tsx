@@ -133,7 +133,7 @@ export default function Navbar() {
     }
   }, [showUserMenu])
 
-  const handleLogout = () => { logout(); navigate('/'); }
+  const handleLogout = () => { logout(); window.location.href = '/'; }
 
   // GSAP hover animations for logout button
   const logoutBtnRef = useRef<HTMLButtonElement>(null)
