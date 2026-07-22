@@ -26,9 +26,9 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
           await bootstrap()
         }
         if (!cancelled) {
-          // After bootstrap, check if we got a real user
+          // After bootstrap, check if we have any user (including guest)
           const currentUser = useAuthStore.getState().user
-          setAuthenticated(!!currentUser && currentUser.id !== 0)
+          setAuthenticated(!!currentUser)
           setChecking(false)
         }
       } catch {
