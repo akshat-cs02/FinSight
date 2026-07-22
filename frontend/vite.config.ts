@@ -22,7 +22,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        globPatterns: ['**/*.{js,css,ico,png,svg,woff,woff2}'],
+        navigateFallback: false,
         runtimeCaching: [
           {
             urlPattern: /\/api\/stocks\/quote\/.*/i,
