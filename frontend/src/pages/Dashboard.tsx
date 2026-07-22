@@ -126,33 +126,54 @@ export default function DashboardPage() {
     if (cachedStatus) setStatus(cachedStatus)
     const cachedIndices = getStaleCache<MarketIndex[]>('dashboard.indices')
     if (cachedIndices) setIndices(cachedIndices)
+    const cachedPortfolio = getStaleCache<PortfolioSummary>('dashboard.portfolio')
+    if (cachedPortfolio) setPortfolio(cachedPortfolio)
+    const cachedNews = getStaleCache<NewsArticle[]>('dashboard.news')
+    if (cachedNews) setNews(cachedNews)
 
-    requestCache('dashboard.status', () => dashboardService.getMarketStatus(), 60_000).then((s) => {
-      setStatus(s)
-      if (!autoPicked) {
-        const o = s.markets?.find((m) => m.is_open && (m.key === 'INDIA' || m.key === 'US'))
-        if (o?.key) setMarket(o.key)
-        setAutoPicked(true)
+    // Fire ALL initial requests in parallel with Promise.allSettled
+    // Each result is processed independently — partial data shows as it arrives
+    Promise.allSettled([
+      requestCache('dashboard.status', () => dashboardService.getMarketStatus(), 60_000),
+      requestCache('dashboard.indices', () => dashboardService.getMarketSummary().then((d) => d.indices), 60_000),
+      requestCache('dashboard.portfolio', () => portfolioService.getSummary(), 60_000),
+      requestCache('dashboard.news', () => newsService.getNews(6), 60_000),
+    ]).then(([statusRes, indicesRes, portfolioRes, newsRes]) => {
+      // Process each result independently — data appears as soon as it arrives
+      if (statusRes.status === 'fulfilled') {
+        setStatus(statusRes.value)
+        if (!autoPicked) {
+          const o = statusRes.value.markets?.find((m) => m.is_open && (m.key === 'INDIA' || m.key === 'US'))
+          if (o?.key) setMarket(o.key)
+          setAutoPicked(true)
+        }
+      } else {
+        setErrors((p) => ({ ...p, status: statusRes.reason?.message || 'Failed to load' }))
       }
-    }).catch((e) => setErrors((p) => ({ ...p, status: e.message })))
-    requestCache('dashboard.indices', () => dashboardService.getMarketSummary().then((d) => d.indices), 60_000).then(setIndices).catch((e) => setErrors((p) => ({ ...p, indices: e.message })))
-    portfolioService.getSummary().then(setPortfolio).catch((e) => setErrors((p) => ({ ...p, portfolio: e.message })))
-    newsService.getNews(6).then(setNews).catch((e) => setErrors((p) => ({ ...p, news: e.message })))
+      if (indicesRes.status === 'fulfilled') setIndices(indicesRes.value)
+      else setErrors((p) => ({ ...p, indices: indicesRes.reason?.message || 'Failed to load' }))
+      if (portfolioRes.status === 'fulfilled') setPortfolio(portfolioRes.value)
+      else setErrors((p) => ({ ...p, portfolio: portfolioRes.reason?.message || 'Failed to load' }))
+      if (newsRes.status === 'fulfilled') setNews(newsRes.value)
+      else setErrors((p) => ({ ...p, news: newsRes.reason?.message || 'Failed to load' }))
+    })
+
     const id = setInterval(() => {
-      requestCache('dashboard.status', () => dashboardService.getMarketStatus(), 60_000).then(setStatus).catch(() => {})
-      requestCache('dashboard.indices', () => dashboardService.getMarketSummary().then((d) => d.indices), 60_000).then(setIndices).catch(() => {})
-      portfolioService.getSummary().then(setPortfolio).catch(() => {})
+      Promise.allSettled([
+        requestCache('dashboard.status', () => dashboardService.getMarketStatus(), 60_000),
+        requestCache('dashboard.indices', () => dashboardService.getMarketSummary().then((d) => d.indices), 60_000),
+        requestCache('dashboard.portfolio', () => portfolioService.getSummary(), 60_000),
+      ]).then(([s, i, p]) => {
+        if (s.status === 'fulfilled') setStatus(s.value)
+        if (i.status === 'fulfilled') setIndices(i.value)
+        if (p.status === 'fulfilled') setPortfolio(p.value)
+      }).catch(() => {})
     }, 60_000)
     return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
     setTrending(null); setGainers(null); setLosers(null)
-    const load = () => {
-      requestCache(`dashboard.trending.${market}`, () => dashboardService.getTrending(market), 60_000).then(setTrending).catch((e) => setErrors((p) => ({ ...p, trending: e.message })))
-      requestCache(`dashboard.gainers.${market}`, () => dashboardService.getGainers(5, market), 60_000).then(setGainers).catch((e) => setErrors((p) => ({ ...p, gainers: e.message })))
-      requestCache(`dashboard.losers.${market}`, () => dashboardService.getLosers(5, market), 60_000).then(setLosers).catch((e) => setErrors((p) => ({ ...p, losers: e.message })))
-    }
     // Show cached data instantly for this market
     const cachedTrending = getStaleCache<StockQuote[]>(`dashboard.trending.${market}`)
     if (cachedTrending) setTrending(cachedTrending)
@@ -160,6 +181,22 @@ export default function DashboardPage() {
     if (cachedGainers) setGainers(cachedGainers)
     const cachedLosers = getStaleCache<StockQuote[]>(`dashboard.losers.${market}`)
     if (cachedLosers) setLosers(cachedLosers)
+
+    // Fire all market data requests in parallel
+    const load = () => {
+      Promise.allSettled([
+        requestCache(`dashboard.trending.${market}`, () => dashboardService.getTrending(market), 60_000),
+        requestCache(`dashboard.gainers.${market}`, () => dashboardService.getGainers(5, market), 60_000),
+        requestCache(`dashboard.losers.${market}`, () => dashboardService.getLosers(5, market), 60_000),
+      ]).then(([t, g, l]) => {
+        if (t.status === 'fulfilled') setTrending(t.value)
+        else setErrors((p) => ({ ...p, trending: t.reason?.message || 'Failed to load' }))
+        if (g.status === 'fulfilled') setGainers(g.value)
+        else setErrors((p) => ({ ...p, gainers: g.reason?.message || 'Failed to load' }))
+        if (l.status === 'fulfilled') setLosers(l.value)
+        else setErrors((p) => ({ ...p, losers: l.reason?.message || 'Failed to load' }))
+      })
+    }
     load()
     const id = setInterval(load, 60_000)
     return () => clearInterval(id)
