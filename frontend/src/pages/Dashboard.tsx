@@ -19,7 +19,7 @@ import IntradaySignals from '@/components/IntradaySignals'
 import WatchlistPanel from '@/components/WatchlistPanel'
 import PriceDisplay from '@/components/PriceDisplay'
 import { formatPrice, guessCurrency } from '@/utils/currency'
-import { requestCache } from '@/utils/requestCache'
+import { requestCache, getStaleCache } from '@/utils/requestCache'
 import { MARKET_ORDER, MARKET_LABELS, tickerSymbolsForMarket } from '@/utils/markets'
 import { Lift } from '@/components/ui/motion'
 
@@ -121,6 +121,12 @@ export default function DashboardPage() {
   const losersCardsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Show cached data instantly (survives page refresh)
+    const cachedStatus = getStaleCache<MarketStatus>('dashboard.status')
+    if (cachedStatus) setStatus(cachedStatus)
+    const cachedIndices = getStaleCache<MarketIndex[]>('dashboard.indices')
+    if (cachedIndices) setIndices(cachedIndices)
+
     requestCache('dashboard.status', () => dashboardService.getMarketStatus(), 60_000).then((s) => {
       setStatus(s)
       if (!autoPicked) {
@@ -147,6 +153,13 @@ export default function DashboardPage() {
       requestCache(`dashboard.gainers.${market}`, () => dashboardService.getGainers(5, market), 60_000).then(setGainers).catch((e) => setErrors((p) => ({ ...p, gainers: e.message })))
       requestCache(`dashboard.losers.${market}`, () => dashboardService.getLosers(5, market), 60_000).then(setLosers).catch((e) => setErrors((p) => ({ ...p, losers: e.message })))
     }
+    // Show cached data instantly for this market
+    const cachedTrending = getStaleCache<StockQuote[]>(`dashboard.trending.${market}`)
+    if (cachedTrending) setTrending(cachedTrending)
+    const cachedGainers = getStaleCache<StockQuote[]>(`dashboard.gainers.${market}`)
+    if (cachedGainers) setGainers(cachedGainers)
+    const cachedLosers = getStaleCache<StockQuote[]>(`dashboard.losers.${market}`)
+    if (cachedLosers) setLosers(cachedLosers)
     load()
     const id = setInterval(load, 60_000)
     return () => clearInterval(id)
