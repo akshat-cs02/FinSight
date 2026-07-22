@@ -273,6 +273,14 @@ export default function Navbar() {
             </button>
           )}
 
+          {/* Guest Mode Badge */}
+          {isGuest && (
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/10 border border-gold/20">
+              <Eye size={12} className="text-gold" />
+              <span className="text-[10px] font-semibold text-gold uppercase tracking-wider">Guest</span>
+            </div>
+          )}
+
           {/* User avatar */}
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
