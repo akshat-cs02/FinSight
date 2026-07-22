@@ -2,8 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
-import { resolve } from 'path'
-
 export default defineConfig({
   plugins: [
     react(),
@@ -80,10 +78,5 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'app.html'),
-      },
-    },
   },
 })
