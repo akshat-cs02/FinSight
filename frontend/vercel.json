@@ -3,11 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "redirects": [
-    { "source": "/landing.html", "destination": "/", "permanent": true }
-  ],
-  "rewrites": [
-    { "source": "/", "destination": "/landing.html" },
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/landing.html", "headers": { "Location": "/" }, "status": 301 },
+    { "src": "/", "dest": "/landing.html" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
