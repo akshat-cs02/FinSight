@@ -4,9 +4,9 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "redirects": [
-    { "source": "/", "destination": "/landing.html", "permanent": false }
+    { "source": "/landing.html", "destination": "/", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/((?!landing\\.html$).*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/app.html" }
   ]
 }

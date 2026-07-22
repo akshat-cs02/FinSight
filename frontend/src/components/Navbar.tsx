@@ -135,6 +135,44 @@ export default function Navbar() {
 
   const handleLogout = () => { logout(); navigate('/'); }
 
+  // GSAP hover animations for logout button
+  const logoutBtnRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const btn = logoutBtnRef.current
+    if (!btn) return
+    const icon = btn.querySelector('svg')
+    const onEnter = () => {
+      gsap.to(btn, { scale: 1.08, duration: 0.25, ease: 'power2.out' })
+      if (icon) gsap.to(icon, { rotation: -15, duration: 0.25, ease: 'power2.out' })
+    }
+    const onLeave = () => {
+      gsap.to(btn, { scale: 1, duration: 0.2, ease: 'power2.inOut' })
+      if (icon) gsap.to(icon, { rotation: 0, duration: 0.2, ease: 'power2.inOut' })
+    }
+    btn.addEventListener('mouseenter', onEnter)
+    btn.addEventListener('mouseleave', onLeave)
+    return () => { btn.removeEventListener('mouseenter', onEnter); btn.removeEventListener('mouseleave', onLeave) }
+  }, [isRealUser])
+
+  // GSAP hover animation for Sign In button
+  const signInBtnRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const btn = signInBtnRef.current
+    if (!btn) return
+    const icon = btn.querySelector('svg')
+    const onEnter = () => {
+      gsap.to(btn, { scale: 1.05, boxShadow: '0 8px 24px -6px rgba(212,168,83,0.35)', duration: 0.3, ease: 'power2.out' })
+      if (icon) gsap.to(icon, { scale: 1.15, duration: 0.3, ease: 'power2.out' })
+    }
+    const onLeave = () => {
+      gsap.to(btn, { scale: 1, boxShadow: 'none', duration: 0.25, ease: 'power2.inOut' })
+      if (icon) gsap.to(icon, { scale: 1, duration: 0.25, ease: 'power2.inOut' })
+    }
+    btn.addEventListener('mouseenter', onEnter)
+    btn.addEventListener('mouseleave', onLeave)
+    return () => { btn.removeEventListener('mouseenter', onEnter); btn.removeEventListener('mouseleave', onLeave) }
+  }, [])
+
   const closeDrawer = () => setDrawerOpen(false)
 
   const handleNavClick = () => {
@@ -217,16 +255,18 @@ export default function Navbar() {
           {/* Logout / Sign In button */}
           {isRealUser ? (
             <button
+              ref={logoutBtnRef}
               onClick={handleLogout}
-              className="hidden lg:flex w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-rose-500/10 items-center justify-center text-white/40 hover:text-rose-400 transition-all duration-300"
+              className="hidden lg:flex w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-rose-500/10 items-center justify-center text-white/40 hover:text-rose-400 transition-colors duration-300"
               title="Logout"
             >
               <LogOut size={16} />
             </button>
           ) : (
             <button
+              ref={signInBtnRef}
               onClick={() => navigate('/login')}
-              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-gold/10 hover:bg-gold/20 text-gold text-sm font-medium transition-all duration-300 border border-gold/20"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-gold/10 text-gold text-sm font-medium transition-colors duration-300 border border-gold/20"
             >
               <Sparkles size={14} />
               Sign In
@@ -316,18 +356,18 @@ export default function Navbar() {
                 {isGuest && (
                   <button
                     onClick={() => navigate('/login')}
-                    className="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-gold/10 transition-all duration-300 flex items-center gap-2.5 text-gold font-medium"
+                    className="group/signin w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-gold/10 transition-all duration-300 flex items-center gap-2.5 text-gold font-medium"
                   >
-                    <Sparkles size={14} />
+                    <Sparkles size={14} className="transition-transform duration-300 group-hover/signin:scale-110" />
                     Sign In / Register
-                    <ChevronRight size={14} className="ml-auto" />
+                    <ChevronRight size={14} className="ml-auto transition-transform duration-300 group-hover/signin:translate-x-1" />
                   </button>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-rose-500/10 transition-all duration-300 flex items-center gap-2.5 text-rose-400 font-medium"
+                  className="group/logout w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-rose-500/10 transition-all duration-300 flex items-center gap-2.5 text-rose-400 font-medium"
                 >
-                  <LogOut size={14} />
+                  <LogOut size={14} className="transition-transform duration-300 group-hover/logout:-translate-x-0.5 group-hover/logout:rotate-[-12deg]" />
                   {isGuest ? 'Reset Session' : 'Logout'}
                 </button>
               </div>
@@ -406,17 +446,17 @@ export default function Navbar() {
           {isGuest ? (
             <button
               onClick={() => { closeDrawer(); navigate('/login'); }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-gold/10 hover:bg-gold/20 text-gold text-sm font-medium transition-all duration-300 border border-gold/20"
+              className="group/msignin w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-gold/10 hover:bg-gold/20 text-gold text-sm font-medium transition-all duration-300 border border-gold/20 hover:shadow-lg hover:shadow-gold/10"
             >
-              <Sparkles size={14} />
+              <Sparkles size={14} className="transition-transform duration-300 group-hover/msignin:scale-110 group-hover/msignin:rotate-12" />
               Sign In
             </button>
           ) : (
             <button
               onClick={() => { closeDrawer(); handleLogout(); }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-medium transition-all duration-300 border border-rose-500/20"
+              className="group/mlogout w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-medium transition-all duration-300 border border-rose-500/20 hover:shadow-lg hover:shadow-rose-500/10"
             >
-              <LogOut size={14} />
+              <LogOut size={14} className="transition-transform duration-300 group-hover/mlogout:-rotate-12 group-hover/mlogout:scale-110" />
               Logout
             </button>
           )}
