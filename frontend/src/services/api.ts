@@ -1,21 +1,75 @@
 import axios from 'axios'
+import toast from 'react-hot-toast'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
-  timeout: 30000, // 30s timeout (reduced from 180s)
+  timeout: 30000, // 30s timeout
   withCredentials: true,
+})
+
+// ─── Backend warming up toast ───
+let warmingToastShown = false
+let warmingToastId: string | undefined
+let pendingSlowRequests = 0
+const toastStyle = {
+  background: 'rgba(20,20,20,0.95)',
+  backdropFilter: 'blur(20px)',
+  color: 'rgba(232,232,224,0.8)',
+  borderRadius: '0.75rem',
+  fontSize: '0.875rem',
+}
+
+api.interceptors.request.use((config) => {
+  const c = config as any
+  // Only show toast on React routes (not landing page)
+  if (!warmingToastShown && !window.location.pathname.match(/^\/$|^\/landing/)) {
+    pendingSlowRequests++
+    c._warmTimer = setTimeout(() => {
+      if (pendingSlowRequests > 0 && !warmingToastShown) {
+        warmingToastShown = true
+        warmingToastId = toast.loading('🔥 Backend is warming up… please wait', {
+          duration: 30000,
+          style: { ...toastStyle, border: '1px solid rgba(212,168,83,0.15)' },
+        })
+      }
+    }, 8000)
+  }
+  return config
 })
 
 // ─── Retry with exponential backoff ───
 const MAX_RETRIES = 2
 api.interceptors.response.use(
-  (r) => r,
+  (r) => {
+    // Request succeeded — dismiss warming toast
+    const c = r.config as any
+    if (c._warmTimer) clearTimeout(c._warmTimer)
+    pendingSlowRequests = Math.max(0, pendingSlowRequests - 1)
+    if (warmingToastId) {
+      toast.dismiss(warmingToastId)
+      toast.success('✅ Backend is ready!', {
+        duration: 2000,
+        style: { ...toastStyle, border: '1px solid rgba(34,197,94,0.2)' },
+      })
+      warmingToastId = undefined
+    }
+    return r
+  },
   async (err) => {
-    const config = err.config as any
+    const c = err.config as any
+
+    // Dismiss warming toast on failure
+    if (c._warmTimer) clearTimeout(c._warmTimer)
+    pendingSlowRequests = Math.max(0, pendingSlowRequests - 1)
+    if (warmingToastId) {
+      toast.dismiss(warmingToastId)
+      warmingToastId = undefined
+    }
+
     // Don't retry on 401 or if already retried
-    if (err.response?.status === 401 || config?._retryCount >= MAX_RETRIES) {
+    if (err.response?.status === 401 || c?._retryCount >= MAX_RETRIES) {
       // Auto-redirect on 401
       if (err.response?.status === 401) {
         const path = window.location.pathname
@@ -36,11 +90,12 @@ api.interceptors.response.use(
       }
       return Promise.reject(err)
     }
+
     // Retry with exponential backoff: 1s, 2s
-    config._retryCount = (config._retryCount || 0) + 1
-    const delay = 1000 * Math.pow(2, config._retryCount - 1)
+    c._retryCount = (c._retryCount || 0) + 1
+    const delay = 1000 * Math.pow(2, c._retryCount - 1)
     await new Promise((r) => setTimeout(r, delay))
-    return api(config)
+    return api(c)
   }
 )
 
@@ -51,7 +106,7 @@ export { API_URL }
 export function warmUpBackend() {
   if (typeof window !== 'undefined' && sessionStorage.getItem('finsight_warmed')) return
   if (typeof window !== 'undefined') sessionStorage.setItem('finsight_warmed', '1')
-  api.get('/market/status').catch(() => {}) // silent ping
+  api.get('/market/status').catch(() => {})
 }
 
 const WS_BASE = API_URL.replace(/^http/, 'ws')
