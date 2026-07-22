@@ -4828,6 +4828,7 @@
         path.style.strokeDashoffset = len;
         wrap.addEventListener("click", (e) => {
           if (e.target === inp) return;
+          e.preventDefault();
           inp.checked = !inp.checked;
           bx.classList.toggle("on", inp.checked);
           if (HAS_GSAP)
