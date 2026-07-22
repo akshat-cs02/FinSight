@@ -4,38 +4,55 @@ const API_URL = import.meta.env.VITE_API_URL || ''
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
-  timeout: 180000,
-  withCredentials: true, // send httpOnly cookies cross-origin
+  timeout: 30000, // 30s timeout (reduced from 180s)
+  withCredentials: true,
 })
 
-// Auto-redirect on 401 (token expired/missing)
+// ─── Retry with exponential backoff ───
+const MAX_RETRIES = 2
 api.interceptors.response.use(
   (r) => r,
-  (err) => {
-    if (err.response?.status === 401) {
-      const path = window.location.pathname
-      if (!['/login', '/register'].includes(path)) {
-        if (['/portfolio', '/predictions', '/admin'].some((p) => path.startsWith(p))) {
-          // Prefer React Router SPA navigation; fallback to full reload if listener not mounted
-          let handled = false
-          const onHandled = () => { handled = true }
-          window.addEventListener('finsight:navigate', onHandled, { once: true })
-          window.dispatchEvent(new CustomEvent('finsight:navigate', { detail: '/login' }))
-          setTimeout(() => {
-            window.removeEventListener('finsight:navigate', onHandled)
-            if (!handled && window.location.pathname !== '/login') {
-              window.location.href = '/login'
-            }
-          }, 100)
+  async (err) => {
+    const config = err.config as any
+    // Don't retry on 401 or if already retried
+    if (err.response?.status === 401 || config?._retryCount >= MAX_RETRIES) {
+      // Auto-redirect on 401
+      if (err.response?.status === 401) {
+        const path = window.location.pathname
+        if (!['/login', '/register'].includes(path)) {
+          if (['/portfolio', '/predictions', '/admin'].some((p) => path.startsWith(p))) {
+            let handled = false
+            const onHandled = () => { handled = true }
+            window.addEventListener('finsight:navigate', onHandled, { once: true })
+            window.dispatchEvent(new CustomEvent('finsight:navigate', { detail: '/login' }))
+            setTimeout(() => {
+              window.removeEventListener('finsight:navigate', onHandled)
+              if (!handled && window.location.pathname !== '/login') {
+                window.location.href = '/login'
+              }
+            }, 100)
+          }
         }
       }
+      return Promise.reject(err)
     }
-    return Promise.reject(err)
+    // Retry with exponential backoff: 1s, 2s
+    config._retryCount = (config._retryCount || 0) + 1
+    const delay = 1000 * Math.pow(2, config._retryCount - 1)
+    await new Promise((r) => setTimeout(r, delay))
+    return api(config)
   }
 )
 
 export default api
 export { API_URL }
+
+// ─── Backend warm-up ping (fire-and-forget, once per session) ───
+export function warmUpBackend() {
+  if (typeof window !== 'undefined' && sessionStorage.getItem('finsight_warmed')) return
+  if (typeof window !== 'undefined') sessionStorage.setItem('finsight_warmed', '1')
+  api.get('/market/status').catch(() => {}) // silent ping
+}
 
 const WS_BASE = API_URL.replace(/^http/, 'ws')
 export { WS_BASE }

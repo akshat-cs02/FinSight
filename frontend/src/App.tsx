@@ -18,6 +18,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import { pageEnter } from '@/utils/animations'
 import { useAuthStore } from '@/store/authStore'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import { warmUpBackend } from '@/services/api'
 
 // ─── Lazy-loaded pages (code-split) ───
 const DashboardPage = lazy(() => import('@/pages/Dashboard'))
@@ -328,6 +329,9 @@ export default function App() {
     sessionStorage.setItem('finsight_splash', 'true')
     setSplashDone(true)
   }
+
+  // Warm up backend on app mount (fire-and-forget)
+  useEffect(() => { warmUpBackend() }, [])
 
   return (
     <Router>

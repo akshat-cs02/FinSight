@@ -28,7 +28,7 @@ export default function LandingPage() {
 
   return (
     <div ref={heroRef} className="min-h-screen bg-[#0a0a0a] relative overflow-hidden">
-      <CanvasParticles count={30} speed={0.15} connectDistance={120} />
+      <CanvasParticles count={12} speed={0.15} connectDistance={120} />
       <FloatingOrbs />
 
       {/* Nav */}
