@@ -2,9 +2,18 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "routes": [
-    { "src": "/landing\\.html", "headers": { "Location": "/" }, "status": 301 },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/app.html" }
+  "rewrites": [
+    { "source": "/dashboard(.*)", "destination": "/app.html" },
+    { "source": "/stocks(.*)", "destination": "/app.html" },
+    { "source": "/predictions(.*)", "destination": "/app.html" },
+    { "source": "/portfolio(.*)", "destination": "/app.html" },
+    { "source": "/news(.*)", "destination": "/app.html" },
+    { "source": "/admin(.*)", "destination": "/app.html" },
+    { "source": "/backtesting(.*)", "destination": "/app.html" },
+    { "source": "/login", "destination": "/app.html" },
+    { "source": "/register", "destination": "/app.html" }
+  ],
+  "redirects": [
+    { "source": "/landing.html", "destination": "/" }
   ]
 }
