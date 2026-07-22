@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, TrendingUp, Brain, BarChart2, Briefcase, Newspaper,
-  Shield, Search, Bell, User, LogOut, Menu, X, Sparkles, Globe, Mail, Eye, Clock, ChevronRight,
+  Shield, Search, Bell, User, LogOut, Menu, X, Sparkles, Globe, Mail, Eye, Clock, ChevronRight, Sun, Moon,
 } from 'lucide-react'
 import gsap from 'gsap'
 import { useAuthStore } from '@/store/authStore'
+import { useThemeStore } from '@/store/themeStore'
 import SearchBar from '@/components/SearchBar'
 import { slideDown } from '@/utils/animations'
 import watchlistService from '@/services/watchlistService'
@@ -40,6 +41,8 @@ export default function Navbar() {
   const logout = useAuthStore((s) => s.logout)
   const user = useAuthStore((s) => s.user)
   const visitor = useAuthStore((s) => s.visitor)
+  const theme = useThemeStore((s) => s.theme)
+  const toggleTheme = useThemeStore((s) => s.toggle)
   const [alertCount, setAlertCount] = useState(0)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -191,7 +194,7 @@ export default function Navbar() {
       {/* ─── DESKTOP NAVBAR (lg+) ─── */}
       <header
         ref={navRef}
-        className="fixed top-0 inset-x-0 z-50 bg-[#141414]/80 backdrop-blur-xl border-b border-white/5"
+        className="fixed top-0 inset-x-0 z-50 bg-[var(--panel)]/80 backdrop-blur-xl border-b border-[var(--border)]"
       >
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6 h-16 flex items-center gap-4">
           {/* Logo */}
@@ -200,8 +203,8 @@ export default function Navbar() {
               FS
             </div>
             <div className="hidden sm:block leading-tight">
-              <div className="font-bold text-sm text-white font-display tracking-tight">FinSight</div>
-              <div className="text-[9px] uppercase tracking-widest text-white/40 font-medium">Market Intelligence</div>
+              <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
+              <div className="text-[9px] uppercase tracking-widest text-[var(--dim)] font-medium">Market Intelligence</div>
             </div>
           </Link>
 
@@ -234,18 +237,27 @@ export default function Navbar() {
           <SearchBar />
 
           {/* Right section — pushed to far right edge */}
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="theme-tg w-9 h-9 rounded-lg border flex items-center justify-center text-[var(--dim)] hover:text-[var(--accent)] transition-all duration-300"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
             {/* Mobile hamburger */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="lg:hidden w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/70 transition-all duration-300"
+            className="lg:hidden w-9 h-9 rounded-lg border flex items-center justify-center text-[var(--dim)] hover:text-[var(--text)] transition-all duration-300"
           >
             <Menu size={18} />
           </button>
 
           {/* Bell */}
           <button
-            className="relative w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/70 transition-all duration-300 p-2.5"
+            className="relative w-9 h-9 rounded-lg border flex items-center justify-center transition-all duration-300 p-2.5"
             title="Notifications"
           >
             <Bell size={16} />
@@ -257,7 +269,7 @@ export default function Navbar() {
             <button
               ref={logoutBtnRef}
               onClick={handleLogout}
-              className="hidden lg:flex w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-rose-500/10 items-center justify-center text-white/40 hover:text-rose-400 transition-colors duration-300"
+              className="hidden lg:flex w-9 h-9 rounded-lg border flex items-center justify-center text-[var(--dim)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors duration-300"
               title="Logout"
             >
               <LogOut size={16} />
@@ -284,7 +296,7 @@ export default function Navbar() {
           {/* User avatar */}
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-white/[0.04] transition-all duration-300 border border-transparent hover:border-white/5"
+            className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-[var(--raised)] transition-all duration-300 border border-transparent hover:border-[var(--border)]"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center flex-shrink-0">
               <span className="text-xs font-bold text-black">{displayName.charAt(0).toUpperCase()}</span>
@@ -297,18 +309,18 @@ export default function Navbar() {
         <div className="relative">
           <div
             ref={userMenuRef}
-            className="absolute right-4 top-1 mt-1 w-72 bg-[#141414]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/5 z-50 overflow-hidden"
+            className="absolute right-4 top-1 mt-1 w-72 bg-[var(--panel)]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-[var(--border)] z-50 overflow-hidden"
             style={{ display: 'none' }}
           >
               {/* Profile header */}
-              <div className="px-5 pt-5 pb-4 bg-gradient-to-b from-gold/5 to-transparent border-b border-white/5">
+              <div className="px-5 pt-5 pb-4 bg-gradient-to-b from-gold/5 to-transparent border-b border-[var(--border)]">
                 <div className="flex items-center gap-3.5">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center flex-shrink-0 shadow-lg shadow-gold/20">
                     <span className="text-base font-bold text-black">{displayName.charAt(0).toUpperCase()}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-white font-display truncate">{displayName}</div>
-                    <div className="text-[11px] text-white/40 truncate mt-0.5">
+                    <div className="text-sm font-semibold text-[var(--text)] font-display truncate">{displayName}</div>
+                    <div className="text-[11px] text-[var(--dim)] truncate mt-0.5">
                       {isRealUser ? user?.email : `${visitor?.ip_address || 'Unknown IP'} · Guest`}
                     </div>
                   </div>
@@ -321,15 +333,15 @@ export default function Navbar() {
                   <>
                     <div className="flex items-center gap-3 text-[12px]">
                       <Mail size={12} className="text-gold shrink-0" />
-                      <span className="text-white/60 truncate">{user?.email}</span>
+                      <span className="text-[var(--dim)] truncate">{user?.email}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[12px]">
                       <User size={12} className="text-gold shrink-0" />
-                      <span className="text-white/60 truncate">{user?.username}</span>
+                      <span className="text-[var(--dim)] truncate">{user?.username}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[12px]">
                       <Clock size={12} className="text-gold shrink-0" />
-                      <span className="text-white/60 truncate">
+                      <span className="text-[var(--dim)] truncate">
                         Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                       </span>
                     </div>
@@ -338,20 +350,20 @@ export default function Navbar() {
                   <>
                     <div className="flex items-center gap-3 text-[12px]">
                       <Globe size={12} className="text-gold shrink-0" />
-                      <span className="text-white/60 truncate">IP: {visitor?.ip_address || 'Unknown'}</span>
+                      <span className="text-[var(--dim)] truncate">IP: {visitor?.ip_address || 'Unknown'}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[12px]">
                       <Eye size={12} className="text-gold shrink-0" />
-                      <span className="text-white/60 truncate">{visitor?.page_views || 1} page views</span>
+                      <span className="text-[var(--dim)] truncate">{visitor?.page_views || 1} page views</span>
                     </div>
                     <div className="flex items-center gap-3 text-[12px]">
                       <Clock size={12} className="text-gold shrink-0" />
-                      <span className="text-white/60 truncate">
+                      <span className="text-[var(--dim)] truncate">
                         First seen: {visitor?.first_seen ? new Date(visitor.first_seen).toLocaleDateString() : 'Today'}
                       </span>
                     </div>
                     <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-gold/5 border border-gold/10">
-                      <p className="text-[10px] text-white/40 leading-relaxed">
+                      <p className="text-[10px] text-[var(--dim)] leading-relaxed">
                         You're browsing as a <span className="text-gold font-medium">guest</span>. Sign in to save your portfolio and access all features.
                       </p>
                     </div>
@@ -360,7 +372,7 @@ export default function Navbar() {
               </div>
 
               {/* Actions */}
-              <div className="px-3 pb-3 pt-1 border-t border-white/5">
+              <div className="px-3 pb-3 pt-1 border-t border-[var(--border)]">
                 {isGuest && (
                   <button
                     onClick={() => window.location.href = '/login'}
@@ -388,32 +400,43 @@ export default function Navbar() {
       <div
         ref={overlayRef}
         onClick={closeDrawer}
-        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" /* overlay stays dark */
         style={{ display: 'none', opacity: 0 }}
       />
 
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-[#141414] border-l border-white/5 lg:hidden overflow-y-auto"
+        className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-[var(--panel)] border-l border-[var(--border)] lg:hidden overflow-y-auto"
         style={{ transform: 'translateX(100%)' }}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/5">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
           <Link to="/dashboard" onClick={closeDrawer} className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center font-bold text-xs text-black">
               FS
             </div>
             <div className="leading-tight">
-              <div className="font-bold text-sm text-white font-display tracking-tight">FinSight</div>
-              <div className="text-[8px] uppercase tracking-widest text-white/40 font-medium">Market Intelligence</div>
+              <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
+              <div className="text-[8px] uppercase tracking-widest text-[var(--dim)] font-medium">Market Intelligence</div>
             </div>
           </Link>
           <button
             onClick={closeDrawer}
-            className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/70 transition-all duration-300"
+            className="w-8 h-8 rounded-lg border flex items-center justify-center text-[var(--dim)] hover:text-[var(--text)] transition-all duration-300"
           >
             <X size={16} />
+          </button>
+        </div>
+
+        {/* Theme toggle in drawer */}
+        <div className="px-3 pb-2">
+          <button
+            onClick={toggleTheme}
+            className="theme-tg w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
         </div>
 

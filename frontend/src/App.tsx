@@ -196,7 +196,7 @@ function Layout() {
   }, [showScrollTop])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] aurora noise grid-bg">
+    <div className="min-h-screen bg-[var(--bg)] aurora noise grid-bg">
       <MouseGlow />
       {isDashboard && <CanvasParticles count={50} speed={0.2} connectDistance={100} />}
       <FloatingOrbs />
@@ -323,7 +323,7 @@ const toastStyle = {
 function LandingRedirect() {
   useEffect(() => { window.location.href = '/' }, [])
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
       <div className="w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
     </div>
   )

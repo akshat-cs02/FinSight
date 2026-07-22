@@ -5,14 +5,13 @@ const API_URL = import.meta.env.VITE_API_URL || ''
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
-  timeout: 30000, // 30s timeout
+  timeout: 60000, // 60s timeout (backends can cold-start)
   withCredentials: true,
 })
 
-// ─── Backend warming up toast ───
-let warmingToastShown = false
+// ─── Backend warming indicator ───
 let warmingToastId: string | undefined
-let pendingSlowRequests = 0
+let pendingRequests = 0
 const toastStyle = {
   background: 'rgba(20,20,20,0.95)',
   backdropFilter: 'blur(20px)',
@@ -23,18 +22,17 @@ const toastStyle = {
 
 api.interceptors.request.use((config) => {
   const c = config as any
-  // Only show toast on React routes (not landing page)
-  if (!warmingToastShown && !window.location.pathname.match(/^\/$|^\/landing/)) {
-    pendingSlowRequests++
+  // Skip on landing/auth pages — they handle their own UI
+  if (!window.location.pathname.match(/^\/$|^\/landing|^\/login|^\/register/)) {
+    pendingRequests++
     c._warmTimer = setTimeout(() => {
-      if (pendingSlowRequests > 0 && !warmingToastShown) {
-        warmingToastShown = true
-        warmingToastId = toast.loading('🔥 Backend is warming up… please wait', {
-          duration: 30000,
+      if (pendingRequests > 0 && !warmingToastId) {
+        warmingToastId = toast.loading('⚡ Backend is waking up — first request may take ~20s', {
+          duration: 60000,
           style: { ...toastStyle, border: '1px solid rgba(212,168,83,0.15)' },
         })
       }
-    }, 8000)
+    }, 5000) // show after 5s (not instantly)
   }
   return config
 })
@@ -43,16 +41,11 @@ api.interceptors.request.use((config) => {
 const MAX_RETRIES = 2
 api.interceptors.response.use(
   (r) => {
-    // Request succeeded — dismiss warming toast
     const c = r.config as any
     if (c._warmTimer) clearTimeout(c._warmTimer)
-    pendingSlowRequests = Math.max(0, pendingSlowRequests - 1)
+    pendingRequests = Math.max(0, pendingRequests - 1)
     if (warmingToastId) {
       toast.dismiss(warmingToastId)
-      toast.success('✅ Backend is ready!', {
-        duration: 2000,
-        style: { ...toastStyle, border: '1px solid rgba(34,197,94,0.2)' },
-      })
       warmingToastId = undefined
     }
     return r
@@ -62,7 +55,7 @@ api.interceptors.response.use(
 
     // Dismiss warming toast on failure
     if (c._warmTimer) clearTimeout(c._warmTimer)
-    pendingSlowRequests = Math.max(0, pendingSlowRequests - 1)
+    pendingRequests = Math.max(0, pendingRequests - 1)
     if (warmingToastId) {
       toast.dismiss(warmingToastId)
       warmingToastId = undefined

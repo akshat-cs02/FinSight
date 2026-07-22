@@ -38,7 +38,7 @@ export default function Footer() {
   }
 
   return (
-    <footer ref={ref} className="relative border-t border-gold/10 bg-[#141414]">
+    <footer ref={ref} className="relative border-t border-gold/10 bg-[var(--panel)]">
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -53,7 +53,7 @@ export default function Footer() {
                 <div className="text-[10px] text-ink-400">Market Intelligence</div>
               </div>
             </div>
-            <p className="text-xs text-ink-400 leading-relaxed max-w-xs">
+            <p className="text-xs text-[var(--dim)] leading-relaxed max-w-xs">
               Real-time market analysis with ICT/SMC signals, multi-model AI predictions,
               and institutional-grade backtesting tools.
             </p>
@@ -72,7 +72,7 @@ export default function Footer() {
 
           {footerLinks.map((group) => (
             <div key={group.label}>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-ink-400 mb-3">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--dim)] mb-3">
                 {group.label}
               </h3>
               <ul className="space-y-2">
@@ -92,7 +92,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/[0.03]">
-          <p className="text-xs text-ink-500">
+          <p className="text-xs text-[var(--faint)]">
             © {new Date().getFullYear()} FinSight. All rights reserved.
             <span className="hidden sm:inline mx-2">·</span>
             <span className="block sm:inline text-ink-500">

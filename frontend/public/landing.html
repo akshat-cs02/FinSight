@@ -19,6 +19,8 @@
         var p = location.pathname;
         if (p === "/login" || p === "/register") {
           document.documentElement.classList.add("auth-only");
+          // Fire warm-up ping immediately so backend is awake by the time user fills the form
+          fetch("/api/market/status").catch(function(){});
         }
       })();
     </script>
@@ -4960,15 +4962,19 @@
             first_name: fields[0].value,
           };
         }
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 45000);
         try {
           const r = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
+            signal: ctrl.signal,
           });
+          clearTimeout(timer);
           if (!r.ok) {
-            const d = await r.json();
-            throw new Error(d.detail || "Request failed");
+            const d = await r.json().catch(() => ({}));
+            throw new Error(d.detail || "Request failed (" + r.status + ")");
           }
           btn.classList.remove("load");
           btn.classList.add("ok");
@@ -4977,8 +4983,13 @@
             window.location.href = "/dashboard";
           }, 800);
         } catch (e) {
+          clearTimeout(timer);
           btn.classList.remove("load");
-          showErr(e.message);
+          if (e.name === "AbortError") {
+            showErr("Server is warming up — please try again in a moment.");
+          } else {
+            showErr(e.message || "Connection failed. Please try again.");
+          }
         }
       }
       $("#btnSignin").addEventListener("click", () =>
