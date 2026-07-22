@@ -17,6 +17,7 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import { pageEnter } from '@/utils/animations'
 import { useAuthStore } from '@/store/authStore'
+import ProtectedRoute from '@/components/ProtectedRoute'
 
 // ─── Lazy-loaded pages (code-split) ───
 const DashboardPage = lazy(() => import('@/pages/Dashboard'))
@@ -333,19 +334,19 @@ export default function App() {
       <Toaster position="top-right" toastOptions={toastStyle} />
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/dashboard"   element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
-          <Route path="/stocks"      element={<ErrorBoundary><StockDetailsPage /></ErrorBoundary>} />
-          <Route path="/stocks/:symbol" element={<ErrorBoundary><StockDetailsPage /></ErrorBoundary>} />
-          <Route path="/predictions" element={<ErrorBoundary><PredictionsPage /></ErrorBoundary>} />
-          <Route path="/backtesting" element={<ErrorBoundary><BacktestingPage /></ErrorBoundary>} />
-          <Route path="/portfolio"   element={<ErrorBoundary><PortfolioPage /></ErrorBoundary>} />
-          <Route path="/news"        element={<ErrorBoundary><NewsPage /></ErrorBoundary>} />
-          <Route path="/admin"       element={<ErrorBoundary><AdminPage /></ErrorBoundary>} />
+          <Route path="/dashboard"   element={<ProtectedRoute><ErrorBoundary><DashboardPage /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/stocks"      element={<ProtectedRoute><ErrorBoundary><StockDetailsPage /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/stocks/:symbol" element={<ProtectedRoute><ErrorBoundary><StockDetailsPage /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/predictions" element={<ProtectedRoute><ErrorBoundary><PredictionsPage /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/backtesting" element={<ProtectedRoute><ErrorBoundary><BacktestingPage /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/portfolio"   element={<ProtectedRoute><ErrorBoundary><PortfolioPage /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/news"        element={<ProtectedRoute><ErrorBoundary><NewsPage /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/admin"       element={<ProtectedRoute adminOnly><ErrorBoundary><AdminPage /></ErrorBoundary></ProtectedRoute>} />
         </Route>
         <Route path="/" element={<Navigate to="/landing.html" replace />} />
-        <Route path="/login" element={<Navigate to="/landing.html" replace />} />
-        <Route path="/register" element={<Navigate to="/landing.html" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
       {/* PWA Install Prompt */}

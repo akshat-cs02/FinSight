@@ -133,7 +133,7 @@ export default function Navbar() {
     }
   }, [showUserMenu])
 
-  const handleLogout = () => { logout(); navigate('/login') }
+  const handleLogout = () => { logout(); navigate('/'); }
 
   const closeDrawer = () => setDrawerOpen(false)
 
@@ -196,7 +196,7 @@ export default function Navbar() {
           <SearchBar />
 
           {/* Right section — pushed to far right edge */}
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-3 ml-auto">
             {/* Mobile hamburger */}
           <button
             onClick={() => setDrawerOpen(true)}
@@ -214,13 +214,32 @@ export default function Navbar() {
             <span ref={bellDotRef} className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-gold" />
           </button>
 
+          {/* Logout / Sign In button */}
+          {isRealUser ? (
+            <button
+              onClick={handleLogout}
+              className="hidden lg:flex w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-rose-500/10 items-center justify-center text-white/40 hover:text-rose-400 transition-all duration-300"
+              title="Logout"
+            >
+              <LogOut size={16} />
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate('/login')}
+              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-gold/10 hover:bg-gold/20 text-gold text-sm font-medium transition-all duration-300 border border-gold/20"
+            >
+              <Sparkles size={14} />
+              Sign In
+            </button>
+          )}
+
           {/* User avatar */}
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/[0.04] transition-all duration-300 border border-transparent hover:border-white/5"
+            className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-white/[0.04] transition-all duration-300 border border-transparent hover:border-white/5"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center flex-shrink-0">
-              <User size={16} className="text-black" />
+              <span className="text-xs font-bold text-black">{displayName.charAt(0).toUpperCase()}</span>
             </div>
           </button>
           </div>
@@ -283,9 +302,9 @@ export default function Navbar() {
                         First seen: {visitor?.first_seen ? new Date(visitor.first_seen).toLocaleDateString() : 'Today'}
                       </span>
                     </div>
-                    <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/5">
-                      <p className="text-[10px] text-white/30 leading-relaxed">
-                        You're browsing as a guest. Sign in to save your portfolio and access all features.
+                    <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-gold/5 border border-gold/10">
+                      <p className="text-[10px] text-white/40 leading-relaxed">
+                        You're browsing as a <span className="text-gold font-medium">guest</span>. Sign in to save your portfolio and access all features.
                       </p>
                     </div>
                   </>
@@ -297,16 +316,16 @@ export default function Navbar() {
                 {isGuest && (
                   <button
                     onClick={() => navigate('/login')}
-                    className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gold/10 transition-all duration-300 flex items-center gap-2 text-gold"
+                    className="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-gold/10 transition-all duration-300 flex items-center gap-2.5 text-gold font-medium"
                   >
-                    <LogOut size={14} />
+                    <Sparkles size={14} />
                     Sign In / Register
                     <ChevronRight size={14} className="ml-auto" />
                   </button>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-white/[0.04] transition-all duration-300 flex items-center gap-2 text-rose-400"
+                  className="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-rose-500/10 transition-all duration-300 flex items-center gap-2.5 text-rose-400 font-medium"
                 >
                   <LogOut size={14} />
                   {isGuest ? 'Reset Session' : 'Logout'}
@@ -374,7 +393,7 @@ export default function Navbar() {
         </nav>
 
         {/* Drawer footer */}
-        <div className="absolute bottom-0 inset-x-0 p-4 border-t border-white/5">
+        <div className="absolute bottom-0 inset-x-0 p-4 border-t border-white/5 space-y-2">
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.02] cursor-pointer transition-all duration-300">
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center text-[9px] font-bold text-black flex-shrink-0">
               {displayName.charAt(0).toUpperCase()}
@@ -384,6 +403,23 @@ export default function Navbar() {
               <div className="text-[10px] text-white/30">{isGuest ? 'Guest' : (user?.subscription_tier || 'Free')}</div>
             </div>
           </div>
+          {isGuest ? (
+            <button
+              onClick={() => { closeDrawer(); navigate('/login'); }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-gold/10 hover:bg-gold/20 text-gold text-sm font-medium transition-all duration-300 border border-gold/20"
+            >
+              <Sparkles size={14} />
+              Sign In
+            </button>
+          ) : (
+            <button
+              onClick={() => { closeDrawer(); handleLogout(); }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-medium transition-all duration-300 border border-rose-500/20"
+            >
+              <LogOut size={14} />
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </>

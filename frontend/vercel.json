@@ -7,8 +7,6 @@
     { "source": "/", "destination": "/landing.html", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/login", "destination": "/landing.html" },
-    { "source": "/register", "destination": "/landing.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!landing\\.html$).*)", "destination": "/index.html" }
   ]
 }
