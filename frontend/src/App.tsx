@@ -342,9 +342,9 @@ export default function App() {
           <Route path="/news"        element={<ErrorBoundary><NewsPage /></ErrorBoundary>} />
           <Route path="/admin"       element={<ErrorBoundary><AdminPage /></ErrorBoundary>} />
         </Route>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/login" element={<ErrorBoundary><LoginPage /></ErrorBoundary>} />
-        <Route path="/register" element={<ErrorBoundary><RegisterPage /></ErrorBoundary>} />
+        <Route path="/" element={<Navigate to="/landing.html" replace />} />
+        <Route path="/login" element={<Navigate to="/landing.html" replace />} />
+        <Route path="/register" element={<Navigate to="/landing.html" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
 
