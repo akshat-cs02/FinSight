@@ -76,12 +76,12 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
       <a href={getTradingViewUrl(s.symbol)} target="_blank" rel="noopener noreferrer"
          onClick={(e) => e.stopPropagation()}
          className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 hover:bg-black/60 p-1.5 rounded-lg">
-        <ExternalLink size={12} className="text-white/40" />
+        <ExternalLink size={12} className="text-[var(--dim)]" />
       </a>
       <div className="flex items-center justify-between mb-2.5 gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-white/80 text-[15px] font-display truncate">{s.symbol}</h3>
-          <p className="text-[11px] text-white/40 truncate">{s.name}</p>
+          <h3 className="font-bold text-[var(--text)] text-[15px] font-display truncate">{s.symbol}</h3>
+          <p className="text-[11px] text-[var(--dim)] truncate">{s.name}</p>
         </div>
         <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded ${
           up ? 'badge-gains' : 'badge-losses'
@@ -303,11 +303,11 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <div className="eyebrow">OVERVIEW</div>
-        <h1 className="text-3xl font-bold text-white font-display tracking-tight leading-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-[var(--text)] font-display tracking-tight leading-tight">Dashboard</h1>
       </div>
 
       {/* Market Tabs — below heading, left-aligned */}
-      <div className="relative flex flex-wrap gap-1.5 p-1 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+      <div className="relative flex flex-wrap gap-1.5 p-1 bg-[var(--raised)] rounded-xl border border-[var(--border)]">
         {MARKET_ORDER.map((k) => {
           const om = status?.markets?.find((m) => m.key === k)
           const isOpen = k === 'ALL' ? status?.is_open : om?.is_open
@@ -315,10 +315,10 @@ export default function DashboardPage() {
             <button key={k} ref={k === market ? activeBtnRef : undefined} onClick={() => setMarket(k)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 ${
                 market === k
-                  ? 'bg-white/[0.08] text-white shadow-sm'
-                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                  ? 'bg-[var(--surface-3)] text-[var(--text)] shadow-sm'
+                  : 'text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--raised)]'
               }`}>
-              {k !== 'ALL' && <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-green-400 animate-pulse' : 'bg-white/20'}`} />}
+              {k !== 'ALL' && <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-green-400 animate-pulse' : 'bg-[var(--faint)]'}`} />}
               {MARKET_LABELS[k]}
             </button>
           )
@@ -348,7 +348,7 @@ export default function DashboardPage() {
             <div className="mt-2 space-y-2"><Skeleton className="h-8 w-36" /><Skeleton className="h-3 w-20" /></div>
           ) : (
             <>
-              <PriceDisplay price={portfolio.total_value} size="xl" className="text-white/80" animate />
+              <PriceDisplay price={portfolio.total_value} size="xl" className="text-[var(--text)]" animate />
               <p className={`text-xs mt-1.5 ${portfolio.total_gain_loss >= 0 ? 'text-green-400/60' : 'text-rose-400/60'}`}>
                 {portfolio.total_gain_loss >= 0 ? '+' : ''}{portfolio.total_gain_loss.toFixed(2)}% all-time
               </p>
@@ -387,12 +387,12 @@ export default function DashboardPage() {
             <div className="mt-2"><Skeleton className="h-8 w-24" /></div>
           ) : (() => {
             const open = (status.markets || []).filter((m) => m.is_open)
-            if (open.length === 0) return <div className="text-lg font-bold font-mono text-white/30 mt-2">CLOSED</div>
+            if (open.length === 0) return <div className="text-lg font-bold font-mono text-[var(--faint)] mt-2">CLOSED</div>
             return (
               <div className="space-y-1.5 mt-1">
                 {open.map((m) => (
                   <div key={m.name} className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-sm text-white/50">
+                    <span className="flex items-center gap-2 text-sm text-[var(--dim)]">
                       <span className="pulse-dot live" />{m.name}
                     </span>
                     <span className="text-[10px] font-semibold text-green-400">LIVE</span>
@@ -448,7 +448,7 @@ export default function DashboardPage() {
 
       {/* ── Market Indices ── */}
       <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
-        <div className="section-rule mb-5 text-white">Market Indices</div>
+        <div className="section-rule mb-5 text-[var(--text)]">Market Indices</div>
         {errors.indices && <div className="text-rose-400 text-sm">⚠ {errors.indices}</div>}
         {indices === null && !errors.indices && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -459,8 +459,8 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {indices.map((i, idx) => (
               <Lift key={i.symbol}><div className="card p-3" style={{ animationDelay: `${idx * 0.05}s` }}>
-                <div className="text-[11px] text-white/40 font-medium truncate">{i.name}</div>
-                <div className="text-lg font-bold text-white/80 font-mono tabular-nums mt-0.5">{i.price.toFixed(2)}</div>
+                <div className="text-[11px] text-[var(--dim)] font-medium truncate">{i.name}</div>
+                <div className="text-lg font-bold text-[var(--text)] font-mono tabular-nums mt-0.5">{i.price.toFixed(2)}</div>
                 <div className={`text-[11px] mt-0.5 font-medium ${i.change_percent >= 0 ? 'text-green-400' : 'text-rose-400'}`}>
                   {i.change_percent >= 0 ? '+' : ''}{i.change_percent.toFixed(2)}%
                 </div>
@@ -472,7 +472,7 @@ export default function DashboardPage() {
 
       {/* ── Trending ── */}
       <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-5">
-        <div className="section-rule mb-5 text-white">
+        <div className="section-rule mb-5 text-[var(--text)]">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
         </div>
         {errors.trending && <div className="text-rose-400 text-sm">⚠ {errors.trending}</div>}
@@ -495,12 +495,12 @@ export default function DashboardPage() {
       {/* ── Gainers & Losers ── */}
       <div ref={scrollAnimRefs.gainersLosers as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Lift className="card-accent card-surface2 p-5">
-          <div className="section-rule mb-5 text-white">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
+          <div className="section-rule mb-5 text-[var(--text)]">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
           {errors.gainers && <div className="text-rose-400 text-sm">⚠ {errors.gainers}</div>}
           {gainers === null && !errors.gainers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
           )}
-          {gainers && gainers.length === 0 && <div className="text-sm text-white/30 py-6 text-center">No active gainers</div>}
+          {gainers && gainers.length === 0 && <div className="text-sm text-[var(--faint)] py-6 text-center">No active gainers</div>}
           {gainers && gainers.length > 0 && (
             <div ref={gainersCardsRef} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {gainers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
@@ -508,12 +508,12 @@ export default function DashboardPage() {
           )}
         </Lift>
         <Lift className="card-accent card-surface2 p-5">
-          <div className="section-rule mb-5 text-white">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
+          <div className="section-rule mb-5 text-[var(--text)]">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
           {errors.losers && <div className="text-rose-400 text-sm">⚠ {errors.losers}</div>}
           {losers === null && !errors.losers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
           )}
-          {losers && losers.length === 0 && <div className="text-sm text-white/30 py-6 text-center">No active losers</div>}
+          {losers && losers.length === 0 && <div className="text-sm text-[var(--faint)] py-6 text-center">No active losers</div>}
           {losers && losers.length > 0 && (
             <div ref={losersCardsRef} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {losers.map((s) => <StockCard key={s.symbol} s={s} onClick={() => navigate(`/stocks/${s.symbol}`)} />)}
@@ -528,7 +528,7 @@ export default function DashboardPage() {
 
       {/* ── News ── */}
       <Lift><div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
-        <div className="section-rule mb-5 text-white">Latest Financial News</div>
+        <div className="section-rule mb-5 text-[var(--text)]">Latest Financial News</div>
         {errors.news && <div className="text-rose-400 text-sm">⚠ {errors.news}</div>}
         {news === null && !errors.news && (
           <div className="space-y-3">{[1,2,3].map((i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>
@@ -537,10 +537,10 @@ export default function DashboardPage() {
           <div className="space-y-1">
             {news.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                 className="flex items-start justify-between gap-3 py-3 px-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-white/[0.02]">
+                 className="flex items-start justify-between gap-3 py-3 px-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-[var(--raised)]">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-white/70 font-display leading-snug">{a.title}</h3>
-                  <p className="text-[11px] text-white/40 mt-1">{a.source}</p>
+                  <h3 className="text-sm font-medium text-[var(--text)] font-display leading-snug">{a.title}</h3>
+                  <p className="text-[11px] text-[var(--dim)] mt-1">{a.source}</p>
                 </div>
                 <span className={`flex-shrink-0 badge ${
                   a.sentiment === 'POSITIVE' ? 'badge-gains' :

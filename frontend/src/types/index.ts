@@ -1,6 +1,6 @@
 // User types
 export interface User {
-  id: number
+  id: string
   username: string
   email: string
   first_name?: string

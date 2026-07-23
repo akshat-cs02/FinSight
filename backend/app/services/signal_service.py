@@ -59,13 +59,13 @@ DEFAULT_STRATEGY = "MSS_OrderBlock"
 
 # ─── Signal universe scanned on every background refresh ─────────────────────
 SIGNAL_UNIVERSE = [
-    "EURUSD=X", "GBPUSD=X", "USDJPY=X", "USDCAD=X", "AUDUSD=X",
+    "EURUSD=X", "GBPUSD=X", "USDJPY=X", "USDCAD=X", "AUDUSD=X", "NZDUSD=X",
     "GC=F",       # Gold futures
     "CL=F",       # US Oil (WTI)
     "BZ=F",       # UK Oil (Brent)
-    "AAPL", "MSFT", "NVDA", "TSLA",
-    "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS",
-    "BTC-USD", "ETH-USD",
+    "AAPL", "MSFT", "NVDA", "TSLA", "AMZN", "META", "GOOGL",
+    "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
+    "BTC-USD", "ETH-USD", "SOL-USD",
 ]
 
 # ─── Breakout scan universe ───────────────────────────────────────────────────
@@ -246,6 +246,7 @@ def _signal_row_to_dict(row: IntradaySignal) -> dict:
         "generated_at": row.generated_at.isoformat() + "Z",
         "outcome":      row.outcome,
         "pnl_r":        row.pnl_r,
+        "is_hidden":    getattr(row, 'is_hidden', False),
     }
 
 # ─── Async refresh — asyncio.gather + run_in_executor ────────────────────────

@@ -26,8 +26,8 @@ export default function SignalActivity() {
 
   if (loading && all.length === 0) {
     return (
-      <div className="bg-[#141414] rounded-xl border border-white/5 p-5">
-        <div className="h-32 flex items-center justify-center text-white/30 text-sm">Loading activity...</div>
+      <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
+        <div className="h-32 flex items-center justify-center text-[var(--faint)] text-sm">Loading activity...</div>
       </div>
     )
   }
@@ -42,33 +42,33 @@ export default function SignalActivity() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Zap size={18} className="text-gold" />
-          <h2 className="text-lg font-semibold text-white">Signal Activity</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">Signal Activity</h2>
         </div>
-        <div className="flex items-center gap-3 text-xs text-white/40">
+        <div className="flex items-center gap-3 text-xs text-[var(--dim)]">
           <span className="flex items-center gap-1"><Clock size={11} /> Live</span>
         </div>
       </div>
 
       {/* Mini stats bar */}
       <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="bg-white/[0.03] rounded-lg px-3 py-2 text-center border border-white/5">
+        <div className="bg-[var(--raised)] rounded-lg px-3 py-2 text-center border border-[var(--border)]">
           <div className="text-lg font-bold text-gold">{activeCount}</div>
-          <div className="text-[10px] text-white/40">Active</div>
+          <div className="text-[10px] text-[var(--dim)]">Active</div>
         </div>
-        <div className="bg-white/[0.03] rounded-lg px-3 py-2 text-center border border-white/5">
+        <div className="bg-[var(--raised)] rounded-lg px-3 py-2 text-center border border-[var(--border)]">
           <div className="text-lg font-bold text-emerald-400">{tpCount}</div>
-          <div className="text-[10px] text-white/40">TP Hit</div>
+          <div className="text-[10px] text-[var(--dim)]">TP Hit</div>
         </div>
-        <div className="bg-white/[0.03] rounded-lg px-3 py-2 text-center border border-white/5">
+        <div className="bg-[var(--raised)] rounded-lg px-3 py-2 text-center border border-[var(--border)]">
           <div className="text-lg font-bold text-rose-400">{slCount}</div>
-          <div className="text-[10px] text-white/40">SL Hit</div>
+          <div className="text-[10px] text-[var(--dim)]">SL Hit</div>
         </div>
       </div>
 
       {/* Activity feed */}
       <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin">
         {all.length === 0 && (
-          <div className="text-center py-6 text-white/30 text-sm">
+          <div className="text-center py-6 text-[var(--faint)] text-sm">
             No signal activity yet — signals generate every 6s in the background.
           </div>
         )}
@@ -105,8 +105,7 @@ function SignalRow({ signal }: { signal: IntradaySignal }) {
       </span>
     )
   } else {
-    outcomeBadge = (
-      <span className="text-[10px] text-white/30">Expired</span>
+    outcomeBadge = (          <span className="text-[10px] text-[var(--faint)]">Expired</span>
     )
   }
 
@@ -117,11 +116,11 @@ function SignalRow({ signal }: { signal: IntradaySignal }) {
           ? 'bg-emerald-950/20 border border-emerald-800/15'
           : signal.outcome === 'SL_HIT'
           ? 'bg-rose-950/20 border border-rose-800/15'
-          : 'bg-white/[0.02] border border-white/5'
+          : 'bg-[var(--raised)] border border-[var(--border)]'
       }`}
     >
       <Icon size={14} className={`${iconColor} shrink-0`} />
-      <span className="font-semibold text-white/80 min-w-[60px]">{signal.symbol}</span>
+      <span className="font-semibold text-[var(--text)] min-w-[60px]">{signal.symbol}</span>
       <span className={`text-[10px] font-medium ${iconColor} min-w-[30px]`}>
         {isBuy ? 'BUY' : 'SELL'}
       </span>

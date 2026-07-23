@@ -259,10 +259,22 @@ class IntradaySignal(Base):
     outcome      = Column(String(20), default="PENDING")  # TP_HIT/SL_HIT/EXPIRED/PENDING
     outcome_at   = Column(DateTime, nullable=True)
     pnl_r        = Column(Float, nullable=True)
+    is_hidden    = Column(Boolean, default=False)  # Admin can hide signals from main site
 
     __table_args__ = (
         Index("ix_outcome_generated_at", "outcome", "generated_at"),
     )
+
+
+def _auto_migrate():
+    """Add missing columns to existing tables (safe to re-run)."""
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE intraday_signals ADD COLUMN is_hidden BOOLEAN DEFAULT 0"))
+            conn.commit()
+            logger.info("Migration: added is_hidden to intraday_signals")
+        except Exception:
+            pass  # Column already exists
 
 
 def init_db():
@@ -273,6 +285,7 @@ def init_db():
         with engine.connect() as conn:
             conn.execute(text("CREATE INDEX IF NOT EXISTS ix_outcome_generated_at ON intraday_signals(outcome, generated_at)"))
             conn.commit()
+        _auto_migrate()
         logger.info("Database tables created successfully")
         return True
     except Exception as e:

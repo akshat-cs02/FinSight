@@ -13,17 +13,17 @@ const REASON_COLORS: Record<string, string> = {
 }
 
 function ReasonChip({ reason }: { reason: string }) {
-  const cls = REASON_COLORS[reason] ?? 'bg-white/[0.05] text-white/60'
+  const cls = REASON_COLORS[reason] ?? 'bg-[var(--raised)] text-[var(--dim)]'
   return <span className={`text-xs px-2 py-0.5 rounded-full ${cls}`}>{reason}</span>
 }
 
 function ScoreBar({ value, color }: { value: number; color: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
+      <div className="flex-1 h-1 bg-[var(--border)] rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
       </div>
-      <span className="text-xs text-white/40 w-7 text-right">{value}</span>
+      <span className="text-xs text-[var(--dim)] w-7 text-right">{value}</span>
     </div>
   )
 }
@@ -43,17 +43,17 @@ export default function WatchThese() {
   if (!loading && candidates.length === 0) return null
 
   return (
-    <div className="bg-[#141414] rounded-xl border border-white/5 p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
       <div className="flex items-center gap-2 mb-4">
         <Eye size={18} className="text-gold" />
-        <h2 className="text-lg font-semibold text-white">Watch These Stocks</h2>
-        <span className="text-xs text-white/30">Near breakout</span>
+        <h2 className="text-lg font-semibold text-[var(--text)]">Watch These Stocks</h2>
+        <span className="text-xs text-[var(--faint)]">Near breakout</span>
       </div>
 
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-24 bg-white/[0.03] animate-pulse rounded-lg" />
+            <div key={i} className="h-24 bg-[var(--raised)] animate-pulse rounded-lg" />
           ))}
         </div>
       )}
@@ -63,9 +63,9 @@ export default function WatchThese() {
           {candidates.map((c) => (
             <div key={c.symbol} className="card-layer rounded-xl p-3 space-y-2">
               <div className="flex items-start justify-between">
-                <span className="font-bold text-white text-sm">{c.symbol}</span>
+                <span className="font-bold text-[var(--text)] text-sm">{c.symbol}</span>
                 <div className="text-right">
-                  <div className="text-white text-sm font-medium">{c.price}</div>
+                  <div className="text-[var(--text)] text-sm font-medium">{c.price}</div>
                   <div className={`text-xs ${c.change_percent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                     {c.change_percent >= 0 ? '+' : ''}{c.change_percent.toFixed(2)}%
                   </div>
@@ -73,7 +73,7 @@ export default function WatchThese() {
               </div>
 
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-white/30">
+                <div className="flex justify-between text-xs text-[var(--faint)]">
                   <span>Technical</span>
                 </div>
                 <ScoreBar value={c.technical_score} color="bg-gold" />

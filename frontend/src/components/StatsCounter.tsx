@@ -26,14 +26,14 @@ function StatCard({ item, loading }: { item: StatItem; loading: boolean }) {
 
   return (
     <div className="group relative">
-      <div className="relative overflow-hidden rounded-2xl border border-gold/10 bg-gradient-to-br from-[#1a1a1a]/80 to-[#222222]/80 backdrop-blur-xl p-6 transition-all duration-500 hover:border-gold/20 hover:shadow-glow-gold">
+      <div className="relative overflow-hidden rounded-2xl border border-gold/10 bg-[var(--panel)] backdrop-blur-xl p-6 transition-all duration-500 hover:border-gold/20 hover:shadow-glow-gold">
         <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} mb-4 shadow-lg`}>
           <Icon size={20} className="text-black" />
         </div>
 
-        <div className="text-3xl md:text-4xl font-bold font-display text-white tracking-tight mb-1">
+        <div className="text-3xl md:text-4xl font-bold font-display text-[var(--text)] tracking-tight mb-1">
           {loading ? (
-            <span className="inline-block w-20 h-8 rounded-md bg-white/5 animate-pulse" />
+            <span className="inline-block w-20 h-8 rounded-md bg-[var(--raised)] animate-pulse" />
           ) : (
             <span ref={countRef}>0</span>
           )}
@@ -41,7 +41,7 @@ function StatCard({ item, loading }: { item: StatItem; loading: boolean }) {
 
         <div className="text-sm text-ink-400 font-medium">{item.label}</div>
 
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-2xl bg-gradient-to-br from-[var(--raised)] to-transparent pointer-events-none" />
       </div>
     </div>
   )
@@ -103,7 +103,7 @@ export default function StatsCounter() {
             </button>
           )}
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
+        <h2 className="text-3xl md:text-4xl font-bold font-display text-[var(--text)] tracking-tight">
           Built for <span className="text-gold">Performance</span>
         </h2>
         <p className="text-ink-400 mt-3 max-w-xl mx-auto text-sm">

@@ -148,6 +148,7 @@ function Layout() {
   const isDashboard = location.pathname === '/dashboard'
 
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const user = useAuthStore((s) => s.user)
   const pingVisitor = useAuthStore((s) => s.pingVisitor)
 
   // Ping visitor on route change
@@ -231,7 +232,7 @@ function Layout() {
             <StatsCounter />
           </Suspense>
         )}
-        {isDashboard && (
+        {isDashboard && user?.email !== 'guest@finsight.app' && (
           <Suspense fallback={null}>
             <CTASection />
           </Suspense>

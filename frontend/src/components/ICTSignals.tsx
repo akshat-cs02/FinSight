@@ -81,7 +81,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
     <div className="card-layer rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2 font-display">
+          <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2 font-display">
             <Shield size={18} className="text-gold" /> ICT/SMC Live Signals
           </h2>
           <p className="text-xs text-gray-400 mt-0.5">
@@ -91,7 +91,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
           </p>
         </div>
         <button onClick={load} disabled={loading}
-                className="text-gray-400 hover:text-white disabled:opacity-50">
+                className="text-[var(--dim)] hover:text-[var(--text)] disabled:opacity-50">
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
@@ -135,7 +135,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
                   {rr !== null && (
                     <div className="text-right">
                       <div className="text-xs text-gray-500">R:R</div>
-                      <div className="text-sm font-bold text-white">1:{rr.toFixed(2)}</div>
+                      <div className="text-sm font-bold text-[var(--text)]">1:{rr.toFixed(2)}</div>
                     </div>
                   )}
                 </div>

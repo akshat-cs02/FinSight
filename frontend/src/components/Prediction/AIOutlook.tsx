@@ -49,7 +49,7 @@ export default function AIOutlook() {
   return (
     <div className="card-layer rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+        <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2">
           <Brain size={18} className="text-blue-400" /> AI Market Outlook
         </h2>
         <button onClick={() => navigate('/predictions')} className="text-xs text-blue-400 hover:text-blue-300">
@@ -58,9 +58,9 @@ export default function AIOutlook() {
       </div>
 
       {err && <div className="text-red-300 text-sm">{err}</div>}
-      {items === null && !err && <div className="text-gray-500 text-sm animate-pulse">Loading AI predictions…</div>}
+      {items === null && !err &&        <div className="text-[var(--dim)] text-sm animate-pulse">Loading AI predictions…</div>}
       {items && items.length === 0 && (
-        <div className="text-gray-500 text-sm py-4 text-center">
+        <div className="text-[var(--dim)] text-sm py-4 text-center">
           No trained models yet. Visit any stock page — it will train automatically on first request.
         </div>
       )}
@@ -73,12 +73,12 @@ export default function AIOutlook() {
               <button
                 key={p.symbol}
                 onClick={() => navigate(`/stocks/${p.symbol}`)}
-                className="text-left bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-lg p-4 transition"
+                className="text-left bg-[var(--raised)] hover:bg-[var(--surface-3)] border border-[var(--border)] rounded-lg p-4 transition"
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <div className="font-bold text-white">{p.symbol}</div>
-                    <div className="text-xs text-gray-400">
+                    <div className="font-bold text-[var(--text)]">{p.symbol}</div>
+                    <div className="text-xs text-[var(--dim)]">
                       {formatPrice(p.current_price, p.currency || guessCurrency(p.symbol))} → {formatPrice(p.predicted_price, p.currency || guessCurrency(p.symbol))}
                     </div>
                   </div>
@@ -89,7 +89,7 @@ export default function AIOutlook() {
                     {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                     {Math.abs(p.change_percent).toFixed(2)}%
                   </span>
-                  <span className="text-xs text-gray-400">conf {p.confidence.toFixed(0)}%</span>
+                  <span className="text-xs text-[var(--dim)]">conf {p.confidence.toFixed(0)}%</span>
                 </div>
               </button>
             )

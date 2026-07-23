@@ -1,5 +1,4 @@
 import axios from 'axios'
-import toast from 'react-hot-toast'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
@@ -9,57 +8,12 @@ const api = axios.create({
   withCredentials: true,
 })
 
-// ─── Backend warming indicator ───
-let warmingToastId: string | undefined
-let pendingRequests = 0
-const toastStyle = {
-  background: 'rgba(20,20,20,0.95)',
-  backdropFilter: 'blur(20px)',
-  color: 'rgba(232,232,224,0.8)',
-  borderRadius: '0.75rem',
-  fontSize: '0.875rem',
-}
-
-api.interceptors.request.use((config) => {
-  const c = config as any
-  // Skip on landing/auth pages — they handle their own UI
-  if (!window.location.pathname.match(/^\/$|^\/landing|^\/login|^\/register/)) {
-    pendingRequests++
-    c._warmTimer = setTimeout(() => {
-      if (pendingRequests > 0 && !warmingToastId) {
-        warmingToastId = toast.loading('⚡ Backend is waking up — first request may take ~20s', {
-          duration: 60000,
-          style: { ...toastStyle, border: '1px solid rgba(212,168,83,0.15)' },
-        })
-      }
-    }, 5000) // show after 5s (not instantly)
-  }
-  return config
-})
-
 // ─── Retry with exponential backoff ───
 const MAX_RETRIES = 2
 api.interceptors.response.use(
-  (r) => {
-    const c = r.config as any
-    if (c._warmTimer) clearTimeout(c._warmTimer)
-    pendingRequests = Math.max(0, pendingRequests - 1)
-    if (warmingToastId) {
-      toast.dismiss(warmingToastId)
-      warmingToastId = undefined
-    }
-    return r
-  },
+  (r) => r,
   async (err) => {
     const c = err.config as any
-
-    // Dismiss warming toast on failure
-    if (c._warmTimer) clearTimeout(c._warmTimer)
-    pendingRequests = Math.max(0, pendingRequests - 1)
-    if (warmingToastId) {
-      toast.dismiss(warmingToastId)
-      warmingToastId = undefined
-    }
 
     // Don't retry on 401 or if already retried
     if (err.response?.status === 401 || c?._retryCount >= MAX_RETRIES) {

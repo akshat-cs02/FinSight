@@ -85,21 +85,21 @@ export default function LiveTicker({ symbols = DEFAULT, intervalSec = 5 }: Props
   return (
     <div ref={containerRef} className="card-layer rounded-xl overflow-hidden">
       <div className="flex justify-between items-center px-3 pt-3 pb-1.5">
-        <div className="flex items-center gap-2 text-xs text-white/40">
+        <div className="flex items-center gap-2 text-xs text-[var(--dim)]">
           {connected
             ? <span className="flex items-center gap-1 text-green-400"><Wifi size={12} /> Live</span>
             : <span className="flex items-center gap-1 text-amber-400"><WifiOff size={12} /> Reconnecting…</span>
           }
           {lastUpdate && <span>· {formatLocalTime(lastUpdate)} {getUserTzAbbr()}</span>}
         </div>
-        <span className={`text-[10px] font-medium transition-all duration-300 ${paused ? 'text-green-400' : 'text-white/30'}`}>
+        <span className={`text-[10px] font-medium transition-all duration-300 ${paused ? 'text-green-400' : 'text-[var(--faint)]'}`}>
           {paused ? '● Paused' : '● Scrolling'}
         </span>
       </div>
 
       <div className="overflow-hidden px-3 pb-3">
         {quotes.length === 0 && (
-          <span className="text-white/30 text-sm">Waiting for data…</span>
+          <span className="text-[var(--faint)] text-sm">Waiting for data…</span>
         )}
         {quotes.length > 0 && (
           <div className="relative whitespace-nowrap">
@@ -116,9 +116,9 @@ export default function LiveTicker({ symbols = DEFAULT, intervalSec = 5 }: Props
                       navigate(`/stocks/${q.symbol}`)
                       window.scrollTo({ top: 0, behavior: 'smooth' })
                     }}
-                    className="flex-shrink-0 flex items-center gap-2.5 bg-[#0f1a0f]/50 rounded-lg px-3 py-1.5 border border-white/5 hover:border-green-500/20 hover:bg-[#0f1a0f]/80 transition-all duration-300 cursor-pointer"
+                    className="flex-shrink-0 flex items-center gap-2.5 bg-[var(--raised)] rounded-lg px-3 py-1.5 border border-[var(--border)] hover:border-green-500/20 hover:bg-[var(--surface-3)] transition-all duration-300 cursor-pointer"
                   >
-                    <span className="font-bold text-white/80 text-sm">{display}</span>
+                    <span className="font-bold text-[var(--text)] text-sm">{display}</span>
                     <span className={`text-sm ${up ? 'text-green-400' : 'text-rose-400'}`}>
                       {formatPrice(q.price, guessCurrency(q.symbol))}
                     </span>

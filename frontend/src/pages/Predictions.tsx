@@ -157,10 +157,10 @@ export default function PredictionsPage() {
       />
       <div ref={mainRef} className="flex justify-between items-center flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-2 font-display">
+          <h1 className="text-3xl font-bold text-[var(--text)] flex items-center gap-2 font-display">
             <Brain size={28} className="text-gold" /> Predictions
           </h1>
-          <p className="text-white/50 text-sm mt-0.5">LSTM + XGBoost ensemble. Trained per symbol on Yahoo Finance data.</p>
+          <p className="text-[var(--dim)] text-sm mt-0.5">LSTM + XGBoost ensemble. Trained per symbol on Yahoo Finance data.</p>
         </div>
       </div>
 
@@ -174,7 +174,7 @@ export default function PredictionsPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 flex items-center gap-1.5 ${
                 selected === m.symbol
                   ? 'bg-gold/10 text-gold border border-gold/20 shadow-sm'
-                  : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]'
+                  : 'text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--raised)]'
               }`}>
               {m.symbol}
               {(m.lstm || m.xgb) ? (
@@ -190,8 +190,8 @@ export default function PredictionsPage() {
       {/* Live TradingView chart */}
       <div ref={chartRef} className="card-surface2 p-3">
         <div className="flex items-center justify-between px-1 pb-2">
-          <h2 className="text-sm font-semibold text-white/60">Live Chart — <span className="text-white/80">{selected}</span></h2>
-          <span className="text-xs text-white/50">TradingView</span>
+          <h2 className="text-sm font-semibold text-[var(--dim)]">Live Chart — <span className="text-[var(--text)]">{selected}</span></h2>
+          <span className="text-xs text-[var(--dim)]">TradingView</span>
         </div>
         <TradingViewWidget symbol={selected} height={420} />
       </div>
@@ -205,9 +205,9 @@ export default function PredictionsPage() {
       <div ref={modelRef} className="card-accent card p-5">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-[3px] h-5 rounded-full bg-gold/60" />
-          <h2 className="text-base font-bold text-white font-display tracking-tight flex items-center gap-2"><Cpu size={18} /> Model Status</h2>
+          <h2 className="text-base font-bold text-[var(--text)] font-display tracking-tight flex items-center gap-2"><Cpu size={18} /> Model Status</h2>
         </div>
-        {models === null && <div className="text-white/50 text-sm">Loading…</div>}
+        {models === null && <div className="text-[var(--dim)] text-sm">Loading…</div>}
         {models && (
           <div className="overflow-x-auto">
             <table className="tbl table-base">
@@ -225,11 +225,11 @@ export default function PredictionsPage() {
                     <td className="font-medium font-display">{m.symbol}</td>
                     <td className="text-center">
                       {m.lstm ? <CheckCircle2 className="inline text-gold" size={16} /> :
-                               <Circle className="inline text-white/50" size={16} />}
+                               <Circle className="inline text-[var(--faint)]" size={16} />}
                     </td>
                     <td className="text-center">
                       {m.xgb ? <CheckCircle2 className="inline text-gold" size={16} /> :
-                               <Circle className="inline text-white/50" size={16} />}
+                               <Circle className="inline text-[var(--faint)]" size={16} />}
                     </td>
                     <td className="text-right">
                       <button
@@ -250,7 +250,7 @@ export default function PredictionsPage() {
         {/* Train custom symbol */}
         <div className="mt-4 flex gap-2 items-end">
           <div>
-            <label className="block text-xs text-white/50 mb-1">Train any symbol</label>
+            <label className="block text-xs text-[var(--dim)] mb-1">Train any symbol</label>
             <input value={trainSym} onChange={(e) => setTrainSym(e.target.value.toUpperCase())}
                    placeholder="e.g. NVDA"
                    className="input-glow w-40 text-sm" />
@@ -266,10 +266,10 @@ export default function PredictionsPage() {
       <div ref={historyRef} className="card-accent card-surface2 p-5">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-[3px] h-5 rounded-full bg-gold/60" />
-          <h2 className="text-base font-bold text-white font-display tracking-tight">Prediction History — {selected}</h2>
+          <h2 className="text-base font-bold text-[var(--text)] font-display tracking-tight">Prediction History — {selected}</h2>
         </div>
         {history.length === 0 ? (
-          <div className="text-white/50 text-sm py-3">No history yet for {selected}</div>
+          <div className="text-[var(--dim)] text-sm py-3">No history yet for {selected}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="table-base">
@@ -286,13 +286,13 @@ export default function PredictionsPage() {
               <tbody ref={historyTableRef}>
                 {history.map((h) => (
                   <tr key={h.id} className="hover:bg-gold/5 transition-all duration-200">
-                    <td className="text-white/60">{formatLocalDateTime(h.created_at)}</td>
+                    <td className="text-[var(--dim)]">{formatLocalDateTime(h.created_at)}</td>
                     <td className="text-right"><PriceDisplay price={h.current_price} currency={guessCurrency(selected)} size="sm" /></td>
                     <td className="text-right"><PriceDisplay price={h.predicted_price} currency={guessCurrency(selected)} size="sm" color="default" /></td>
                     <td className={`text-right font-mono tabular-nums ${h.change_percent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {h.change_percent >= 0 ? '+' : ''}{h.change_percent.toFixed(2)}%
                     </td>
-                    <td className="text-right font-mono tabular-nums text-white/60">{h.confidence.toFixed(0)}%</td>
+                    <td className="text-right font-mono tabular-nums text-[var(--dim)]">{h.confidence.toFixed(0)}%</td>
                     <td className="text-center">
                       <span className="signal-badge-pulse inline-block">
                         <SignalBadge signal={h.signal} size="sm" />

@@ -41,7 +41,7 @@ export default function NewsPage() {
       />
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
-          <h1 className="text-[28px] font-bold font-display text-white">Financial News</h1>
+          <h1 className="text-[28px] font-bold font-display text-[var(--text)]">Financial News</h1>
           <p className="eyebrow mt-0.5">Latest market news and analysis</p>
         </div>
         <Lift className="flex gap-2 card p-1 rounded-xl">
@@ -53,15 +53,15 @@ export default function NewsPage() {
                         : f === 'NEGATIVE' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20'
                         : f === 'NEUTRAL' ? 'bg-gray-500/15 text-gray-400 border border-gray-500/20'
                         : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
-                      : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]'
+                      : 'text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--raised)]'
                     }`}>{f}</button>
           ))}
         </Lift>
       </div>
 
       {err && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300">{err}</div>}
-      {articles === null && !err && <div className="text-white/50">Loading news…</div>}
-      {list && list.length === 0 && <div className="text-white/50 text-center py-8">No news matches filter</div>}
+      {articles === null && !err && <div className="text-[var(--dim)]">Loading news…</div>}
+      {list && list.length === 0 && <div className="text-[var(--dim)] text-center py-8">No news matches filter</div>}
 
       {list && (
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -70,15 +70,15 @@ export default function NewsPage() {
                 className="card-accent card-surface2 p-5 rounded-xl transition flex flex-col cursor-pointer">
               {a.thumbnail && <img src={a.thumbnail} alt="" loading="lazy" className="w-full h-32 object-cover rounded-lg mb-3" />}
               <div className="flex justify-between items-start mb-2 gap-2">
-                <h3 className="text-white font-bold flex-1 font-display">{a.title}</h3>
+                <h3 className="text-[var(--text)] font-bold flex-1 font-display">{a.title}</h3>
                 <span className={`flex-shrink-0 ${
                   a.sentiment === 'POSITIVE' ? 'badge-gains' :
                   a.sentiment === 'NEGATIVE' ? 'badge-losses' :
                   'badge-neutral'
                 }`}>{a.sentiment}</span>
               </div>
-              {a.summary && <p className="text-white/50 text-sm line-clamp-3 mb-2">{a.summary}</p>}
-              <div className="flex justify-between text-xs text-white/40 mt-auto">
+              {a.summary && <p className="text-[var(--dim)] text-sm line-clamp-3 mb-2">{a.summary}</p>}
+              <div className="flex justify-between text-xs text-[var(--dim)] mt-auto">
                 <span>{a.source}</span>
                 {a.symbol && <span className="text-amber-400 font-medium">{a.symbol}</span>}
               </div>

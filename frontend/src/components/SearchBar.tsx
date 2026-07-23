@@ -275,7 +275,7 @@ export default function SearchBar() {
       {!expanded && (
         <button
           onClick={toggleExpand}
-          className="w-9 h-9 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/70 transition-all duration-300"
+          className="w-9 h-9 rounded-lg bg-[var(--raised)] hover:bg-[var(--surface-3)] flex items-center justify-center text-[var(--dim)] hover:text-[var(--text)] transition-all duration-300"
           title="Search"
         >
           <Search size={16} />
@@ -294,7 +294,7 @@ export default function SearchBar() {
                 className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
                   market === m.id
                     ? 'bg-green-600/20 text-green-400 border border-green-500/30'
-                    : 'text-white/40 hover:text-white/70 border border-transparent hover:border-white/[0.06]'
+                    : 'text-[var(--dim)] hover:text-[var(--text)] border border-transparent hover:border-[var(--border)]'
                 }`}
               >
                 {m.flag} {m.label}
@@ -303,7 +303,7 @@ export default function SearchBar() {
             {/* Close button */}
             <button
               onClick={toggleExpand}
-              className="ml-auto w-6 h-6 rounded-md bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-white/30 hover:text-white/60 transition-all duration-200"
+              className="ml-auto w-6 h-6 rounded-md bg-[var(--raised)] hover:bg-[var(--surface-3)] flex items-center justify-center text-[var(--faint)] hover:text-[var(--dim)] transition-all duration-200"
               title="Close search"
             >
               <X size={12} />
@@ -312,7 +312,7 @@ export default function SearchBar() {
 
           {/* Search input BELOW chips */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--faint)]" size={15} />
             <input
               ref={searchInputRef}
               value={q}
@@ -325,7 +325,7 @@ export default function SearchBar() {
                 market === 'europe'? 'European stocks (SAP.DE, AZN.L, MC.PA…)' :
                                      'Commodities — GLD, SLV, USO, UNG…'
               }
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-white/25 focus:outline-none focus:border-green-500/50 focus:bg-white/[0.06] transition-all duration-300"
+              className="w-full bg-[var(--raised)] border border-[var(--border)] rounded-lg pl-9 pr-3 py-2 text-sm text-[var(--text)] placeholder-[var(--faint)] focus:outline-none focus:border-green-500/50 focus:bg-[var(--surface-3)] transition-all duration-300"
             />
           </div>
 
@@ -341,7 +341,7 @@ export default function SearchBar() {
                     className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
                       market === m.id
                         ? 'bg-green-600/20 text-green-400 border border-green-500/30'
-                        : 'text-white/40 hover:text-white/70'
+                        : 'text-[var(--dim)] hover:text-[var(--text)]'
                     }`}
                   >
                     {m.flag} {m.label}
@@ -351,18 +351,18 @@ export default function SearchBar() {
               {/* Market suggestions */}
               {showSuggestions && !q.trim() && (
                 <>
-                  <div className="px-3 py-2 text-xs text-white/30 border-b border-white/[0.06]">
+                  <div className="px-3 py-2 text-xs text-[var(--faint)] border-b border-[var(--border)]">
                     Popular in {MARKET_LABELS.find((m) => m.id === market)?.label}
                   </div>
                   {suggestions.map((s) => (
                     <button key={s.symbol} onClick={() => pick(s.symbol)}
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-white/[0.03] border-b border-white/[0.04] last:border-b-0 flex items-center justify-between">
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--raised)] border-b border-[var(--border)] last:border-b-0 flex items-center justify-between">
                       <span>
-                        <span className="font-bold text-white/80">{s.symbol}</span>
-                        <span className="text-white/30 ml-2">{s.name}</span>
+                        <span className="font-bold text-[var(--text)]">{s.symbol}</span>
+                        <span className="text-[var(--dim)] ml-2">{s.name}</span>
                       </span>
                       {s.type && (
-                        <span className="text-xs text-white/20 bg-white/[0.04] px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-[var(--faint)] bg-[var(--raised)] px-2 py-0.5 rounded-full">
                           {TYPE_LABEL[s.type] || s.type}
                         </span>
                       )}
@@ -372,22 +372,22 @@ export default function SearchBar() {
               )}
               {/* Live search results */}
               {q.trim() && loading && (
-                <div className="px-3 py-2 text-white/40 text-sm">Searching…</div>
+                <div className="px-3 py-2 text-[var(--dim)] text-sm">Searching…</div>
               )}
               {q.trim() && !loading && results.length === 0 && (
-                <button onClick={() => pick(q)} className="w-full text-left px-3 py-2 text-sm hover:bg-white/[0.03]">
+                <button onClick={() => pick(q)} className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--raised)]">
                   <span className="font-bold text-white/80">{q.toUpperCase()}</span>
-                  <span className="text-white/30 ml-2">— go directly to this ticker</span>
+                  <span className="text-[var(--dim)] ml-2">— go directly to this ticker</span>
                 </button>
               )}
               {q.trim() && results.map((r) => (
                 <button key={r.symbol} onClick={() => pick(r.symbol, r.tv_symbol)}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-white/[0.03] border-b border-white/[0.04] last:border-b-0 flex items-center justify-between">
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--raised)] border-b border-[var(--border)] last:border-b-0 flex items-center justify-between">
                   <span>
                     <span className="font-bold text-white/80">{r.symbol}</span>
                     {r.name && <span className="text-white/30 ml-2">{r.name}</span>}
                   </span>
-                  {r.exchange && <span className="text-xs text-white/20">{r.exchange}</span>}
+                  {r.exchange && <span className="text-xs text-[var(--faint)]">{r.exchange}</span>}
                 </button>
               ))}
             </div>

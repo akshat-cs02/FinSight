@@ -20,10 +20,10 @@ function ConfidenceBar({ value }: { value: number }) {
   const color = value >= 75 ? 'bg-emerald-500' : value >= 60 ? 'bg-yellow-500' : 'bg-red-500'
   return (
     <div className="flex items-center gap-1.5">
-      <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
       </div>
-      <span className="text-xs text-gray-300 w-8 text-right">{value.toFixed(0)}%</span>
+      <span className="text-xs text-[var(--dim)] w-8 text-right">{value.toFixed(0)}%</span>
     </div>
   )
 }
@@ -73,7 +73,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Zap size={18} className="text-yellow-400" />
-          <h2 className="text-lg font-semibold text-white">Intraday Signals</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">Intraday Signals</h2>
           {market !== 'ALL' && (
             <span className="text-xs px-2 py-0.5 rounded-full font-medium text-green-300 bg-green-500/10">
               {MARKET_LABELS[market]}
@@ -90,7 +90,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
           <button
             onClick={() => load(false)}
             disabled={loading}
-            className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-1 text-xs text-[var(--dim)] hover:text-[var(--text)] transition-colors"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
             Refresh
@@ -107,12 +107,12 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
         const biasColor = bias === 'BULLISH' ? 'text-emerald-400' : bias === 'BEARISH' ? 'text-red-400' : 'text-yellow-400'
         const biasBarW = Math.round((bulls / total) * 100)
         return (
-          <div className="mb-4 bg-gray-800/60 rounded-lg p-3 flex items-center gap-4">
+          <div className="mb-4 bg-[var(--raised)] rounded-lg p-3 flex items-center gap-4">
             <div className={`text-sm font-bold ${biasColor} w-20 flex-shrink-0`}>{bias}</div>
             <div className="flex-1 h-2 bg-red-900/50 rounded-full overflow-hidden">
               <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${biasBarW}%` }} />
             </div>
-            <div className="text-xs text-gray-400 flex-shrink-0">
+            <div className="text-xs text-[var(--dim)] flex-shrink-0">
               <span className="text-emerald-400 font-medium">{bulls} BUY</span>
               <span className="text-ink-500 mx-1">/</span>
               <span className="text-red-400 font-medium">{bears} SELL</span>
@@ -123,7 +123,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
 
       {/* No signals state */}
       {!loading && signals.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-[var(--dim)]">
           <Clock size={32} className="mx-auto mb-2 opacity-40" />
           <p className="text-sm">
             {market === 'ALL'
@@ -154,7 +154,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
               {/* Symbol + direction */}
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-bold text-white text-sm">{symbolDisplayName(sig.symbol)}</span>
+                  <span className="font-bold text-[var(--text)] text-sm">{symbolDisplayName(sig.symbol)}</span>
                   {symbolDisplayName(sig.symbol) !== sig.symbol && (
                     <span className="text-[10px] text-gray-500 ml-1.5">{sig.symbol}</span>
                   )}
@@ -172,15 +172,15 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
               {/* Levels */}
               <div className="grid grid-cols-3 gap-1 text-xs">
                 <div>
-                  <div className="text-gray-500">Entry</div>
-                  <div className="text-white font-medium">{sig.entry}</div>
+                  <div className="text-[var(--faint)]">Entry</div>
+                  <div className="text-[var(--text)] font-medium">{sig.entry}</div>
                 </div>
                 <div>
-                  <div className="text-gray-500">SL</div>
+                  <div className="text-[var(--faint)]">SL</div>
                   <div className="text-red-400 font-medium">{sig.sl}</div>
                 </div>
                 <div>
-                  <div className="text-gray-500">TP</div>
+                  <div className="text-[var(--faint)]">TP</div>
                   <div className="text-emerald-400 font-medium">{sig.tp}</div>
                 </div>
               </div>

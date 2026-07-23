@@ -3,7 +3,7 @@ import api from '@/services/api'
 import { pingVisitor, fetchVisitor, getStoredGuestUsername } from '@/services/visitorService'
 
 export interface User {
-  id: number
+  id: string
   username: string
   email: string
   first_name: string | null
@@ -35,7 +35,7 @@ interface AuthState {
 }
 
 const GUEST_USER: User = {
-  id: 0,
+  id: '0',
   username: 'Guest',
   email: 'guest@finsight.app',
   first_name: 'Demo',

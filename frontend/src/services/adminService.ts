@@ -45,6 +45,24 @@ export interface SystemStats {
   }
 }
 
+export interface AdminSignal {
+  id: number
+  symbol: string
+  strategy: string
+  signal: string
+  entry: number
+  sl: number
+  tp: number
+  confidence: number
+  timeframe: string
+  kill_zone: string | null
+  htf_bias: string | null
+  generated_at: string | null
+  outcome: string
+  pnl_r: number | null
+  is_hidden: boolean
+}
+
 export const adminService = {
   listUsers: () => api.get<{ count: number; users: AdminUser[] }>('/admin/users').then((r) => r.data),
   toggleActive: (id: number) => api.patch(`/admin/users/${id}/toggle-active`).then((r) => r.data),
@@ -54,4 +72,9 @@ export const adminService = {
   retrain: (symbol: string, lstm_epochs = 8, skip_lstm = false, skip_xgb = false) =>
     api.post('/admin/models/retrain', { symbol, lstm_epochs, skip_lstm, skip_xgb }).then((r) => r.data),
   stats: () => api.get<SystemStats>('/admin/stats').then((r) => r.data),
+  // Signal management
+  listSignals: (params: { limit?: number; offset?: number; outcome?: string; symbol?: string } = {}) =>
+    api.get<{ total: number; signals: AdminSignal[] }>('/admin/signals', { params }).then((r) => r.data),
+  toggleHideSignal: (id: number) => api.patch(`/admin/signals/${id}/hide`).then((r) => r.data),
+  deleteSignal: (id: number) => api.delete(`/admin/signals/${id}`).then((r) => r.data),
 }

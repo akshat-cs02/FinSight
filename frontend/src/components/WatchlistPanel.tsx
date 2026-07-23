@@ -52,12 +52,11 @@ export default function WatchlistPanel({ onSearch }: Props) {
   }
 
   return (
-    <div className="bg-[#141414] rounded-xl border border-white/5 p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
       <div className="flex items-center gap-2 mb-4">
         <Star size={18} className="text-gold" />
-        <h2 className="text-lg font-semibold text-white">My Watchlist</h2>
-        {items.length > 0 && (
-          <span className="text-xs text-white/30 bg-white/[0.03] px-2 py-0.5 rounded-full">{items.length}</span>
+        <h2 className="text-lg font-semibold text-[var(--text)]">My Watchlist</h2>
+        {items.length > 0 && (              <span className="text-xs text-[var(--dim)] bg-[var(--raised)] px-2 py-0.5 rounded-full">{items.length}</span>
         )}
       </div>
 
@@ -83,15 +82,15 @@ export default function WatchlistPanel({ onSearch }: Props) {
       )}
 
       <div className="flex gap-2 mb-4">
-        <div className="flex-1 flex items-center gap-2 bg-white/[0.03] rounded-lg px-3 py-2">
-          <Search size={13} className="text-white/30 shrink-0" />
+        <div className="flex-1 flex items-center gap-2 bg-[var(--raised)] rounded-lg px-3 py-2">
+          <Search size={13} className="text-[var(--faint)] shrink-0" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
             placeholder="Add symbol (e.g. AAPL)"
-            className="flex-1 bg-transparent text-sm text-white placeholder-white/30 outline-none"
+            className="flex-1 bg-transparent text-sm text-[var(--text)] placeholder-[var(--faint)] outline-none"
           />
         </div>
         <button
@@ -104,11 +103,11 @@ export default function WatchlistPanel({ onSearch }: Props) {
       </div>
 
       {loading && items.length === 0 && (
-        <div className="text-xs text-white/30 text-center py-4">Loading...</div>
+        <div className="text-xs text-[var(--dim)] text-center py-4">Loading...</div>
       )}
 
       {!loading && items.length === 0 && (
-        <div className="text-xs text-white/30 text-center py-4">
+        <div className="text-xs text-[var(--dim)] text-center py-4">
           Your watchlist is empty — add symbols above.
         </div>
       )}
@@ -118,16 +117,16 @@ export default function WatchlistPanel({ onSearch }: Props) {
           {items.map((item) => (
             <div
               key={item.symbol}
-              className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg px-2.5 py-1.5 text-sm group"
+              className="flex items-center gap-1.5 bg-[var(--raised)] rounded-lg px-2.5 py-1.5 text-sm group"
             >
               <span
-                className="text-white font-medium cursor-pointer hover:text-gold transition-all duration-300"
+                className="text-[var(--text)] font-medium cursor-pointer hover:text-gold transition-all duration-300"
                 onClick={() => onSearch?.(item.symbol)}
               >
                 {item.symbol}
               </span>
               {item.price !== null && (
-                <span className="text-xs text-white/40">{item.price}</span>
+                <span className="text-xs text-[var(--dim)]">{item.price}</span>
               )}
               {item.change_percent !== null && (
                 <span className={`text-xs font-medium ${item.change_percent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -136,7 +135,7 @@ export default function WatchlistPanel({ onSearch }: Props) {
               )}
               <button
                 onClick={() => handleRemove(item.symbol)}
-                className="text-white/30 hover:text-red-400 transition-all duration-300 ml-0.5"
+                className="text-[var(--faint)] hover:text-red-400 transition-all duration-300 ml-0.5"
               >
                 <X size={12} />
               </button>

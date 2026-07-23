@@ -226,18 +226,18 @@ export default function PaperTrading({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2">
             <DollarSign size={18} className="text-blue-400" /> Paper Trading
           </h2>
-          <p className="text-xs text-gray-400 mt-0.5">Demo capital — no real money. Test ICT signals accuracy.</p>
+          <p className="text-xs text-[var(--dim)] mt-0.5">Demo capital — no real money. Test ICT signals accuracy.</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={refreshPrices} disabled={refreshing}
-                  className="text-gray-400 hover:text-white disabled:opacity-50" title="Refresh prices">
+                  className="text-[var(--dim)] hover:text-[var(--text)] disabled:opacity-50" title="Refresh prices">
             <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
           </button>
           <button onClick={() => setShowForm(!showForm)}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-xs">
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gold hover:bg-gold-2 rounded-lg text-black text-xs">
             <Plus size={13} /> Trade
           </button>
         </div>
@@ -245,95 +245,95 @@ export default function PaperTrading({
 
       {/* Stats bar */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-        <div className="bg-gray-700/60 rounded-lg p-3">
-          <div className="text-xs text-gray-500">Capital</div>
-          <div className="text-white font-bold">${portfolio.capital.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+        <div className="bg-[var(--raised)] rounded-lg p-3">
+          <div className="text-xs text-[var(--faint)]">Capital</div>
+          <div className="text-[var(--text)] font-bold">${portfolio.capital.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
         </div>
-        <div className="bg-gray-700/60 rounded-lg p-3">
-          <div className="text-xs text-gray-500">Unrealized P&L</div>
+        <div className="bg-[var(--raised)] rounded-lg p-3">
+          <div className="text-xs text-[var(--faint)]">Unrealized P&L</div>
           <div className={`font-bold ${totalUnrealizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {totalUnrealizedPnl >= 0 ? '+' : ''}${totalUnrealizedPnl.toFixed(2)}
           </div>
         </div>
-        <div className="bg-gray-700/60 rounded-lg p-3">
-          <div className="text-xs text-gray-500">Realized P&L</div>
+        <div className="bg-[var(--raised)] rounded-lg p-3">
+          <div className="text-xs text-[var(--faint)]">Realized P&L</div>
           <div className={`font-bold ${totalRealizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {totalRealizedPnl >= 0 ? '+' : ''}${totalRealizedPnl.toFixed(2)}
           </div>
         </div>
-        <div className="bg-gray-700/60 rounded-lg p-3">
-          <div className="text-xs text-gray-500">Win Rate</div>
-          <div className="font-bold text-white">{winRate}{winRate !== '—' ? '%' : ''}</div>
+        <div className="bg-[var(--raised)] rounded-lg p-3">
+          <div className="text-xs text-[var(--faint)]">Win Rate</div>
+          <div className="font-bold text-[var(--text)]">{winRate}{winRate !== '—' ? '%' : ''}</div>
           <div className="text-xs text-ink-500">{winCount}W / {lossCount}L</div>
         </div>
-        <div className="bg-gray-700/60 rounded-lg p-3">
-          <div className="text-xs text-gray-500">Open Trades</div>
-          <div className="font-bold text-white">{openTrades.length}</div>
+        <div className="bg-[var(--raised)] rounded-lg p-3">
+          <div className="text-xs text-[var(--faint)]">Open Trades</div>
+          <div className="font-bold text-[var(--text)]">{openTrades.length}</div>
         </div>
       </div>
 
       {/* Trade entry form */}
       {showForm && (
         <form onSubmit={openTrade}
-              className="bg-gray-700/50 border border-gray-600 rounded-xl p-4 space-y-3">
-          <div className="text-sm font-semibold text-white">New Paper Trade — {symbol}</div>
+              className="bg-[var(--raised)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <div className="text-sm font-semibold text-[var(--text)]">New Paper Trade — {symbol}</div>
           <div className="flex flex-wrap gap-3">
             {/* Side */}
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Direction</label>
+              <label className="text-xs text-[var(--dim)] block mb-1">Direction</label>
               <div className="flex gap-1">
                 {(['BUY', 'SELL'] as const).map(s => (
                   <button type="button" key={s} onClick={() => setForm(f => ({ ...f, side: s }))}
                           className={`px-3 py-1.5 text-xs rounded font-bold transition ${
                             form.side === s
                               ? s === 'BUY' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
-                              : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                              : 'bg-[var(--surface-3)] text-[var(--dim)] hover:bg-[var(--raised)]'
                           }`}>{s}</button>
                 ))}
               </div>
             </div>
             {/* Entry */}
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Entry Price</label>
+              <label className="text-xs text-[var(--dim)] block mb-1">Entry Price</label>
               <input type="number" step="any" required value={form.entry}
                      onChange={e => setForm(f => ({ ...f, entry: e.target.value }))}
-                     className="bg-gray-600 border border-gray-500 rounded px-2 py-1.5 text-white text-xs w-28" />
+                     className="bg-[var(--raised)] border border-[var(--border)] rounded px-2 py-1.5 text-[var(--text)] text-xs w-28" />
             </div>
             {/* SL */}
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Stop Loss</label>
+              <label className="text-xs text-[var(--dim)] block mb-1">Stop Loss</label>
               <input type="number" step="any" required value={form.sl}
                      onChange={e => setForm(f => ({ ...f, sl: e.target.value }))}
-                     className="bg-gray-600 border border-red-500/40 rounded px-2 py-1.5 text-red-300 text-xs w-28" />
+                     className="bg-[var(--raised)] border border-red-500/40 rounded px-2 py-1.5 text-red-300 text-xs w-28" />
             </div>
             {/* TP */}
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Take Profit</label>
+              <label className="text-xs text-[var(--dim)] block mb-1">Take Profit</label>
               <input type="number" step="any" required value={form.tp}
                      onChange={e => setForm(f => ({ ...f, tp: e.target.value }))}
-                     className="bg-gray-600 border border-emerald-500/40 rounded px-2 py-1.5 text-emerald-300 text-xs w-28" />
+                     className="bg-[var(--raised)] border border-emerald-500/40 rounded px-2 py-1.5 text-emerald-300 text-xs w-28" />
             </div>
             {/* Risk % */}
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Risk %</label>
+              <label className="text-xs text-[var(--dim)] block mb-1">Risk %</label>
               <input type="number" step="0.5" min="0.5" max="10" value={form.risk}
                      onChange={e => setForm(f => ({ ...f, risk: e.target.value }))}
-                     className="bg-gray-600 border border-gray-500 rounded px-2 py-1.5 text-white text-xs w-16" />
+                     className="bg-[var(--raised)] border border-[var(--border)] rounded px-2 py-1.5 text-[var(--text)] text-xs w-16" />
             </div>
             {/* Strategy tag */}
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Strategy</label>
+              <label className="text-xs text-[var(--dim)] block mb-1">Strategy</label>
               <input type="text" value={form.strategy}
                      onChange={e => setForm(f => ({ ...f, strategy: e.target.value }))}
                      placeholder="e.g. BOS_FVG"
-                     className="bg-gray-600 border border-gray-500 rounded px-2 py-1.5 text-white text-xs w-28" />
+                     className="bg-[var(--raised)] border border-[var(--border)] rounded px-2 py-1.5 text-[var(--text)] text-xs w-28" />
             </div>
           </div>
           {/* R:R preview */}
           {form.entry && form.sl && form.tp && parseFloat(form.sl) !== parseFloat(form.entry) && (
             <div className="text-xs text-gray-400">
               R:R{' '}
-              <span className="text-white font-bold">
+              <span className="text-[var(--text)] font-bold">
                 1:{(Math.abs(parseFloat(form.tp) - parseFloat(form.entry)) / Math.abs(parseFloat(form.sl) - parseFloat(form.entry))).toFixed(2)}
               </span>
               {' · '}Risk amount:{' '}
@@ -344,11 +344,11 @@ export default function PaperTrading({
           )}
           <div className="flex gap-2">
             <button type="submit"
-                    className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-xs font-semibold">
+                    className="px-4 py-1.5 bg-gold hover:bg-gold-2 rounded text-black text-xs font-semibold">
               Open Trade
             </button>
             <button type="button" onClick={() => setShowForm(false)}
-                    className="px-4 py-1.5 bg-gray-600 hover:bg-gray-500 rounded text-gray-300 text-xs">
+                    className="px-4 py-1.5 bg-[var(--surface-3)] hover:bg-[var(--raised)] rounded text-[var(--dim)] text-xs">
               Cancel
             </button>
           </div>
@@ -358,7 +358,7 @@ export default function PaperTrading({
       {/* Open trades */}
       {openTrades.length > 0 && (
         <div>
-          <div className="text-xs font-semibold text-gray-400 mb-2">Open Positions</div>
+          <div className="text-xs font-semibold text-[var(--dim)] mb-2">Open Positions</div>
           <div className="space-y-2">
             {openTrades.map(t => {
               const currentPrice = prices[t.symbol]
@@ -384,7 +384,7 @@ export default function PaperTrading({
                         <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                           t.side === 'BUY' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
                         }`}>{t.side}</span>
-                        <span className="text-white font-semibold text-sm">{t.symbol}</span>
+                        <span className="text-[var(--text)] font-semibold text-sm">{t.symbol}</span>
                         {t.strategy && <span className="text-xs text-gray-500">{t.strategy}</span>}
                         <span className="text-xs text-ink-500">{formatLocalDateTime(t.openedAt)}</span>
                       </div>
@@ -411,7 +411,7 @@ export default function PaperTrading({
                         </div>
                       )}
                       <button onClick={() => closeTrade(t)} title="Close trade at market"
-                              className="p-1.5 bg-gray-600 hover:bg-gray-500 rounded text-gray-300">
+                              className="p-1.5 bg-[var(--surface-3)] hover:bg-[var(--raised)] rounded text-[var(--dim)]">
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -426,11 +426,11 @@ export default function PaperTrading({
       {/* Trade history */}
       {closedTrades.length > 0 && (
         <div>
-          <div className="text-xs font-semibold text-gray-400 mb-2">Trade History (last {closedTrades.length})</div>
+          <div className="text-xs font-semibold text-[var(--dim)] mb-2">Trade History (last {closedTrades.length})</div>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-gray-300">
+            <table className="w-full text-xs text-[var(--dim)]">
               <thead>
-                <tr className="text-gray-500 border-b border-gray-700">
+                <tr className="text-[var(--faint)] border-b border-[var(--border)]">
                   <th className="text-left pb-1.5 px-1">Symbol</th>
                   <th className="text-left pb-1.5 px-1">Side</th>
                   <th className="text-left pb-1.5 px-1">Strategy</th>
@@ -443,12 +443,12 @@ export default function PaperTrading({
               </thead>
               <tbody>
                 {closedTrades.map(t => (
-                  <tr key={t.id} className="border-b border-gray-700/30 hover:bg-gray-700/20">
-                    <td className="py-1.5 px-1 font-medium text-white">{t.symbol}</td>
+                  <tr key={t.id} className="border-b border-[var(--border)] hover:bg-[var(--raised)]">
+                    <td className="py-1.5 px-1 font-medium text-[var(--text)]">{t.symbol}</td>
                     <td className="py-1.5 px-1">
                       <span className={`px-1 rounded font-bold ${t.side === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>{t.side}</span>
                     </td>
-                    <td className="py-1.5 px-1 text-gray-500">{t.strategy || '—'}</td>
+                    <td className="py-1.5 px-1 text-[var(--faint)]">{t.strategy || '—'}</td>
                     <td className="py-1.5 px-1 text-right">{formatPrice(t.entry, currency)}</td>
                     <td className="py-1.5 px-1 text-right">{t.closePrice ? formatPrice(t.closePrice, currency) : '—'}</td>
                     <td className={`py-1.5 px-1 text-right font-bold ${(t.pnl ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -472,7 +472,7 @@ export default function PaperTrading({
       )}
 
       {/* Reset */}
-      <div className="flex items-center gap-2 pt-1 border-t border-gray-700">
+      <div className="flex items-center gap-2 pt-1 border-t border-[var(--border)]">
         {!resetConfirm ? (
           <button onClick={() => setResetConfirm(true)}
                   className="text-xs text-ink-500 hover:text-red-400 transition">
@@ -482,9 +482,9 @@ export default function PaperTrading({
           <>
             <span className="text-xs text-red-400">Reset to ${DEFAULT_CAPITAL.toLocaleString()}?</span>
             <button onClick={resetPortfolio}
-                    className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-white">Yes, reset</button>
+                    className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-[var(--text)]">Yes, reset</button>
             <button onClick={() => setResetConfirm(false)}
-                    className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded text-gray-300">Cancel</button>
+                    className="text-xs px-2 py-1 bg-[var(--surface-3)] hover:bg-[var(--raised)] rounded text-[var(--dim)]">Cancel</button>
           </>
         )}
       </div>

@@ -49,7 +49,7 @@ export default function Footer() {
                 FS
               </div>
               <div>
-                <div className="font-bold text-sm text-white font-display tracking-tight">FinSight</div>
+                <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
                 <div className="text-[10px] text-ink-400">Market Intelligence</div>
               </div>
             </div>

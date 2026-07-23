@@ -119,8 +119,8 @@ export default function PortfolioPage() {
       <div ref={headerRef} className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <div className="eyebrow">Portfolio Overview</div>
-          <h1 className="text-3xl font-bold text-white font-display">Portfolio</h1>
-          <p className="text-white/50 text-sm mt-0.5">Track your holdings and performance</p>
+          <h1 className="text-3xl font-bold text-[var(--text)] font-display">Portfolio</h1>
+          <p className="text-[var(--dim)] text-sm mt-0.5">Track your holdings and performance</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowForm(!showForm)}
@@ -128,11 +128,11 @@ export default function PortfolioPage() {
             <Plus size={16} /> Add Holding
           </button>
           <a href={`${API_URL}/api/reports/portfolio/pdf`} target="_blank" rel="noopener"
-             className="text-white/50 hover:text-white/70 border border-white/5 hover:border-white/10 text-sm px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-1.5">
+             className="text-[var(--dim)] hover:text-[var(--text)] border border-[var(--border)] hover:border-[var(--border-2)] text-sm px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-1.5">
             <Download size={16} /> PDF
           </a>
           <a href={`${API_URL}/api/reports/portfolio/csv`} target="_blank" rel="noopener"
-             className="text-white/50 hover:text-white/70 border border-white/5 hover:border-white/10 text-sm px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-1.5">
+             className="text-[var(--dim)] hover:text-[var(--text)] border border-[var(--border)] hover:border-[var(--border-2)] text-sm px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-1.5">
             <Download size={16} /> CSV
           </a>
         </div>
@@ -141,21 +141,21 @@ export default function PortfolioPage() {
       {showForm && (
         <Lift className="card-accent card-flat p-4 rounded-xl flex flex-wrap gap-3 items-end"><form onSubmit={add}>
           <div>
-            <label className="block text-xs text-white/40 mb-1">Symbol</label>
+            <label className="block text-xs text-[var(--dim)] mb-1">Symbol</label>
             <input required value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
-                   placeholder="AAPL" className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/40 w-32 uppercase focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all duration-300" />
+                   placeholder="AAPL" className="bg-[var(--raised)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm text-[var(--text)] placeholder-[var(--faint)] w-32 uppercase focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all duration-300" />
           </div>
           <div>
-            <label className="block text-xs text-white/40 mb-1">Quantity</label>
+            <label className="block text-xs text-[var(--dim)] mb-1">Quantity</label>
             <input type="number" step="any" required value={form.quantity}
                    onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                   className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/40 w-32 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all duration-300" />
+                   className="bg-[var(--raised)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm text-[var(--text)] placeholder-[var(--faint)] w-32 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all duration-300" />
           </div>
           <div>
-            <label className="block text-xs text-white/40 mb-1">Purchase Price</label>
+            <label className="block text-xs text-[var(--dim)] mb-1">Purchase Price</label>
             <input type="number" step="any" required value={form.purchase_price}
                    onChange={(e) => setForm({ ...form, purchase_price: e.target.value })}
-                   className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/40 w-32 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all duration-300" />
+                   className="bg-[var(--raised)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm text-[var(--text)] placeholder-[var(--faint)] w-32 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all duration-300" />
           </div>
           <button disabled={busy} type="submit"
                   className="bg-gold/10 text-gold hover:bg-gold/20 disabled:opacity-50 text-sm px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-1.5">
@@ -165,7 +165,7 @@ export default function PortfolioPage() {
       )}
 
       {err && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300">{err}</div>}
-      {summary === null && !err && <div className="text-white/50">Loading portfolio…</div>}
+      {summary === null && !err && <div className="text-[var(--dim)]">Loading portfolio…</div>}
 
       {summary && (
         <>
@@ -201,12 +201,12 @@ export default function PortfolioPage() {
               <div className="eyebrow">Breakdown</div>
               <h2 className="section-rule">Allocation Breakdown</h2>
               {summary.allocation.length === 0 ? (
-                <div className="text-white/50 text-sm">No holdings yet</div>
+                <div className="text-[var(--dim)] text-sm">No holdings yet</div>
               ) : (
                 <div className="space-y-2">
                   {summary.allocation.map((a) => (
                     <div key={a.symbol} className="flex justify-between text-sm">
-                      <span className="text-white/80 font-medium">{a.symbol}</span>
+                      <span className="text-[var(--text)] font-medium">{a.symbol}</span>
                       <span className="text-white/60">
                         <PriceDisplay price={a.value} currency={guessCurrency(a.symbol)} size="sm" />
                         {' '}({a.percentage.toFixed(1)}%)
@@ -222,7 +222,7 @@ export default function PortfolioPage() {
             <div className="eyebrow">Holdings</div>
             <h2 className="section-rule">Holdings</h2>
             {summary.holdings.length === 0 ? (
-              <div className="text-white/50 text-sm py-6 text-center">No holdings. Click "Add Holding" to start.</div>
+              <div className="text-[var(--dim)] text-sm py-6 text-center">No holdings. Click "Add Holding" to start.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="tbl">
@@ -245,7 +245,7 @@ export default function PortfolioPage() {
                           <td className="font-medium">
                             <button
                               onClick={() => setExpanded(expanded === h.id ? null : h.id)}
-                              className="flex items-center gap-1 text-white/80 hover:text-gold transition-all duration-300"
+                              className="flex items-center gap-1 text-[var(--text)] hover:text-gold transition-all duration-300"
                               title="Show live chart"
                             >
                               {expanded === h.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -269,7 +269,7 @@ export default function PortfolioPage() {
                           </td>
                         </tr>
                         {expanded === h.id && (
-                          <tr className="bg-black/20">
+                          <tr className="bg-[var(--raised)]">
                             <td colSpan={8} className="p-3">
                               <TradingViewWidget symbol={h.symbol} height={340} compact />
                             </td>

@@ -38,8 +38,8 @@ export default function BacktestPanel({ symbol }: Props) {
       <div className="flex items-start gap-3">
         <AlertTriangle size={18} className="text-yellow-400 flex-shrink-0 mt-0.5" />
         <div>
-          <h3 className="text-sm font-bold text-white mb-1">Backtest unavailable</h3>
-          <p className="text-xs text-gray-400">{err}</p>
+          <h3 className="text-sm font-bold text-[var(--text)] mb-1">Backtest unavailable</h3>
+          <p className="text-xs text-[var(--dim)]">{err}</p>
         </div>
       </div>
     </Lift>
@@ -59,20 +59,20 @@ export default function BacktestPanel({ symbol }: Props) {
   const up = model.strategy_return >= 0
 
   return (
-    <Lift className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-5 space-y-4">
+    <Lift className="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-blue-300 font-display">
           <BarChart3 size={16} /> ML Model Backtest — {symbol}
         </div>
         <div className="flex items-center gap-2">
           <select value={period} onChange={(e) => setPeriod(e.target.value)}
-            className="bg-gray-700 text-xs text-white rounded px-2 py-1 border border-gray-600">
+            className="bg-[var(--raised)] text-xs text-[var(--text)] rounded px-2 py-1 border border-[var(--border)]">
             <option value="1y">1 Year</option>
             <option value="2y">2 Years</option>
             <option value="3y">3 Years</option>
             <option value="5y">5 Years</option>
           </select>
-          <button onClick={() => fetch(true)} disabled={loading} title="Refresh" className="text-gray-400 hover:text-white disabled:opacity-50">
+          <button onClick={() => fetch(true)} disabled={loading} title="Refresh" className="text-[var(--dim)] hover:text-[var(--text)] disabled:opacity-50">
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
@@ -80,34 +80,34 @@ export default function BacktestPanel({ symbol }: Props) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <MetricCard label="Return" value={`${summary.total_return_pct.toFixed(1)}%`} tone={up ? 'text-emerald-400' : 'text-red-400'} />
-        <MetricCard label="vs Buy/Hold" value={`${summary.benchmark_return_pct.toFixed(1)}%`} tone="text-gray-300" />
+        <MetricCard label="vs Buy/Hold" value={`${summary.benchmark_return_pct.toFixed(1)}%`} tone="text-[var(--dim)]" />
         <MetricCard label="Max DD" value={`${summary.max_drawdown_pct.toFixed(1)}%`} tone="text-red-400" />
         <MetricCard label="Sharpe" value={summary.sharpe_ratio.toFixed(2)} tone={summary.sharpe_ratio >= 1 ? 'text-emerald-400' : summary.sharpe_ratio >= 0 ? 'text-yellow-400' : 'text-red-400'} />
         <MetricCard label="Win Rate" value={`${(model.win_rate * 100).toFixed(0)}%`} tone="text-blue-300" />
         <MetricCard label="Dir. Accuracy" value={`${(model.directional_accuracy * 100).toFixed(0)}%`} tone="text-blue-300" />
-        <MetricCard label="RMSE" value={model.rmse.toFixed(2)} tone="text-gray-300" />
+        <MetricCard label="RMSE" value={model.rmse.toFixed(2)} tone="text-[var(--dim)]" />
         <MetricCard label="MAPE" value={`${model.mape.toFixed(1)}%`} tone={model.mape < 3 ? 'text-emerald-400' : model.mape < 6 ? 'text-yellow-400' : 'text-red-400'} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <MetricCard label="Trades" value={summary.total_trades.toString()} tone="text-white" />
-        <MetricCard label="W / L" value={`${summary.winning_trades} / ${summary.losing_trades}`} tone="text-white" />
+        <MetricCard label="Trades" value={summary.total_trades.toString()} tone="text-[var(--text)]" />
+        <MetricCard label="W / L" value={`${summary.winning_trades} / ${summary.losing_trades}`} tone="text-[var(--text)]" />
       </div>
 
       {equity_curve.length > 0 && (
         <div>
-          <p className="text-xs text-gray-400 mb-2">Equity Curve (strategy vs buy & hold)</p>
-          <div className="bg-gray-900/60 rounded-lg p-3">
+          <p className="text-xs text-[var(--dim)] mb-2">Equity Curve (strategy vs buy & hold)</p>
+          <div className="bg-[var(--raised)] rounded-lg p-3">
             <MiniChart data={equity_curve} />
           </div>
         </div>
       )}
 
-      <details className="bg-gray-900/50 border border-gray-700 rounded-xl p-3">
-        <summary className="text-xs text-gray-400 cursor-pointer hover:text-white">Baseline comparison</summary>
+      <details className="bg-[var(--raised)] border border-[var(--border)] rounded-xl p-3">
+        <summary className="text-xs text-[var(--dim)] cursor-pointer hover:text-[var(--text)]">Baseline comparison</summary>
         <div className="mt-2 space-y-1 text-xs">
           {Object.entries(baselines).map(([name, m]) => (
-            <div key={name} className="flex justify-between text-gray-400">
+            <div key={name} className="flex justify-between text-[var(--dim)]">
               <span className="capitalize">{name.replace(/_/g, ' ')}</span>
               <span>RMSE {m.rmse.toFixed(2)} · MAE {m.mae.toFixed(2)} · MAPE {m.mape.toFixed(1)}% · R² {m.r2.toFixed(3)}</span>
             </div>
@@ -120,8 +120,8 @@ export default function BacktestPanel({ symbol }: Props) {
 
 function MetricCard({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="bg-gray-900/50 rounded-lg px-3 py-2">
-      <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
+    <div className="bg-[var(--raised)] rounded-lg px-3 py-2">
+      <div className="text-[10px] text-[var(--dim)] uppercase tracking-wide">{label}</div>
       <div className={`text-sm font-semibold font-mono tabular-nums ${tone}`}>{value}</div>
     </div>
   )

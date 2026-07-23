@@ -36,7 +36,7 @@ function Unit({ value, label, red }: { value: number; label: string; red: boolea
         <span className={`absolute inset-0 bg-gradient-to-b ${red ? 'from-red-500/20' : 'from-indigo-500/10'} to-transparent animate-pulse`} />
         <span
           key={value}
-          className={`text-2xl font-bold tabular-nums animate-[flip_0.4s_ease] ${red ? 'text-red-400' : 'text-white'}`}
+          className={`text-2xl font-bold tabular-nums animate-[flip_0.4s_ease] ${red ? 'text-red-400' : 'text-[var(--text)]'}`}
         >
           {String(value).padStart(2, '0')}
         </span>
@@ -140,7 +140,7 @@ export default function MarketClosedBanner({ marketName, isOpen, nextOpen, nextO
             <Moon className={`${red ? 'text-red-300' : 'text-indigo-300'} animate-[sway_3s_ease-in-out_infinite]`} size={26} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">{marketName} market is closed</h3>
+            <h3 className="text-lg font-bold text-[var(--text)]">{marketName} market is closed</h3>
             <p className="text-sm text-gray-400 flex items-center gap-1.5">
               <Clock size={13} />
               {red ? <span className="text-red-400 font-semibold animate-pulse">Opening in seconds…</span>

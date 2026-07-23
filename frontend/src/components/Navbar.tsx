@@ -54,8 +54,8 @@ export default function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const linksRef = useRef<(HTMLAnchorElement | null)[]>([])
 
-  const isGuest = user?.id === 0
-  const isRealUser = !isGuest && user !== null && user.id > 0
+  const isGuest = user?.id === '0'
+  const isRealUser = !isGuest && user !== null && !!user.id
 
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||

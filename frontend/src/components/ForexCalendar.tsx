@@ -82,7 +82,7 @@ export default function ForexCalendar() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Calendar size={20} className="text-blue-400" />
-          <h2 className="text-lg font-bold text-white font-display">Forex & Economic Calendar</h2>
+          <h2 className="text-lg font-bold text-[var(--text)] font-display">Forex & Economic Calendar</h2>
         </div>
         <div className="flex items-center gap-3">
           {source && (
@@ -98,7 +98,7 @@ export default function ForexCalendar() {
             </div>
           )}
           <button onClick={load} disabled={loading} title="Refresh"
-                  className="text-gray-400 hover:text-white disabled:opacity-40 transition">
+                  className="text-[var(--dim)] hover:text-[var(--text)] disabled:opacity-40 transition">
             <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
@@ -133,9 +133,9 @@ export default function ForexCalendar() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {pairs.slice(0, 8).map((p) => (
-              <div key={p.pair} className="bg-gray-700/60 rounded-lg p-2.5 border border-gray-600 hover:border-gray-500 transition">
-                <p className="text-xs text-gray-400">{p.pair}</p>
-                <p className="text-white font-bold text-sm">{p.rate.toFixed(4)}</p>
+              <div key={p.pair} className="bg-[var(--raised)] rounded-lg p-2.5 border border-[var(--border)] hover:border-[var(--border-2)] transition">
+                <p className="text-xs text-[var(--dim)]">{p.pair}</p>
+                <p className="text-[var(--text)] font-bold text-sm">{p.rate.toFixed(4)}</p>
                 <p className={`text-xs font-medium ${p.change_percent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {p.change_percent >= 0 ? '▲' : '▼'} {Math.abs(p.change_percent).toFixed(3)}%
                 </p>
@@ -152,7 +152,7 @@ export default function ForexCalendar() {
             Upcoming Events
           </span>
           <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-500 mr-1">Impact:</span>
+            <span className="text-xs text-[var(--dim)] mr-1">Impact:</span>
             {['High', 'Medium', 'Low', ''].map((imp) => (
               <button
                 key={imp || 'all'}
@@ -160,7 +160,7 @@ export default function ForexCalendar() {
                 className={`px-2 py-1 text-xs rounded border transition ${
                   impactFilter === imp
                     ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-                    : 'border-gray-600 bg-gray-700 text-gray-400 hover:bg-gray-600'
+                    : 'border-[var(--border)] bg-[var(--raised)] text-[var(--dim)] hover:bg-[var(--surface-3)]'
                 }`}
               >
                 {imp === 'High' ? '🔴 High' : imp === 'Medium' ? '🟠 Med' : imp === 'Low' ? '⚪ Low' : 'All'}
@@ -174,11 +174,11 @@ export default function ForexCalendar() {
         )}
 
         {events === null && !calError && (
-          <div className="text-gray-500 text-sm animate-pulse">Loading calendar…</div>
+          <div className="text-[var(--dim)] text-sm animate-pulse">Loading calendar…</div>
         )}
 
         {events && events.length === 0 && !calError && (
-          <div className="text-gray-500 text-sm py-4 text-center">No events matching current filter.</div>
+          <div className="text-[var(--dim)] text-sm py-4 text-center">No events matching current filter.</div>
         )}
 
         {events && events.length > 0 && (
@@ -186,8 +186,8 @@ export default function ForexCalendar() {
             {events.map((ev, i) => (
               <div key={i} className={`flex items-start gap-3 rounded-lg p-3 border transition ${
                 isNewsHigh(ev)
-                  ? 'bg-red-900/10 border-red-800/30 hover:bg-red-900/20'
-                  : 'bg-gray-700/30 border-gray-700 hover:bg-gray-700/50'
+                  ? 'bg-red-500/5 border-red-500/20 hover:bg-red-500/10'
+                  : 'bg-[var(--raised)] border-[var(--border)] hover:bg-[var(--surface-3)]'
               }`}>
                 {/* Impact dot */}
                 <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${IMPACT_DOTS[ev.impact] || 'bg-gray-500'}`} />
@@ -195,7 +195,7 @@ export default function ForexCalendar() {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1">
-                      <span className="text-white text-sm font-medium">{ev.title}</span>
+                      <span className="text-[var(--text)] text-sm font-medium">{ev.title}</span>
                       <span className="ml-2 text-xs font-bold text-blue-400">
                         {COUNTRY_FLAGS[ev.country] || ''} {ev.country}
                       </span>
@@ -205,7 +205,7 @@ export default function ForexCalendar() {
                     </span>
                   </div>
 
-                  <p className="text-xs text-gray-400 mt-0.5">{formatEventDate(ev.date)}</p>
+                  <p className="text-xs text-[var(--dim)] mt-0.5">{formatEventDate(ev.date)}</p>
 
                   {(ev.forecast || ev.previous || ev.actual) && (
                     <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">

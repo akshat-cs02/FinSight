@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Shield, Users, Cpu, BarChart3, RefreshCw, PlayCircle, CheckCircle2, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Shield, Users, Cpu, BarChart3, RefreshCw, PlayCircle, CheckCircle2, Trash2, ToggleLeft, ToggleRight, Eye, EyeOff, Zap, Filter } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { pageEnter, staggerItems } from '@/utils/animations'
 import {
-  adminService, AdminUser, ModelOverview, SystemStats,
+  adminService, AdminUser, ModelOverview, SystemStats, AdminSignal,
 } from '@/services/adminService'
 import SEO from '@/components/SEO'
 import { formatTradeDate, formatLocalDate } from '@/utils/timezone'
@@ -23,6 +23,9 @@ export default function AdminPage() {
   const [models, setModels] = useState<ModelOverview[] | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
+  const [signals, setSignals] = useState<AdminSignal[] | null>(null)
+  const [signalsTotal, setSignalsTotal] = useState(0)
+  const [signalFilter, setSignalFilter] = useState<string>('')
   const mainRef = useRef<HTMLDivElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
   const modelsRef = useRef<HTMLDivElement>(null)
@@ -41,18 +44,28 @@ export default function AdminPage() {
   const refresh = async () => {
     setErr(null)
     try {
-      const [s, u, m] = await Promise.all([
+      const [s, u, m, sig] = await Promise.all([
         adminService.stats(),
         adminService.listUsers(),
         adminService.modelsOverview(),
+        adminService.listSignals({ limit: 100, ...(signalFilter ? { outcome: signalFilter } : {}) }),
       ])
       setStats(s); setUsers(u.users); setModels(m.models)
+      setSignals(sig.signals); setSignalsTotal(sig.total)
     } catch (e: any) {
       setErr(e.response?.data?.detail || e.message)
     }
   }
 
+  const refreshSignals = async () => {
+    try {
+      const sig = await adminService.listSignals({ limit: 100, ...(signalFilter ? { outcome: signalFilter } : {}) })
+      setSignals(sig.signals); setSignalsTotal(sig.total)
+    } catch {}
+  }
+
   useEffect(() => { refresh() }, [])
+  useEffect(() => { refreshSignals() }, [signalFilter])
 
   const toggleUser = async (id: number) => {
     try {
@@ -92,6 +105,27 @@ export default function AdminPage() {
     } catch (e: any) {
       toast.error(e.response?.data?.detail || 'Failed')
       setBusy(null)
+    }
+  }
+
+  const toggleHideSignal = async (id: number) => {
+    try {
+      await adminService.toggleHideSignal(id)
+      toast.success('Signal visibility updated')
+      refreshSignals()
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail || 'Failed')
+    }
+  }
+
+  const deleteSignal = async (id: number, symbol: string) => {
+    if (!confirm(`Permanently delete ${symbol} signal #${id}?`)) return
+    try {
+      await adminService.deleteSignal(id)
+      toast.success('Signal deleted')
+      refreshSignals()
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail || 'Failed')
     }
   }
 
@@ -242,6 +276,98 @@ export default function AdminPage() {
                         {u.is_active ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                       </button>
                       <button onClick={() => deleteUser(u.id, u.email)} className="text-gold hover:text-gold-2">
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Section>
+      </div>
+
+      {/* Signal Management */}
+      <div>
+      <Section title="Signal Management" icon={<Zap size={18} className="text-gold" />} className="card-accent card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-ink-400">{signalsTotal} total signals</span>
+            <div className="flex items-center gap-1">
+              <Filter size={12} className="text-ink-400" />
+              <select
+                value={signalFilter}
+                onChange={(e) => setSignalFilter(e.target.value)}
+                className="text-xs bg-[var(--raised)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text)] outline-none"
+              >
+                <option value="">All</option>
+                <option value="PENDING">Pending</option>
+                <option value="TP_HIT">TP Hit</option>
+                <option value="SL_HIT">SL Hit</option>
+                <option value="EXPIRED">Expired</option>
+              </select>
+            </div>
+          </div>
+          <button onClick={refreshSignals} className="text-xs text-ink-400 hover:text-ink-100 flex items-center gap-1">
+            <RefreshCw size={12} /> Refresh
+          </button>
+        </div>
+        {signals === null ? <div className="text-ink-500 text-sm">Loading…</div> : (
+          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+            <table className="tbl w-full text-sm">
+              <thead>
+                <tr className="text-ink-400 border-b border-ink-700">
+                  <th className="text-left py-2 px-2">ID</th>
+                  <th className="text-left py-2 px-2">Symbol</th>
+                  <th className="text-center py-2 px-2">Signal</th>
+                  <th className="text-right py-2 px-2">Entry</th>
+                  <th className="text-right py-2 px-2">SL</th>
+                  <th className="text-right py-2 px-2">TP</th>
+                  <th className="text-right py-2 px-2">Confidence</th>
+                  <th className="text-center py-2 px-2">Outcome</th>
+                  <th className="text-center py-2 px-2">Hidden</th>
+                  <th className="text-right py-2 px-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {signals.map((s) => (
+                  <tr key={s.id} className={`border-b border-ink-700 ${s.is_hidden ? 'opacity-50' : ''}`}>
+                    <td className="py-2 px-2 text-ink-400 text-xs">{s.id}</td>
+                    <td className="py-2 px-2 text-ink-100 font-medium">{s.symbol}</td>
+                    <td className="py-2 px-2 text-center">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        s.signal === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                      }`}>{s.signal}</span>
+                    </td>
+                    <td className="py-2 px-2 text-right text-ink-300 font-mono text-xs">{s.entry?.toFixed(2)}</td>
+                    <td className="py-2 px-2 text-right text-red-400 font-mono text-xs">{s.sl?.toFixed(2)}</td>
+                    <td className="py-2 px-2 text-right text-emerald-400 font-mono text-xs">{s.tp?.toFixed(2)}</td>
+                    <td className="py-2 px-2 text-right text-ink-300 text-xs">{s.confidence?.toFixed(0)}%</td>
+                    <td className="py-2 px-2 text-center">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        s.outcome === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400' :
+                        s.outcome === 'TP_HIT' ? 'bg-emerald-500/20 text-emerald-400' :
+                        s.outcome === 'SL_HIT' ? 'bg-red-500/20 text-red-400' :
+                        'bg-white/10 text-white/50'
+                      }`}>{s.outcome}</span>
+                    </td>
+                    <td className="py-2 px-2 text-center">
+                      {s.is_hidden ? <EyeOff size={14} className="text-red-400 mx-auto" /> : <Eye size={14} className="text-ink-400 mx-auto" />}
+                    </td>
+                    <td className="py-2 px-2 text-right space-x-2">
+                      <button
+                        onClick={() => toggleHideSignal(s.id)}
+                        className="text-ink-400 hover:text-gold transition-colors"
+                        title={s.is_hidden ? 'Unhide from main site' : 'Hide from main site'}
+                      >
+                        {s.is_hidden ? <Eye size={14} /> : <EyeOff size={14} />}
+                      </button>
+                      <button
+                        onClick={() => deleteSignal(s.id, s.symbol)}
+                        className="text-ink-400 hover:text-red-400 transition-colors"
+                        title="Delete signal"
+                      >
                         <Trash2 size={14} />
                       </button>
                     </td>

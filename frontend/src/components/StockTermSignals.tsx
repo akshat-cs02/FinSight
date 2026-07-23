@@ -74,7 +74,7 @@ function FundamentalChip({ label, value }: { label: string; value: string | numb
   return (
     <div className="bg-gray-800 rounded px-2 py-1 text-center">
       <div className="text-xs text-gray-500">{label}</div>
-      <div className="text-xs font-medium text-white">{value}</div>
+      <div className="text-xs font-medium text-[var(--text)]">{value}</div>
     </div>
   )
 }
@@ -103,7 +103,7 @@ function TermCard({
     <div className={`rounded-xl border ${borderColor} ${bgColor} bg-gray-900 p-4 flex flex-col gap-3`}>
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-sm font-semibold text-white">{title}</div>
+          <div className="text-sm font-semibold text-[var(--text)]">{title}</div>
           <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
             <Calendar size={10} /> {timeframe}
           </div>

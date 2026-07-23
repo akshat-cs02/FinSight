@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import (
-    AuditLog, Portfolio, Prediction, User, get_db,
+    AuditLog, IntradaySignal, Portfolio, Prediction, User, get_db,
 )
 from app.security import get_current_admin as _base_admin
 from app.rate_limit import sliding_window_check
@@ -191,6 +191,67 @@ def system_stats(admin: User = Depends(get_current_admin), db: Session = Depends
             "details": trained,
         },
     }
+
+
+# ============ Signal management ============
+@router.get("/signals")
+def list_signals(
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    outcome: Optional[str] = Query(None),
+    symbol: Optional[str] = Query(None),
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """List all signals (including hidden) for admin management."""
+    q = db.query(IntradaySignal)
+    if outcome:
+        q = q.filter(IntradaySignal.outcome == outcome)
+    if symbol:
+        q = q.filter(IntradaySignal.symbol == symbol.upper())
+    total = q.count()
+    rows = q.order_by(IntradaySignal.generated_at.desc()).offset(offset).limit(limit).all()
+    return {
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "signals": [
+            {
+                "id": r.id, "symbol": r.symbol, "strategy": r.strategy,
+                "signal": r.signal, "entry": r.entry, "sl": r.sl, "tp": r.tp,
+                "confidence": r.confidence, "timeframe": r.timeframe,
+                "kill_zone": r.kill_zone, "htf_bias": r.htf_bias,
+                "generated_at": r.generated_at.isoformat() + "Z" if r.generated_at else None,
+                "outcome": r.outcome, "pnl_r": r.pnl_r,
+                "is_hidden": getattr(r, 'is_hidden', False),
+            }
+            for r in rows
+        ],
+    }
+
+
+@router.patch("/signals/{signal_id}/hide")
+def toggle_hide_signal(signal_id: int, admin: User = Depends(get_current_admin),
+                       db: Session = Depends(get_db)):
+    """Toggle hidden flag on a signal — hidden signals don't show on main site."""
+    row = db.query(IntradaySignal).filter(IntradaySignal.id == signal_id).first()
+    if not row:
+        raise HTTPException(404, "Signal not found")
+    row.is_hidden = not getattr(row, 'is_hidden', False)
+    db.commit()
+    return {"id": row.id, "symbol": row.symbol, "is_hidden": row.is_hidden}
+
+
+@router.delete("/signals/{signal_id}")
+def delete_signal(signal_id: int, admin: User = Depends(get_current_admin),
+                  db: Session = Depends(get_db)):
+    """Permanently delete a signal."""
+    row = db.query(IntradaySignal).filter(IntradaySignal.id == signal_id).first()
+    if not row:
+        raise HTTPException(404, "Signal not found")
+    db.delete(row)
+    db.commit()
+    return {"deleted": signal_id}
 
 
 # ============ Audit logs ============

@@ -15,10 +15,10 @@ const TABS: { label: string; value: Days }[] = [
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="bg-white/[0.03] rounded-xl p-3 text-center border border-white/5">
-      <div className="text-xl font-bold text-white">{value}</div>
-      <div className="text-xs text-white/40 mt-0.5">{label}</div>
-      {sub && <div className="text-xs text-white/30 mt-0.5">{sub}</div>}
+    <div className="bg-[var(--raised)] rounded-xl p-3 text-center border border-[var(--border)]">
+      <div className="text-xl font-bold text-[var(--text)]">{value}</div>
+      <div className="text-xs text-[var(--dim)] mt-0.5">{label}</div>
+      {sub && <div className="text-xs text-[var(--faint)] mt-0.5">{sub}</div>}
     </div>
   )
 }
@@ -42,19 +42,19 @@ export default function SignalPerformance() {
   useEffect(() => { load(days) }, [days])
 
   return (
-    <div className="bg-[#141414] rounded-xl border border-white/5 p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <BarChart2 size={18} className="text-gold" />
-          <h2 className="text-lg font-semibold text-white">My Signal Performance</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">My Signal Performance</h2>
         </div>
-        <div className="flex gap-1 bg-white/[0.03] rounded-lg p-0.5">
+        <div className="flex gap-1 bg-[var(--raised)] rounded-lg p-0.5">
           {TABS.map((t) => (
             <button
               key={t.value}
               onClick={() => setDays(t.value)}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-300 ${
-                days === t.value ? 'bg-gold text-black' : 'text-white/40 hover:text-white/70'
+                days === t.value ? 'bg-gold text-black' : 'text-[var(--dim)] hover:text-[var(--text)]'
               }`}
             >
               {t.label}
@@ -64,7 +64,7 @@ export default function SignalPerformance() {
       </div>
 
       {loading && !stats && (
-        <div className="h-40 flex items-center justify-center text-white/30 text-sm">Loading...</div>
+        <div className="h-40 flex items-center justify-center text-[var(--faint)] text-sm">Loading...</div>
       )}
 
       {stats && (
@@ -99,7 +99,7 @@ export default function SignalPerformance() {
 
           {stats.total_signals > 0 && stats.daily_pnl.length > 1 && (
             <div className="mb-4">
-              <div className="text-xs text-white/40 mb-2 flex items-center gap-1">
+              <div className="text-xs text-[var(--dim)] mb-2 flex items-center gap-1">
                 <TrendingUp size={11} /> Cumulative P&L (R-multiples)
               </div>
               <ResponsiveContainer width="100%" height={110}>
@@ -125,7 +125,7 @@ export default function SignalPerformance() {
 
           {stats.daily_pnl.length > 1 && (
             <div>
-              <div className="text-xs text-white/40 mb-2">Daily Wins vs Losses</div>
+              <div className="text-xs text-[var(--dim)] mb-2">Daily Wins vs Losses</div>
               <ResponsiveContainer width="100%" height={80}>
                 <BarChart data={stats.daily_pnl} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
                   <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
@@ -141,7 +141,7 @@ export default function SignalPerformance() {
           )}
 
           {stats.daily_pnl.length <= 1 && (
-            <div className="text-center py-6 text-white/30 text-sm">
+            <div className="text-center py-6 text-[var(--faint)] text-sm">
               Not enough data yet — signals will appear here as they generate and resolve.
             </div>
           )}

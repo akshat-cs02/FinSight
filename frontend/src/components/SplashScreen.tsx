@@ -51,7 +51,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0a0a0a]"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[var(--bg)]"
     >
       <div ref={logoRef} className="mb-6">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center font-bold text-2xl text-black shadow-2xl shadow-gold/30">
@@ -60,7 +60,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
       </div>
 
       <div ref={textRef} className="text-center">
-        <h1 className="text-3xl font-bold font-display text-white tracking-tight">
+        <h1 className="text-3xl font-bold font-display text-[var(--text)] tracking-tight">
           FinSight
         </h1>
       </div>

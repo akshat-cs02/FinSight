@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
     const checkAuth = async () => {
       try {
         // bootstrap calls /auth/me which validates the httpOnly cookie
-        if (!initialized || !user || user.id === 0) {
+        if (!initialized || !user || user.id === '0') {
           await bootstrap()
         }
         if (!cancelled) {

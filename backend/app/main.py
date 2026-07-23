@@ -3,6 +3,7 @@ FinSight Backend — public API serving real market data, portfolio, news, indic
 """
 import asyncio
 import logging
+import httpx
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -44,6 +45,21 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger("finsight")
 
 
+async def _keep_alive_loop():
+    """Self-ping /health every 5 minutes to prevent Render free-tier sleep."""
+    import os
+    base = os.environ.get("FINSIGHT_PUBLIC_URL", "http://127.0.0.1:8000")
+    url = f"{base.rstrip('/')}/health"
+    while True:
+        await asyncio.sleep(300)  # 5 minutes
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                r = await client.get(url)
+                logger.debug("Keep-alive ping %s → %s", url, r.status_code)
+        except Exception as exc:
+            logger.warning("Keep-alive ping failed: %s", exc)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
@@ -61,6 +77,8 @@ async def lifespan(app: FastAPI):
         logger.error("Startup cleanup failed: %s", e)
     asyncio.create_task(background_signals_loop())
     logger.info("Background signal refresh loop started")
+    asyncio.create_task(_keep_alive_loop())
+    logger.info("Keep-alive loop started (every 5 min)")
     yield
 
 

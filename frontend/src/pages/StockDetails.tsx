@@ -226,16 +226,16 @@ function StockDetailsContent() {
       <div ref={headerRef} className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <div className="eyebrow">Stock Details</div>
-          <h1 className="text-3xl font-bold text-white font-display">{SYMBOL}</h1>
+          <h1 className="text-3xl font-bold text-[var(--text)] font-display">{SYMBOL}</h1>
           {quote ? (
-            <p className="text-white/50">
+            <p className="text-[var(--dim)]">
               {quote.name} · {quote.exchange || ''} ·{' '}
               <span className="text-green font-semibold">{currency}</span>
             </p>
           ) : !err ? (
-            <p className="text-white/40 text-sm animate-pulse">Loading {SYMBOL}…</p>
+            <p className="text-[var(--dim)] text-sm animate-pulse">Loading {SYMBOL}…</p>
           ) : (
-            <p className="text-white/40 text-sm">Symbol not found</p>
+            <p className="text-[var(--dim)] text-sm">Symbol not found</p>
           )}
         </div>
         {quote ? (
@@ -258,10 +258,10 @@ function StockDetailsContent() {
 
       {/* Spot-adjusted note */}
       {spotAdjusted && (
-        <Lift className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
+        <Lift className="card-layer rounded-xl px-4 py-2.5 text-[var(--dim)] text-sm flex items-start gap-2">
           <span className="text-blue-400 mt-0.5 shrink-0">ⓘ</span>
           <span>
-            Showing <strong className="text-white font-medium">spot {spotAdjusted}</strong> prices. Yahoo only carries
+            Showing <strong className="text-[var(--text)] font-medium">spot {spotAdjusted}</strong> prices. Yahoo only carries
             {' '}{spotAdjusted} as a futures contract, so we convert it to the spot scale (anchored to the
             {' '}{spotAdjusted === 'gold' ? 'GLD' : 'SLV'} ETF). Signals, entries, SL/TP and targets are all on the spot scale.
           </span>
@@ -270,11 +270,11 @@ function StockDetailsContent() {
 
       {/* Futures-only note */}
       {futuresNote && (
-        <Lift className="card-layer rounded-xl px-4 py-2.5 text-white/50 text-sm flex items-start gap-2">
+        <Lift className="card-layer rounded-xl px-4 py-2.5 text-[var(--dim)] text-sm flex items-start gap-2">
           <span className="text-amber mt-0.5 shrink-0">ⓘ</span>
           <span>
             Spot {SYMBOL.replace('=X', '')} has no live data feed, so prices, chart, and signals here use{' '}
-            <strong className="text-white font-medium">{futuresNote}</strong> — which trades slightly above/below spot.
+            <strong className="text-[var(--text)] font-medium">{futuresNote}</strong> — which trades slightly above/below spot.
             The direction and % moves track spot closely.
           </span>
         </Lift>
@@ -310,13 +310,13 @@ function StockDetailsContent() {
         <Lift className="card-layer rounded-xl p-4"><form onSubmit={addToPortfolio}>
           <div className="flex flex-wrap gap-3 items-end">
             <div>
-              <label className="block text-xs text-white/40 mb-1">Quantity</label>
+              <label className="block text-xs text-[var(--dim)] mb-1">Quantity</label>
               <input type="number" step="any" required value={addForm.quantity}
                      onChange={(e) => setAddForm({ ...addForm, quantity: e.target.value })}
                      className="inp w-32" />
             </div>
             <div>
-              <label className="block text-xs text-white/40 mb-1">Buy Price ({sym})</label>
+              <label className="block text-xs text-[var(--dim)] mb-1">Buy Price ({sym})</label>
               <input type="number" step="any" required value={addForm.purchase_price}
                      onChange={(e) => setAddForm({ ...addForm, purchase_price: e.target.value })}
                      placeholder={quote?.price.toFixed(2) || '0.00'}
@@ -344,7 +344,7 @@ function StockDetailsContent() {
           </Lift>
           <Lift className="card-flat card-layer rounded-xl p-3">
             <p className="eyebrow">Volume</p>
-            <p className="text-white font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
+            <p className="text-[var(--text)] font-semibold font-mono tabular-nums">{quote.volume.toLocaleString()}</p>
           </Lift>
           {quote.fifty_two_week_high && (
             <Lift className="card-flat card-layer rounded-xl p-3">
@@ -361,13 +361,13 @@ function StockDetailsContent() {
           {quote.market_cap && (
             <Lift className="card-flat card-layer rounded-xl p-3">
               <p className="eyebrow">Market Cap</p>
-              <p className="text-white font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
+              <p className="text-[var(--text)] font-semibold font-mono tabular-nums">{formatMarketCap(quote.market_cap, currency)}</p>
             </Lift>
           )}
           {quote.pe_ratio && (
             <Lift className="card-flat card-layer rounded-xl p-3">
               <p className="eyebrow">P/E</p>
-              <p className="text-white font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
+              <p className="text-[var(--text)] font-semibold font-mono tabular-nums">{quote.pe_ratio.toFixed(2)}</p>
             </Lift>
           )}
         </div>
@@ -414,14 +414,14 @@ function StockDetailsContent() {
       {indicators && (
         <Lift className="card-accent card-surface2 p-5"><div ref={technicalRef}>
           <div className="eyebrow">Analysis</div>
-          <h2 className="section-rule mb-4 text-white">Technical Indicators</h2>
+          <h2 className="section-rule mb-4 text-[var(--text)]">Technical Indicators</h2>
           <div className="flex justify-between items-center mb-4">
             <p className="text-xs text-white/50">
               This bias comes from RSI / MACD / Bollinger only. The <strong className="text-green-400">AI Prediction</strong> above
               is the authoritative recommendation — it combines these indicators with the LSTM+XGBoost forecast.
             </p>
             <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-              <span className="text-xs text-white/50">Technical-only bias:</span>
+              <span className="text-xs text-[var(--dim)]">Technical-only bias:</span>
               <span className={`badge ${
                 indicators.signal === 'BUY' ? 'badge-gains' :
                 indicators.signal === 'SELL' ? 'badge-losses' :
@@ -432,8 +432,8 @@ function StockDetailsContent() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.entries(indicators.latest).map(([k, v]) => (
               <Lift key={k} className="card-flat card-layer rounded-xl p-3">
-                <p className="text-xs text-white/40 uppercase tracking-wider">{k.replace(/_/g, ' ')}</p>
-                <p className="text-white font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
+                <p className="text-xs text-[var(--dim)] uppercase tracking-wider">{k.replace(/_/g, ' ')}</p>
+                <p className="text-[var(--text)] font-semibold font-mono tabular-nums">{v !== null && v !== undefined ? v.toFixed(2) : '-'}</p>
               </Lift>
             ))}
           </div>
@@ -443,24 +443,24 @@ function StockDetailsContent() {
       {/* News */}
       <Lift className="card-surface2 p-5 rounded-xl"><div ref={newsRef}>
         <div className="eyebrow">Latest</div>
-        <h2 className="text-lg mb-4 text-white font-display font-bold">Recent News</h2>
-        {news === null && <div className="text-white/40 text-sm">Loading news…</div>}
-        {news && news.length === 0 && <div className="text-white/40 text-sm">No recent news</div>}
+        <h2 className="text-lg mb-4 text-[var(--text)] font-display font-bold">Recent News</h2>
+        {news === null && <div className="text-[var(--dim)] text-sm">Loading news…</div>}
+        {news && news.length === 0 && <div className="text-[var(--dim)] text-sm">No recent news</div>}
         {news && news.length > 0 && (
           <div className="space-y-3">
             {news.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                 className="block pb-3 border-b border-white/5 last:border-b-0 hover:bg-white/[0.02] rounded p-2 -m-2 transition-all duration-300">
+                 className="block pb-3 border-b border-[var(--border)] last:border-b-0 hover:bg-[var(--raised)] rounded p-2 -m-2 transition-all duration-300">
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-white/70 font-medium flex-1">{a.title}</h3>
+                  <h3 className="text-[var(--text)] font-medium flex-1">{a.title}</h3>
                   <span className={`ml-3 badge ${
                     a.sentiment === 'POSITIVE' ? 'badge-gains' :
                     a.sentiment === 'NEGATIVE' ? 'badge-losses' :
                     'badge-neutral'
                   }`}>{a.sentiment}</span>
                 </div>
-                {a.summary && <p className="text-white/50 text-sm line-clamp-2">{a.summary}</p>}
-                <p className="text-white/40 text-xs mt-1">{a.source}</p>
+                {a.summary && <p className="text-[var(--dim)] text-sm line-clamp-2">{a.summary}</p>}
+                <p className="text-[var(--dim)] text-xs mt-1">{a.source}</p>
               </a>
             ))}
           </div>

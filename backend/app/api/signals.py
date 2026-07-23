@@ -62,6 +62,7 @@ def get_signal_activity(limit: int = Query(20, ge=1, le=100), db: Session = Depe
         db.query(IntradaySignal)
         .filter(IntradaySignal.generated_at >= cutoff)
         .filter(IntradaySignal.outcome.in_(["TP_HIT", "SL_HIT", "EXPIRED"]))
+        .filter(IntradaySignal.is_hidden == False)
         .order_by(IntradaySignal.outcome_at.desc())
         .limit(limit)
         .all()
