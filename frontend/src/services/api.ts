@@ -25,11 +25,11 @@ api.interceptors.response.use(
             let handled = false
             const onHandled = () => { handled = true }
             window.addEventListener('finsight:navigate', onHandled, { once: true })
-            window.dispatchEvent(new CustomEvent('finsight:navigate', { detail: '/login' }))
+            window.dispatchEvent(new CustomEvent('finsight:navigate', { detail: '/' }))
             setTimeout(() => {
               window.removeEventListener('finsight:navigate', onHandled)
-              if (!handled && window.location.pathname !== '/login') {
-                window.location.href = '/login'
+              if (!handled && window.location.pathname !== '/') {
+                window.location.href = '/'
               }
             }, 100)
           }

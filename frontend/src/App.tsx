@@ -31,8 +31,7 @@ const BacktestingPage = lazy(() => import('@/pages/Backtesting'))
 const StatsCounter = lazy(() => import('@/components/StatsCounter'))
 const CTASection = lazy(() => import('@/components/CTASection'))
 const Footer = lazy(() => import('@/components/Footer'))
-const LoginPage = lazy(() => import('@/pages/auth/Login'))
-const RegisterPage = lazy(() => import('@/pages/auth/Register'))
+// Login/Register handled by static landing.html — no React SPA routes needed
 
 /* ─── Mouse glow effect ─── */
 function MouseGlow() {
@@ -358,8 +357,8 @@ export default function App() {
           <Route path="/news"        element={<ProtectedRoute><ErrorBoundary><NewsPage /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/admin"       element={<ProtectedRoute adminOnly><ErrorBoundary><AdminPage /></ErrorBoundary></ProtectedRoute>} />
         </Route>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LandingRedirect />} />
+        <Route path="/register" element={<LandingRedirect />} />
         <Route path="*" element={<LandingRedirect />} />
       </Routes>
 

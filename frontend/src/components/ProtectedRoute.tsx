@@ -21,14 +21,19 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
     let cancelled = false
     const checkAuth = async () => {
       try {
-        // bootstrap calls /auth/me which validates the httpOnly cookie
-        if (!initialized || !user || user.id === '0') {
+        // Only call bootstrap if not yet initialized or user is null.
+        // Never re-bootstrap if user already has a real logged-in account
+        // (prevents resetting a logged-in user back to guest on re-render).
+        const currentUser = useAuthStore.getState().user
+        const isGuestEmail = currentUser?.email === 'guest@finsight.app'
+        const isRealUser = !isGuestEmail && currentUser !== null && !!currentUser?.id && currentUser.id !== '0'
+        if (!initialized || !currentUser || (!isRealUser && !isGuestEmail)) {
           await bootstrap()
         }
         if (!cancelled) {
           // After bootstrap, check if we have any user (including guest)
-          const currentUser = useAuthStore.getState().user
-          setAuthenticated(!!currentUser)
+          const finalUser = useAuthStore.getState().user
+          setAuthenticated(!!finalUser)
           setChecking(false)
         }
       } catch {
@@ -54,7 +59,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
   }
 
   if (!authenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/" replace />
   }
 
   if (adminOnly && !user?.is_admin) {

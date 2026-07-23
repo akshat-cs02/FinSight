@@ -99,7 +99,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       // for backward compat, but the cookie is the authoritative auth mechanism.
       const { data } = await api.post('/auth/login', { email, password })
       const user = (data.user || GUEST_USER) as User
-      set({ user, token: 'cookie', loading: false })
+      set({ user, token: 'cookie', loading: false, initialized: true })
       return user
     } catch (err) {
       set({ loading: false })
@@ -112,7 +112,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await api.post('/auth/register', formData)
       const user = (data.user || GUEST_USER) as User
-      set({ user, token: 'cookie', loading: false })
+      set({ user, token: 'cookie', loading: false, initialized: true })
     } catch (err) {
       set({ loading: false })
       throw err

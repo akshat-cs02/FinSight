@@ -680,6 +680,50 @@ h1, h2, h3, h4, .font-display {
 [data-theme="light"] .bg-gradient-to-br.from-\[\#1a1a1a\]\/90 { background: rgba(245,245,240,0.9) !important; }
 [data-theme="light"] .bg-gradient-to-br.to-\[\#222222\]\/80 { background: rgba(232,232,224,0.8) !important; }
 
+/* --- Missing gray-900 background variants (PredictionCard, SignalConsensus, StockTermSignals) --- */
+[data-theme="light"] .bg-gray-900\/40 { background: rgba(232,232,224,0.4) !important; }
+[data-theme="light"] .bg-gray-900\/50 { background: rgba(232,232,224,0.5) !important; }
+[data-theme="light"] .bg-gray-900\/60 { background: rgba(232,232,224,0.6) !important; }
+[data-theme="light"] .bg-gray-900\/70 { background: rgba(232,232,224,0.7) !important; }
+
+/* --- Missing gray-800 base and variants (Backtesting, charts) --- */
+[data-theme="light"] .bg-gray-800 { background: var(--raised) !important; }
+[data-theme="light"] .bg-gray-800\/50 { background: rgba(232,232,224,0.5) !important; }
+[data-theme="light"] .bg-gray-800\/80 { background: rgba(232,232,224,0.8) !important; }
+
+/* --- Missing gray-700 opacity variants (PaperTrading, Backtesting) --- */
+[data-theme="light"] .bg-gray-700\/30 { background: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] .bg-gray-700\/50 { background: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .bg-gray-700\/60 { background: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] .bg-gray-700\/20 { background: rgba(0,0,0,0.03) !important; }
+
+/* --- Missing gray-600 backgrounds (PaperTrading, PredictionCard) --- */
+[data-theme="light"] .bg-gray-600 { background: var(--surface-3) !important; }
+[data-theme="light"] .bg-gray-600\/40 { background: rgba(0,0,0,0.05) !important; }
+
+/* --- Missing gray-500 backgrounds (ForexCalendar) --- */
+[data-theme="light"] .bg-gray-500\/15 { background: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .bg-gray-500\/20 { background: rgba(0,0,0,0.06) !important; }
+
+/* --- Missing gray-950 variants (TradingViewWidget) --- */
+[data-theme="light"] .bg-gray-950\/60 { background: rgba(232,232,224,0.6) !important; }
+
+/* --- Missing border-gray overrides --- */
+[data-theme="light"] .border-gray-600 { border-color: var(--border-2) !important; }
+[data-theme="light"] .border-gray-700 { border-color: var(--border) !important; }
+[data-theme="light"] .border-gray-700\/40 { border-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .border-gray-700\/50 { border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .border-gray-600\/40 { border-color: rgba(0,0,0,0.06) !important; }
+
+/* --- Missing gray text color overrides --- */
+[data-theme="light"] .text-gray-200 { color: rgba(26,26,26,0.75) !important; }
+[data-theme="light"] .text-gray-300 { color: rgba(26,26,26,0.65) !important; }
+[data-theme="light"] .hover\:text-gray-200:hover { color: rgba(26,26,26,0.75) !important; }
+[data-theme="light"] .hover\:text-gray-300:hover { color: rgba(26,26,26,0.65) !important; }
+[data-theme="light"] .hover\:bg-gray-700:hover { background: var(--surface-3) !important; }
+[data-theme="light"] .hover\:bg-gray-700\/20:hover { background: rgba(0,0,0,0.03) !important; }
+[data-theme="light"] .hover\:bg-gray-700\/30:hover { background: rgba(0,0,0,0.04) !important; }
+
 /* --- Reduced Motion --- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

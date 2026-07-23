@@ -3,11 +3,11 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "redirects": [
-    { "source": "/landing.html", "destination": "/" }
+    { "source": "/landing.html", "destination": "/" },
+    { "source": "/login", "destination": "/" },
+    { "source": "/register", "destination": "/" }
   ],
   "rewrites": [
-    { "source": "/login", "destination": "/index.html" },
-    { "source": "/register", "destination": "/index.html" },
     { "source": "/api/(.*)", "destination": "https://finsight-backend-mnn6.onrender.com/api/$1" },
     { "source": "/dashboard(.*)", "destination": "/app.html" },
     { "source": "/stocks(.*)", "destination": "/app.html" },

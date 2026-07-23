@@ -54,8 +54,8 @@ export default function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const linksRef = useRef<(HTMLAnchorElement | null)[]>([])
 
-  const isGuest = user?.id === '0'
-  const isRealUser = !isGuest && user !== null && !!user.id
+  const isGuest = user?.email === 'guest@finsight.app' || user?.id === '0'
+  const isRealUser = !isGuest && user !== null && !!user?.email && user.email !== 'guest@finsight.app'
 
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
@@ -277,7 +277,7 @@ export default function Navbar() {
           ) : (
             <button
               ref={signInBtnRef}
-              onClick={() => window.location.href = '/login'}
+              onClick={() => window.location.href = '/'}
               className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-gold/10 text-gold text-sm font-medium transition-colors duration-300 border border-gold/20"
             >
               <Sparkles size={14} />
@@ -375,7 +375,7 @@ export default function Navbar() {
               <div className="px-3 pb-3 pt-1 border-t border-[var(--border)]">
                 {isGuest && (
                   <button
-                    onClick={() => window.location.href = '/login'}
+                    onClick={() => window.location.href = '/'}
                     className="group/signin w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-gold/10 transition-all duration-300 flex items-center gap-2.5 text-gold font-medium"
                   >
                     <Sparkles size={14} className="transition-transform duration-300 group-hover/signin:scale-110" />
@@ -476,7 +476,7 @@ export default function Navbar() {
           </div>
           {isGuest ? (
             <button
-              onClick={() => { closeDrawer(); window.location.href = '/login'; }}
+              onClick={() => { closeDrawer(); window.location.href = '/'; }}
               className="group/msignin w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-gold/10 hover:bg-gold/20 text-gold text-sm font-medium transition-all duration-300 border border-gold/20 hover:shadow-lg hover:shadow-gold/10"
             >
               <Sparkles size={14} className="transition-transform duration-300 group-hover/msignin:scale-110 group-hover/msignin:rotate-12" />
