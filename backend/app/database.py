@@ -20,11 +20,14 @@ def _utcnow():
 
 # Database setup — echo=False suppresses connection-pool ROLLBACK noise.
 # Set echo=settings.DEBUG only if you need raw SQL logging for debugging.
+_is_pg = settings.DATABASE_URL.startswith("postgresql")
 engine = create_engine(
     settings.DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {},
+    connect_args={"check_same_thread": False} if not _is_pg else {},
     echo=False,
     pool_pre_ping=True,
+    # PostgreSQL: pool settings for Neon serverless (connections are transient)
+    **({"pool_size": 5, "max_overflow": 10, "pool_timeout": 30, "pool_recycle": 300} if _is_pg else {}),
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -57,7 +60,6 @@ class User(Base):
     email_verification_expires = Column(Float, nullable=True)
     password_reset_token     = Column(String(128), nullable=True, index=True)
     password_reset_expires   = Column(Float, nullable=True)
-    last_login = Column(DateTime, nullable=True)
 
 class Portfolio(Base):
     """Portfolio model"""
@@ -269,24 +271,34 @@ class IntradaySignal(Base):
 def _auto_migrate():
     """Add missing columns to existing tables (safe to re-run)."""
     with engine.connect() as conn:
-        try:
-            conn.execute(text("ALTER TABLE intraday_signals ADD COLUMN is_hidden BOOLEAN DEFAULT 0"))
-            conn.commit()
-            logger.info("Migration: added is_hidden to intraday_signals")
-        except Exception:
-            pass  # Column already exists
+        # SQLite-only: ALTER TABLE ADD COLUMN (PostgreSQL uses CREATE IF NOT)
+        if not _is_pg:
+            try:
+                conn.execute(text("ALTER TABLE intraday_signals ADD COLUMN is_hidden BOOLEAN DEFAULT 0"))
+                conn.commit()
+                logger.info("Migration: added is_hidden to intraday_signals")
+            except Exception:
+                pass  # Column already exists
+        else:
+            # PostgreSQL: ALTER COLUMN SET DEFAULT if column exists but default is missing
+            try:
+                conn.execute(text("ALTER TABLE intraday_signals ALTER COLUMN is_hidden SET DEFAULT false"))
+                conn.commit()
+            except Exception:
+                pass
 
 
 def init_db():
     """Initialize database with all tables"""
     try:
         Base.metadata.create_all(bind=engine)
-        # Create missing indexes (safe to re-run — CREATE INDEX IF NOT EXISTS in SQLite ≥3.33.0)
+        # Create missing indexes (safe to re-run on both SQLite and PostgreSQL)
         with engine.connect() as conn:
             conn.execute(text("CREATE INDEX IF NOT EXISTS ix_outcome_generated_at ON intraday_signals(outcome, generated_at)"))
             conn.commit()
-        _auto_migrate()
-        logger.info("Database tables created successfully")
+        if not _is_pg:
+            _auto_migrate()
+        logger.info("Database tables created successfully (%s)", "PostgreSQL" if _is_pg else "SQLite")
         return True
     except Exception as e:
         logger.error(f"Failed to initialize database: {str(e)}")

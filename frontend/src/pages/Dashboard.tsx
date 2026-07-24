@@ -284,6 +284,7 @@ export default function DashboardPage() {
     signals: useRef<HTMLDivElement>(null),
     performance: useRef<HTMLDivElement>(null),
     indices: useRef<HTMLDivElement>(null),
+    trending: useRef<HTMLDivElement>(null),
     gainersLosers: useRef<HTMLDivElement>(null),
     news: useRef<HTMLDivElement>(null),
   }
@@ -471,7 +472,7 @@ export default function DashboardPage() {
       </div></Lift>
 
       {/* ── Trending ── */}
-      <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-5">
+      <Lift><div ref={scrollAnimRefs.trending as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-5">
         <div className="section-rule mb-5 text-[var(--text)]">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
         </div>

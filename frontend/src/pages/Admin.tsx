@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Shield, Users, Cpu, BarChart3, RefreshCw, PlayCircle, CheckCircle2, Trash2, ToggleLeft, ToggleRight, Eye, EyeOff, Zap, Filter } from 'lucide-react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { Shield, Users, Cpu, BarChart3, RefreshCw, PlayCircle, CheckCircle2, Trash2, ToggleLeft, ToggleRight, Eye, EyeOff, Zap, Filter, Database, Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Plus, Pencil, X, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { pageEnter, staggerItems } from '@/utils/animations'
 import {
   adminService, AdminUser, ModelOverview, SystemStats, AdminSignal,
+  DbTable, DbTablesResponse, DbTableRowsResponse,
 } from '@/services/adminService'
 import SEO from '@/components/SEO'
 import { formatTradeDate, formatLocalDate } from '@/utils/timezone'
@@ -14,6 +15,328 @@ function Section({ title, icon, className, children }: { title: string; icon?: R
       <h2 className="section-eyebrow font-display text-ink-100 mb-4 flex items-center gap-2">{icon}{title}</h2>
       {children}
     </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Database Explorer — browse any table, search, sort, paginate
+   ═══════════════════════════════════════════════════════════════════════ */
+function DatabaseExplorer() {
+  const [tables, setTables] = useState<DbTable[]>([])
+  const [selected, setSelected] = useState<string>('users')
+  const [rows, setRows] = useState<Record<string, any>[]>([])
+  const [columns, setColumns] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [perPage] = useState(50)
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState<string>('id')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [loading, setLoading] = useState(false)
+  const [summary, setSummary] = useState<{ total_tables: number; total_rows: number; activity_7d: { new_users: number; signals_generated: number; predictions_made: number } } | null>(null)
+  // CRUD state
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newRow, setNewRow] = useState<Record<string, string>>({})
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editRow, setEditRow] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState<number | null>(null)
+
+  // Load table list + summary on mount
+  useEffect(() => {
+    adminService.dbTables().then((r) => setTables(r.tables)).catch(() => {})
+    adminService.dbSummary().then(setSummary).catch(() => {})
+  }, [])
+
+  // Load table rows when selected table, page, search, or sort changes
+  const loadRows = useCallback(async () => {
+    setLoading(true)
+    try {
+      const r = await adminService.dbTableRows(selected, {
+        page, per_page: perPage, search: search || undefined,
+        sort_by: sortBy || undefined, sort_dir: sortDir,
+      })
+      setRows(r.rows)
+      setColumns(r.columns)
+      setTotal(r.total)
+      setTotalPages(r.total_pages)
+    } catch {} finally {
+      setLoading(false)
+    }
+  }, [selected, page, perPage, search, sortBy, sortDir])
+
+  useEffect(() => { loadRows() }, [loadRows])
+
+  // Reset to page 1 when table or search changes
+  useEffect(() => { setPage(1) }, [selected, search])
+
+  const toggleSort = (col: string) => {
+    if (sortBy === col) {
+      setSortDir((d) => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(col)
+      setSortDir('desc')
+    }
+  }
+
+  const formatCell = (val: any): string => {
+    if (val === null || val === undefined) return '—'
+    if (typeof val === 'boolean') return val ? '✓' : '✗'
+    if (typeof val === 'number') return val.toLocaleString()
+    if (typeof val === 'string' && val.length > 120) return val.slice(0, 120) + '…'
+    return String(val)
+  }
+
+  const activeTable = tables.find((t) => t.name === selected)
+
+  // ── CRUD helpers ──
+  const EDITABLE_COLS = useMemo(() => columns.filter((c) => c !== 'id' && c !== 'created_at' && c !== 'updated_at'), [columns])
+
+  const openAddModal = () => {
+    const blank: Record<string, string> = {}
+    EDITABLE_COLS.forEach((c) => { blank[c] = '' })
+    setNewRow(blank)
+    setShowAddModal(true)
+  }
+
+  const handleCreate = async () => {
+    setSaving(true)
+    try {
+      const payload: Record<string, any> = {}
+      Object.entries(newRow).forEach(([k, v]) => { if (v !== '') payload[k] = v })
+      await adminService.dbCreateRow(selected, payload)
+      toast.success('Row created!')
+      setShowAddModal(false)
+      loadRows()
+      adminService.dbTables().then((r) => setTables(r.tables)).catch(() => {})
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail || 'Create failed')
+    } finally { setSaving(false) }
+  }
+
+  const startEdit = (row: Record<string, any>) => {
+    setEditingId(row.id)
+    const mapped: Record<string, string> = {}
+    EDITABLE_COLS.forEach((c) => { mapped[c] = row[c] != null ? String(row[c]) : '' })
+    setEditRow(mapped)
+  }
+
+  const handleUpdate = async () => {
+    if (editingId == null) return
+    setSaving(true)
+    try {
+      const payload: Record<string, any> = {}
+      Object.entries(editRow).forEach(([k, v]) => { payload[k] = v === '' ? null : v })
+      await adminService.dbUpdateRow(selected, editingId, payload)
+      toast.success('Row updated!')
+      setEditingId(null)
+      loadRows()
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail || 'Update failed')
+    } finally { setSaving(false) }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(`Delete row #${id} from ${selected}?`)) return
+    setDeleting(id)
+    try {
+      await adminService.dbDeleteRow(selected, id)
+      toast.success('Row deleted!')
+      loadRows()
+      adminService.dbTables().then((r) => setTables(r.tables)).catch(() => {})
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail || 'Delete failed')
+    } finally { setDeleting(null) }
+  }
+
+  return (
+    <Section title="Database Explorer" icon={<Database size={18} className="text-gold" />} className="card-accent card p-5">
+      {/* Summary row */}
+      {summary && (
+        <div className="flex flex-wrap gap-4 mb-4 pb-4 border-b border-ink-700">
+          <div className="text-xs text-ink-400">
+            <span className="text-ink-100 font-bold font-mono">{summary.total_tables}</span> tables
+            <span className="mx-1.5 text-ink-600">·</span>
+            <span className="text-ink-100 font-bold font-mono">{summary.total_rows.toLocaleString()}</span> total rows
+          </div>
+          <div className="flex gap-3 text-xs">
+            <span className="text-green-400">+{summary.activity_7d.new_users} users (7d)</span>
+            <span className="text-gold">+{summary.activity_7d.signals_generated} signals (7d)</span>
+            <span className="text-blue-400">+{summary.activity_7d.predictions_made} predictions (7d)</span>
+          </div>
+        </div>
+      )}
+
+      {/* Table tabs + search */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex flex-wrap gap-1.5">
+          {tables.map((t) => (
+            <button
+              key={t.name}
+              onClick={() => setSelected(t.name)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                selected === t.name
+                  ? 'bg-gold text-black shadow-sm'
+                  : 'bg-[var(--raised)] text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--surface-3)]'
+              }`}
+            >
+              {t.name.replace(/_/g, ' ')}
+              <span className="opacity-60 text-[10px]">({t.rows})</span>
+            </button>
+          ))}
+        </div>
+        <div className="relative flex-shrink-0">
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search rows…"
+            className="pl-8 pr-3 py-1.5 text-xs bg-[var(--raised)] border border-[var(--border)] rounded-lg text-[var(--text)] outline-none focus:border-gold/50 w-48"
+          />
+        </div>
+      </div>
+
+      {/* Table info */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-ink-400">
+          {activeTable && (
+            <>
+              <span className="text-ink-100 font-medium">{selected}</span>
+              {' '}&middot;{' '}{activeTable.columns.length} columns
+              {' '}&middot;{' '}{total.toLocaleString()} rows
+              {search && <span className="text-gold"> &middot; filtered</span>}
+            </>
+          )}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setPage((p) => Math.max(1, p - 1)) }}
+            disabled={page <= 1}
+            className="p-1 rounded bg-[var(--raised)] text-ink-400 hover:text-ink-100 disabled:opacity-30"
+          ><ChevronLeft size={14} /></button>
+          <span className="text-xs text-ink-400 font-mono">
+            {page} / {totalPages || 1}
+          </span>
+          <button
+            onClick={() => { setPage((p) => Math.min(totalPages, p + 1)) }}
+            disabled={page >= totalPages}
+            className="p-1 rounded bg-[var(--raised)] text-ink-400 hover:text-ink-100 disabled:opacity-30"
+          ><ChevronRight size={14} /></button>
+          <button
+            onClick={openAddModal}
+            className="ml-2 px-2.5 py-1 bg-gold hover:bg-gold-2 text-black text-xs font-medium rounded-lg inline-flex items-center gap-1 transition-colors"
+          ><Plus size={12} /> Add Row</button>
+        </div>
+      </div>
+
+      {/* Data table */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="text-center py-12 text-ink-500 text-sm">
+          {search ? 'No rows match your search' : 'No data in this table'}
+        </div>
+      ) : (
+        <div className="overflow-x-auto max-h-[600px] overflow-y-auto rounded-lg border border-[var(--border)]">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-[var(--raised)]">
+                {columns.map((col) => (
+                  <th
+                    key={col}
+                    onClick={() => toggleSort(col)}
+                    className="text-left py-2.5 px-3 text-ink-400 font-medium whitespace-nowrap cursor-pointer hover:text-ink-100 transition-colors border-b border-ink-700 select-none"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {col.replace(/_/g, ' ')}
+                      {sortBy === col ? (
+                        sortDir === 'asc' ? <ArrowUp size={10} className="text-gold" /> : <ArrowDown size={10} className="text-gold" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-0 group-hover:opacity-100" />
+                      )}
+                    </span>
+                  </th>
+                ))}
+                <th className="text-right py-2.5 px-3 text-ink-400 font-medium border-b border-ink-700 w-20">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => {
+                const isEditing = editingId === row.id
+                return (
+                  <tr key={row.id ?? i} className={`border-b border-ink-700/50 transition-colors ${isEditing ? 'bg-gold/[0.04]' : 'hover:bg-white/[0.02]'}`}>
+                    {columns.map((col) => (
+                      <td key={col} className="py-2 px-3 text-ink-300 whitespace-nowrap max-w-[250px]">
+                        {isEditing && EDITABLE_COLS.includes(col) ? (
+                          <input
+                            type="text"
+                            value={editRow[col] ?? ''}
+                            onChange={(e) => setEditRow({ ...editRow, [col]: e.target.value })}
+                            className="w-full bg-[var(--raised)] border border-gold/30 rounded px-2 py-1 text-xs text-[var(--text)] outline-none focus:border-gold"
+                          />
+                        ) : (
+                          <span className="truncate block" title={String(row[col] ?? '')}>
+                            {formatCell(row[col])}
+                          </span>
+                        )}
+                      </td>
+                    ))}
+                    <td className="py-2 px-3 text-right">
+                      {isEditing ? (
+                        <span className="inline-flex gap-1">
+                          <button onClick={handleUpdate} disabled={saving} className="text-green-400 hover:text-green-300" title="Save"><Save size={14} /></button>
+                          <button onClick={() => setEditingId(null)} className="text-ink-400 hover:text-ink-100" title="Cancel"><X size={14} /></button>
+                        </span>
+                      ) : (
+                        <span className="inline-flex gap-1">
+                          <button onClick={() => startEdit(row)} className="text-ink-400 hover:text-gold transition-colors" title="Edit row"><Pencil size={13} /></button>
+                          <button onClick={() => handleDelete(row.id)} disabled={deleting === row.id} className="text-ink-400 hover:text-red-400 transition-colors disabled:opacity-30" title="Delete row"><Trash2 size={13} /></button>
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {/* Add Row Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)}>
+          <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-[var(--text)] flex items-center gap-2"><Plus size={18} className="text-gold" /> Add Row to {selected}</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-ink-400 hover:text-ink-100"><X size={18} /></button>
+            </div>
+            <div className="space-y-3">
+              {EDITABLE_COLS.map((col) => (
+                <div key={col}>
+                  <label className="block text-xs text-[var(--dim)] mb-1 capitalize">{col.replace(/_/g, ' ')}</label>
+                  <input
+                    type="text"
+                    value={newRow[col] ?? ''}
+                    onChange={(e) => setNewRow({ ...newRow, [col]: e.target.value })}
+                    placeholder={`Enter ${col.replace(/_/g, ' ')}…`}
+                    className="w-full bg-[var(--raised)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-gold/50"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowAddModal(false)} className="px-4 py-2 text-sm text-ink-400 hover:text-ink-100">Cancel</button>
+              <button onClick={handleCreate} disabled={saving} className="px-4 py-2 bg-gold hover:bg-gold-2 text-black text-sm font-medium rounded-lg inline-flex items-center gap-1 disabled:opacity-50">
+                {saving ? 'Saving…' : <><Save size={14} /> Create</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </Section>
   )
 }
 
@@ -287,6 +610,9 @@ export default function AdminPage() {
         )}
       </Section>
       </div>
+
+      {/* Database Explorer */}
+      <DatabaseExplorer />
 
       {/* Signal Management */}
       <div>

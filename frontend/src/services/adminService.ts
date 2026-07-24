@@ -63,6 +63,39 @@ export interface AdminSignal {
   is_hidden: boolean
 }
 
+export interface DbTable {
+  name: string
+  rows: number
+  columns: string[]
+}
+
+export interface DbTablesResponse {
+  tables: DbTable[]
+  total_tables: number
+  total_rows: number
+}
+
+export interface DbTableRowsResponse {
+  table: string
+  columns: string[]
+  rows: Record<string, any>[]
+  total: number
+  page: number
+  per_page: number
+  total_pages: number
+}
+
+export interface DbSummary {
+  tables: { name: string; rows: number }[]
+  total_tables: number
+  total_rows: number
+  activity_7d: {
+    new_users: number
+    signals_generated: number
+    predictions_made: number
+  }
+}
+
 export const adminService = {
   listUsers: () => api.get<{ count: number; users: AdminUser[] }>('/admin/users').then((r) => r.data),
   toggleActive: (id: number) => api.patch(`/admin/users/${id}/toggle-active`).then((r) => r.data),
@@ -77,4 +110,15 @@ export const adminService = {
     api.get<{ total: number; signals: AdminSignal[] }>('/admin/signals', { params }).then((r) => r.data),
   toggleHideSignal: (id: number) => api.patch(`/admin/signals/${id}/hide`).then((r) => r.data),
   deleteSignal: (id: number) => api.delete(`/admin/signals/${id}`).then((r) => r.data),
+  // Database dashboard
+  dbTables: () => api.get<DbTablesResponse>('/admin/database/tables').then((r) => r.data),
+  dbTableRows: (table: string, params: { page?: number; per_page?: number; search?: string; sort_by?: string; sort_dir?: string } = {}) =>
+    api.get<DbTableRowsResponse>(`/admin/database/table/${table}`, { params }).then((r) => r.data),
+  dbSummary: () => api.get<DbSummary>('/admin/database/summary').then((r) => r.data),
+  dbCreateRow: (table: string, data: Record<string, any>) =>
+    api.post<{ ok: boolean; row: Record<string, any> }>(`/admin/database/table/${table}`, data).then((r) => r.data),
+  dbUpdateRow: (table: string, id: number, data: Record<string, any>) =>
+    api.put<{ ok: boolean; row: Record<string, any> }>(`/admin/database/table/${table}/${id}`, data).then((r) => r.data),
+  dbDeleteRow: (table: string, id: number) =>
+    api.delete<{ ok: boolean }>(`/admin/database/table/${table}/${id}`).then((r) => r.data),
 }
