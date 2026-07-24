@@ -342,6 +342,10 @@ export default function App() {
   // Warm up backend on app mount (fire-and-forget)
   useEffect(() => { warmUpBackend() }, [])
 
+  // Recover session from httpOnly cookie on app mount
+  const bootstrap = useAuthStore((s) => s.bootstrap)
+  useEffect(() => { bootstrap() }, [])
+
   return (
     <Router>
       <GlobalNavigateListener />
