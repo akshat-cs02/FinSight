@@ -8,7 +8,18 @@ import gsap from 'gsap'
 
 interface Props { symbols?: string[]; intervalSec?: number }
 
-const DEFAULT = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA', 'AMZN']
+const DEFAULT = [
+  // US Stocks
+  'AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA', 'AMZN', 'META',
+  // India
+  'RELIANCE.NS', 'TCS.NS',
+  // Crypto
+  'BTC-USD', 'ETH-USD',
+  // Forex
+  'EURUSD=X', 'GBPUSD=X', 'USDJPY=X',
+  // Commodities
+  'GC=F', 'CL=F',
+]
 
 export default function LiveTicker({ symbols = DEFAULT, intervalSec = 5 }: Props) {
   const navigate = useNavigate()

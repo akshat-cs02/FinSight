@@ -19,22 +19,26 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
 
   useEffect(() => {
     let cancelled = false
+    let bootstrapped = false
     const checkAuth = async () => {
       try {
-        // Only call bootstrap if not yet initialized or user is null.
-        // Never re-bootstrap if user already has a real logged-in account
-        // (prevents resetting a logged-in user back to guest on re-render).
+        // Fast path: if user is already a real logged-in user, skip everything.
         const currentUser = useAuthStore.getState().user
-        const isGuestEmail = currentUser?.email === 'guest@finsight.app'
-        const isRealUser = !isGuestEmail && currentUser !== null && !!currentUser?.id && currentUser.id !== '0'
-        if (!initialized || !currentUser || (!isRealUser && !isGuestEmail)) {
+        const isReal = currentUser && currentUser.id !== '0' && currentUser.email !== 'guest@finsight.app'
+        if (isReal) {
+          if (!cancelled) { setAuthenticated(true); setChecking(false) }
+          return
+        }
+        // Only call bootstrap once (prevents double-calls from App.tsx + ProtectedRoute)
+        if (!bootstrapped) {
+          bootstrapped = true
           await bootstrap()
         }
         if (!cancelled) {
-          // After bootstrap, only allow real logged-in users (not GUEST_USER)
+          // After bootstrap, check again
           const finalUser = useAuthStore.getState().user
-          const isReal = finalUser && finalUser.id !== '0' && finalUser.email !== 'guest@finsight.app'
-          setAuthenticated(!!isReal)
+          const ok = finalUser && finalUser.id !== '0' && finalUser.email !== 'guest@finsight.app'
+          setAuthenticated(!!ok)
           setChecking(false)
         }
       } catch {
@@ -46,7 +50,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
     }
     checkAuth()
     return () => { cancelled = true }
-  }, [initialized, user, bootstrap])
+  }, [])
 
   if (checking) {
     return (
