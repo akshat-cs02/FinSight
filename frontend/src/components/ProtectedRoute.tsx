@@ -31,9 +31,10 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
           await bootstrap()
         }
         if (!cancelled) {
-          // After bootstrap, check if we have any user (including guest)
+          // After bootstrap, only allow real logged-in users (not GUEST_USER)
           const finalUser = useAuthStore.getState().user
-          setAuthenticated(!!finalUser)
+          const isReal = finalUser && finalUser.id !== '0' && finalUser.email !== 'guest@finsight.app'
+          setAuthenticated(!!isReal)
           setChecking(false)
         }
       } catch {

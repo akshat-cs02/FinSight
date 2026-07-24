@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: GUEST_USER,
   token: null,
   loading: false,
-  initialized: true,
+  initialized: false,
   visitor: null,
 
   bootstrap: async () => {

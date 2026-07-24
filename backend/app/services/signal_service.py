@@ -164,8 +164,12 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
             return cached
 
     # ── Compute fresh signal (expensive yfinance calls) ────────────────────
-    raw = get_live_signal(sym, strategy)
-    sig = raw["signal"]
+    try:
+        raw = get_live_signal(sym, strategy)
+        sig = raw["signal"]
+    except Exception as exc:
+        logger.warning("Signal worker: get_live_signal failed for %s: %s", sym, exc)
+        return None
 
     try:
         df15      = _fetch_ohlcv(sym, "30d", interval="15m")
@@ -184,9 +188,45 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
         if sig != "HOLD" else 0.0
     )
 
-    # ── Persist to DB (skip HOLD — no point tracking) ──────────────────────
+    # ── Fallback: when ICT strategy returns HOLD, derive a weak direction
+    #    from RSI + HTF bias so the dashboard always shows live activity.
+    #    This avoids the empty-cache problem (all 26 symbols → HOLD → nothing).
+    #    Fallback signals are NOT persisted to DB — they're transient indicators.
+    is_fallback = False
     if sig == "HOLD":
-        return None
+        fallback_dir = 0
+        if htf_bias == "BULLISH" and rsi_val < 45:
+            fallback_dir = 1   # oversold in uptrend → weak BUY
+        elif htf_bias == "BEARISH" and rsi_val > 55:
+            fallback_dir = -1  # overbought in downtrend → weak SELL
+        elif rsi_val < 35:
+            fallback_dir = 1   # deeply oversold
+        elif rsi_val > 65:
+            fallback_dir = -1  # deeply overbought
+        if fallback_dir == 0:
+            return None  # truly neutral — no point showing
+        sig = "BUY" if fallback_dir == 1 else "SELL"
+        confidence = 35.0  # weak signal — below the 45% display threshold
+        is_fallback = True
+    # ── Persist to DB (skip HOLD and fallback signals — too weak to track) ──
+    if is_fallback:
+        # Fallback signals are in-memory only — useful for the dashboard
+        # live feed but not worth persisting (low confidence, transient).
+        return {
+            "symbol":       sym,
+            "strategy":     strategy,
+            "signal":       sig,
+            "entry":        raw.get("entry", 0),
+            "sl":           raw.get("sl", 0),
+            "tp":           raw.get("tp", 0),
+            "confidence":   confidence,
+            "timeframe":    "15M",
+            "kill_zone":    kill_zone,
+            "htf_bias":     htf_bias,
+            "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
+            "outcome":      "PENDING",
+            "is_fallback":  True,
+        }
     db = SessionLocal()
     try:
         # DB-level dedup: don't insert if an identical signal for this
@@ -304,31 +344,34 @@ def get_cached_signals(extra_symbols: list[str] | None = None) -> list[dict]:
     global _signals_cache, _signals_cache_ts
 
     if not _signals_cache:
-        # Cold start: blocking parallel warm-up via the executor
-        # Retry up to 3 times with increasing timeout (yfinance can be slow)
-        for attempt in range(3):
-            timeout = 20 + (attempt * 15)  # 20s, 35s, 50s
-            logger.info("Signal warm-up attempt %d/3 (timeout=%ds)", attempt + 1, timeout)
-            kill_zone    = _current_kill_zone()
-            futures_map  = {_executor.submit(_process_symbol, sym, kill_zone): sym
-                            for sym in SIGNAL_UNIVERSE}
-            done, _      = futures_wait(futures_map, timeout=timeout)
-            results      = []
+        # Cold start: blocking parallel warm-up via the executor.
+        # Split into small batches to avoid one slow symbol blocking the rest.
+        kill_zone    = _current_kill_zone()
+        all_results: list[dict] = []
+        batch_size = 8  # process 8 symbols at a time
+        for i in range(0, len(SIGNAL_UNIVERSE), batch_size):
+            batch = SIGNAL_UNIVERSE[i:i + batch_size]
+            batch_timeout = 30  # 30s per batch of 8 — generous for yfinance
+            logger.info("Signal warm-up batch %d/%d (%d symbols, timeout=%ds)",
+                        i // batch_size + 1,
+                        (len(SIGNAL_UNIVERSE) + batch_size - 1) // batch_size,
+                        len(batch), batch_timeout)
+            futures_map = {_executor.submit(_process_symbol, sym, kill_zone): sym
+                           for sym in batch}
+            done, _     = futures_wait(futures_map, timeout=batch_timeout)
             for f in done:
                 try:
                     r = f.result()
                     if r:
-                        results.append(r)
-                except Exception:
-                    pass
-            if results:
-                break  # Got at least some signals, no need to retry
-            logger.warning("Signal warm-up attempt %d yielded 0 signals, retrying...", attempt + 1)
+                        all_results.append(r)
+                except Exception as exc:
+                    logger.debug("Warm-up worker exception: %s", exc)
 
-        results.sort(key=lambda x: x["confidence"], reverse=True)
-        _signals_cache    = results
+        all_results.sort(key=lambda x: x["confidence"], reverse=True)
+        _signals_cache    = all_results
         _signals_cache_ts = time.monotonic()
-        logger.info("Signal warm-up complete: %d signals generated", len(results))
+        logger.info("Signal warm-up complete: %d signals generated (from %d symbols)",
+                    len(all_results), len(SIGNAL_UNIVERSE))
 
     return _signals_cache
 
