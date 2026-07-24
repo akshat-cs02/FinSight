@@ -24,8 +24,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
       try {
         // Fast path: if user is already a real logged-in user, skip everything.
         const currentUser = useAuthStore.getState().user
-        const isReal = currentUser && currentUser.id !== '0' && currentUser.email !== 'guest@finsight.app'
-        if (isReal) {
+        if (currentUser && currentUser.id !== '0' && currentUser.email !== 'guest@finsight.app') {
           if (!cancelled) { setAuthenticated(true); setChecking(false) }
           return
         }
@@ -35,10 +34,9 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
           await bootstrap()
         }
         if (!cancelled) {
-          // After bootstrap, check again
+          // Allow both real users and guest users
           const finalUser = useAuthStore.getState().user
-          const ok = finalUser && finalUser.id !== '0' && finalUser.email !== 'guest@finsight.app'
-          setAuthenticated(!!ok)
+          setAuthenticated(!!finalUser)
           setChecking(false)
         }
       } catch {
@@ -56,7 +54,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
           <p className="text-gray-400 text-sm">Verifying session…</p>
         </div>
       </div>
