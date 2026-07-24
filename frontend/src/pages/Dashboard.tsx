@@ -81,9 +81,9 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
       <div className="flex items-center justify-between mb-2.5 gap-2">
         <div className="min-w-0 flex-1">
           <h3 className="font-bold text-[var(--text)] text-[15px] font-display truncate">{s.symbol}</h3>
-          <p className="text-[11px] text-[var(--dim)] truncate">{s.name}</p>
+          <p className="text-sm text-[var(--dim)] truncate">{s.name}</p>
         </div>
-        <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded ${
+        <span className={`inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded ${
           up ? 'badge-gains' : 'badge-losses'
         }`}>
           {up ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
@@ -91,7 +91,7 @@ function StockCard({ s, onClick }: { s: StockQuote; onClick: () => void }) {
         </span>
       </div>
       <PriceDisplay price={s.price} currency={s.currency || guessCurrency(s.symbol)} size="lg" />
-      <p className={`text-[11px] mt-1 ${up ? 'text-green-400/60' : 'text-rose-400/60'}`}>
+      <p className={`text-xs mt-1 ${up ? 'text-green-400' : 'text-rose-400'}`}>
         {up ? '+' : ''}{s.change.toFixed(2)}
       </p>
     </div>
@@ -293,12 +293,12 @@ export default function DashboardPage() {
     <div ref={mainRef} className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1600px] mx-auto">
       <SEO
         title="Dashboard"
-        description="Real-time stock market overview with live prices, trending stocks, top gainers and losers, market indices, ICT/SMC signals, AI predictions, and portfolio summary."
+        description="Live stock prices, trending markets, top gainers & losers, ICT/SMC signals, AI predictions, and portfolio tracking — all in one view."
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',
           name: 'FinSight Dashboard',
-          description: 'Real-time stock market overview with AI-powered predictions and analysis.',
+          description: 'Live market data with ICT/SMC signals and AI predictions.',
         }}
       />
       {/* Header */}

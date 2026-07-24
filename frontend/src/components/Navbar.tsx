@@ -204,7 +204,7 @@ export default function Navbar() {
             </div>
             <div className="hidden sm:block leading-tight">
               <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
-              <div className="text-[9px] uppercase tracking-widest text-[var(--dim)] font-medium">Market Intelligence</div>
+              <div className="text-[9px] uppercase tracking-widest text-[var(--dim)] font-medium">Trade Smarter</div>
             </div>
           </Link>
 
@@ -418,7 +418,7 @@ export default function Navbar() {
             </div>
             <div className="leading-tight">
               <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
-              <div className="text-[8px] uppercase tracking-widest text-[var(--dim)] font-medium">Market Intelligence</div>
+              <div className="text-[8px] uppercase tracking-widest text-[var(--dim)] font-medium">Trade Smarter</div>
             </div>
           </Link>
           <button

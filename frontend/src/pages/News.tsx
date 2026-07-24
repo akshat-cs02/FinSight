@@ -31,7 +31,7 @@ export default function NewsPage() {
     <div ref={mainRef} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <SEO
         title="Financial News"
-        description="Latest financial news with AI-powered sentiment analysis. Stay updated on market movements, stock trends, and breaking financial events."
+        description="Latest financial news with sentiment analysis — market movements, stock trends, and breaking events."
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',

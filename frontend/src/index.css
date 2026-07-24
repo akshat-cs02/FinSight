@@ -597,6 +597,13 @@ h1, h2, h3, h4, .font-display {
 /* --- Green/Red text overrides (darker for light bg) --- */
 [data-theme="light"] .text-green-400\/60 { color: rgba(22,163,74,0.7) !important; }
 [data-theme="light"] .text-rose-400\/60 { color: rgba(220,38,38,0.7) !important; }
+[data-theme="light"] .text-green-400 { color: #16A34A !important; }
+[data-theme="light"] .text-rose-400 { color: #DC2626 !important; }
+[data-theme="light"] .text-emerald-400 { color: #16A34A !important; }
+[data-theme="light"] .text-red-400 { color: #DC2626 !important; }
+[data-theme="light"] .text-yellow-400 { color: #D97706 !important; }
+[data-theme="light"] .text-blue-400 { color: #2563EB !important; }
+[data-theme="light"] .text-orange-400 { color: #EA580C !important; }
 
 /* --- Section rules --- */
 [data-theme="light"] .section-rule { color: var(--text); }
@@ -718,11 +725,36 @@ h1, h2, h3, h4, .font-display {
 /* --- Missing gray text color overrides --- */
 [data-theme="light"] .text-gray-200 { color: rgba(26,26,26,0.75) !important; }
 [data-theme="light"] .text-gray-300 { color: rgba(26,26,26,0.65) !important; }
+[data-theme="light"] .text-gray-500 { color: rgba(26,26,26,0.4) !important; }
+[data-theme="light"] .text-gray-400 { color: rgba(26,26,26,0.45) !important; }
 [data-theme="light"] .hover\:text-gray-200:hover { color: rgba(26,26,26,0.75) !important; }
 [data-theme="light"] .hover\:text-gray-300:hover { color: rgba(26,26,26,0.65) !important; }
 [data-theme="light"] .hover\:bg-gray-700:hover { background: var(--surface-3) !important; }
 [data-theme="light"] .hover\:bg-gray-700\/20:hover { background: rgba(0,0,0,0.03) !important; }
 [data-theme="light"] .hover\:bg-gray-700\/30:hover { background: rgba(0,0,0,0.04) !important; }
+
+/* --- Blue/Indigo text for light mode --- */
+[data-theme="light"] .text-blue-300 { color: #2563EB !important; }
+[data-theme="light"] .text-blue-400 { color: #2563EB !important; }
+
+/* --- Orange text for light mode --- */
+[data-theme="light"] .text-orange-300 { color: #EA580C !important; }
+
+/* --- bg-gray-500 for light mode (ForexCalendar dots) --- */
+[data-theme="light"] .bg-gray-500 { background: #6B7280 !important; }
+[data-theme="light"] .bg-gray-500\/15 { background: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .bg-gray-500\/20 { background: rgba(0,0,0,0.06) !important; }
+
+/* --- bg-gray-400 for light mode --- */
+[data-theme="light"] .bg-gray-400 { background: #9CA3AF !important; }
+
+/* --- bg-red-500 for light mode (MarketClosedBanner) --- */
+[data-theme="light"] .bg-red-950\/60 { background: rgba(220,38,38,0.12) !important; }
+[data-theme="light"] .border-red-500\/60 { border-color: rgba(220,38,38,0.3) !important; }
+[data-theme="light"] .border-indigo-500\/30 { border-color: rgba(99,102,241,0.2) !important; }
+
+/* --- text-ink-500 (source credit in ForexCalendar) --- */
+[data-theme="light"] .text-ink-500 { color: rgba(26,26,26,0.35) !important; }
 
 /* --- Reduced Motion --- */
 @media (prefers-reduced-motion: reduce) {

@@ -305,21 +305,30 @@ def get_cached_signals(extra_symbols: list[str] | None = None) -> list[dict]:
 
     if not _signals_cache:
         # Cold start: blocking parallel warm-up via the executor
-        kill_zone    = _current_kill_zone()
-        futures_map  = {_executor.submit(_process_symbol, sym, kill_zone): sym
-                        for sym in SIGNAL_UNIVERSE}
-        done, _      = futures_wait(futures_map, timeout=25)
-        results      = []
-        for f in done:
-            try:
-                r = f.result()
-                if r:
-                    results.append(r)
-            except Exception:
-                pass
+        # Retry up to 3 times with increasing timeout (yfinance can be slow)
+        for attempt in range(3):
+            timeout = 20 + (attempt * 15)  # 20s, 35s, 50s
+            logger.info("Signal warm-up attempt %d/3 (timeout=%ds)", attempt + 1, timeout)
+            kill_zone    = _current_kill_zone()
+            futures_map  = {_executor.submit(_process_symbol, sym, kill_zone): sym
+                            for sym in SIGNAL_UNIVERSE}
+            done, _      = futures_wait(futures_map, timeout=timeout)
+            results      = []
+            for f in done:
+                try:
+                    r = f.result()
+                    if r:
+                        results.append(r)
+                except Exception:
+                    pass
+            if results:
+                break  # Got at least some signals, no need to retry
+            logger.warning("Signal warm-up attempt %d yielded 0 signals, retrying...", attempt + 1)
+
         results.sort(key=lambda x: x["confidence"], reverse=True)
         _signals_cache    = results
         _signals_cache_ts = time.monotonic()
+        logger.info("Signal warm-up complete: %d signals generated", len(results))
 
     return _signals_cache
 

@@ -16,12 +16,22 @@ export default function AIOutlook() {
   const [err, setErr] = useState<string | null>(null)
 
   useEffect(() => {
-    (async () => {
+    let cancelled = false
+    const timeout = setTimeout(() => {
+      if (!cancelled && items === null) {
+        setItems([])
+        setErr('AI predictions are still loading on the server. Try again in a moment.')
+      }
+    }, 45000) // 45s timeout for AI predictions (heavy ML inference)
+
+    ;(async () => {
       try {
         const status = await predictionService.listModels()
+        if (cancelled) return
         const trained = status.models.filter((m) => m.lstm || m.xgb).map((m) => m.symbol)
         if (trained.length === 0) {
           setItems([])
+          clearTimeout(timeout)
           return
         }
         const results = await Promise.allSettled(
@@ -34,16 +44,20 @@ export default function AIOutlook() {
             return data
           })
         )
+        if (cancelled) return
         const ok = results
           .filter((r): r is PromiseFulfilledResult<Prediction> => r.status === 'fulfilled')
           .map((r) => r.value)
         // Sort by confidence × abs(change) — "high conviction" moves first
         ok.sort((a, b) => (b.confidence * Math.abs(b.change_percent)) - (a.confidence * Math.abs(a.change_percent)))
         setItems(ok)
+        clearTimeout(timeout)
       } catch (e: any) {
-        setErr(e.response?.data?.detail || e.message)
+        if (!cancelled) setErr(e.response?.data?.detail || e.message)
+        clearTimeout(timeout)
       }
     })()
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [])
 
   return (

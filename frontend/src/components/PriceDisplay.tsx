@@ -6,8 +6,8 @@ const intSize = { sm: 'font-medium text-sm', md: 'font-semibold text-base', lg: 
 const decSize = { sm: 'text-[10px]', md: 'text-[11px]', lg: 'text-[12px]', xl: 'text-[14px]', hero: 'text-lg' }
 const gapMap = { sm: 'gap-px', md: 'gap-px', lg: 'gap-0.5', xl: 'gap-0.5', hero: 'gap-0.5' }
 
-const colorMap: Record<string, { color: string }> = {
-  default: { color: 'rgba(255, 255, 255, 0.85)' },
+const colorMap: Record<string, { color: string } | undefined> = {
+  default: undefined, // Use CSS variable for light/dark theme support
   gains: { color: '#22C55E' },
   losses: { color: '#EF4444' },
   brand: { color: '#D4A853' },
@@ -79,7 +79,7 @@ export default function PriceDisplay({
   const { int, dec } = splitParts(price, decimals)
   const intComma = withCommas(int)
   const s = { sym: symSize[size], int: intSize[size], dec: decSize[size], gap: gapMap[size] }
-  const colorStyle = colorMap[color] || colorMap.default
+  const colorStyle = colorMap[color] ?? colorMap.default
 
   const prev = useRef(price)
   const [flash, setFlash] = useState<'up' | 'down' | null>(null)
@@ -135,13 +135,13 @@ export default function PriceDisplay({
     <span
       ref={containerRef}
       className={`inline-flex items-baseline font-mono tabular-nums ${s.gap} ${flashClass} ${className}`}
-      style={colorStyle}
+      style={colorStyle ? colorStyle : undefined}
     >
       {showSign && price > 0 && <span className="opacity-50 text-[0.75em]">+</span>}
       {price < 0 && <span className="opacity-50 text-[0.75em]">−</span>}
-      <span className={`opacity-35 font-medium ${s.sym}`}>{sym}</span>
-      <span className={`pd-int ${s.int}`}>{intComma}</span>
-      {dec && <span className={`pd-dec opacity-40 ${s.dec}`}>.{dec}</span>}
+      <span className={`opacity-35 font-medium ${s.sym} ${!color || color === 'default' ? 'text-[var(--text)]' : ''}`}>{sym}</span>
+      <span className={`pd-int ${s.int} ${!color || color === 'default' ? 'text-[var(--text)]' : ''}`}>{intComma}</span>
+      {dec && <span className={`pd-dec opacity-40 ${s.dec} ${!color || color === 'default' ? 'text-[var(--text)]' : ''}`}>.{dec}</span>}
     </span>
   )
 }

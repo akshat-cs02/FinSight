@@ -31,14 +31,35 @@ function ScoreBar({ value, color }: { value: number; color: string }) {
 export default function WatchThese() {
   const [candidates, setCandidates] = useState<BreakoutCandidate[]>([])
   const [loading, setLoading] = useState(false)
+  const [timedOut, setTimedOut] = useState(false)
 
   useEffect(() => {
     setLoading(true)
+    setTimedOut(false)
+    const timeout = setTimeout(() => {
+      setLoading(false)
+      setTimedOut(true)
+    }, 30000) // 30s timeout
+
     signalService.getBreakouts()
       .then(setCandidates)
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => {
+        clearTimeout(timeout)
+        setLoading(false)
+      })
+    return () => clearTimeout(timeout)
   }, [])
+
+  if (timedOut && candidates.length === 0) return (
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Eye size={18} className="text-gold" />
+        <h2 className="text-lg font-semibold text-[var(--text)]">Watch These Stocks</h2>
+      </div>
+      <p className="text-xs text-[var(--dim)]">Scanning for breakout candidates… Data is still loading on the server.</p>
+    </div>
+  )
 
   if (!loading && candidates.length === 0) return null
 

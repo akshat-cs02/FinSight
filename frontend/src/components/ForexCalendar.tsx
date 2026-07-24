@@ -129,7 +129,7 @@ export default function ForexCalendar() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp size={14} className="text-emerald-400" />
-            <span className="text-xs text-gray-400 uppercase tracking-wide font-semibold">Major Pairs · Live Rates</span>
+            <span className="text-xs text-[var(--dim)] uppercase tracking-wide font-semibold">Major Pairs · Live Rates</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {pairs.slice(0, 8).map((p) => (
@@ -148,7 +148,7 @@ export default function ForexCalendar() {
       {/* Calendar section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
+          <span className="text-xs text-[var(--dim)] font-semibold uppercase tracking-wide">
             Upcoming Events
           </span>
           <div className="flex items-center gap-1">
@@ -208,16 +208,16 @@ export default function ForexCalendar() {
                   <p className="text-xs text-[var(--dim)] mt-0.5">{formatEventDate(ev.date)}</p>
 
                   {(ev.forecast || ev.previous || ev.actual) && (
-                    <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                    <div className="flex flex-wrap gap-3 mt-1 text-xs text-[var(--faint)]">
                       {ev.forecast && (
-                        <span>Forecast: <span className="text-gray-300 font-medium">{ev.forecast}</span></span>
+                        <span>Forecast: <span className="text-[var(--text)] font-medium">{ev.forecast}</span></span>
                       )}
                       {ev.previous && (
-                        <span>Prev: <span className="text-gray-300">{ev.previous}</span></span>
+                        <span>Prev: <span className="text-[var(--text)]">{ev.previous}</span></span>
                       )}
                       {ev.actual && (
                         <span>Actual: <span className={
-                          ev.actual !== ev.forecast ? 'text-yellow-400 font-semibold' : 'text-gray-300'
+                          ev.actual !== ev.forecast ? 'text-yellow-400 font-semibold' : 'text-[var(--text)]'
                         }>{ev.actual}</span></span>
                       )}
                     </div>
@@ -229,7 +229,7 @@ export default function ForexCalendar() {
         )}
       </div>
 
-      <p className="text-xs text-ink-500 flex items-center gap-1">
+      <p className="text-xs text-[var(--faint)] flex items-center gap-1">
         <Calendar size={10} />
         Source: {source || 'Loading…'} · High-impact events can cause significant price gaps — avoid trading during NFP, CPI, FOMC releases.
       </p>

@@ -37,7 +37,7 @@ export default function SignalActivity() {
   const activeCount = pending.length
 
   return (
-    <div className="bg-[#141414] rounded-xl border border-white/5 p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

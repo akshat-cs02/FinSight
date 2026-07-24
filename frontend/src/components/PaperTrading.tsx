@@ -264,7 +264,7 @@ export default function PaperTrading({
         <div className="bg-[var(--raised)] rounded-lg p-3">
           <div className="text-xs text-[var(--faint)]">Win Rate</div>
           <div className="font-bold text-[var(--text)]">{winRate}{winRate !== '—' ? '%' : ''}</div>
-          <div className="text-xs text-ink-500">{winCount}W / {lossCount}L</div>
+          <div className="text-xs text-[var(--faint)]">{winCount}W / {lossCount}L</div>
         </div>
         <div className="bg-[var(--raised)] rounded-lg p-3">
           <div className="text-xs text-[var(--faint)]">Open Trades</div>
@@ -386,16 +386,16 @@ export default function PaperTrading({
                         }`}>{t.side}</span>
                         <span className="text-[var(--text)] font-semibold text-sm">{t.symbol}</span>
                         {t.strategy && <span className="text-xs text-gray-500">{t.strategy}</span>}
-                        <span className="text-xs text-ink-500">{formatLocalDateTime(t.openedAt)}</span>
+                        <span className="text-xs text-[var(--faint)]">{formatLocalDateTime(t.openedAt)}</span>
                       </div>
                       <div className="flex flex-wrap gap-3 mt-2 text-xs">
                         <div><span className="text-gray-500">Entry </span><span className="text-blue-300">{formatPrice(t.entry, currency)}</span></div>
                         <div><span className="text-gray-500">SL </span><span className="text-red-400">{formatPrice(t.sl, currency)}</span></div>
                         <div><span className="text-gray-500">TP </span><span className="text-emerald-400">{formatPrice(t.tp, currency)}</span></div>
-                        <div><span className="text-gray-500">R:R </span><span className="text-white">1:{rr.toFixed(2)}</span></div>
-                        <div><span className="text-gray-500">Qty </span><span className="text-white">{t.qty}</span></div>
+                        <div><span className="text-gray-500">R:R </span><span className="text-[var(--text)]">1:{rr.toFixed(2)}</span></div>
+                        <div><span className="text-gray-500">Qty </span><span className="text-[var(--text)]">{t.qty}</span></div>
                         {currentPrice && (
-                          <div><span className="text-gray-500">Now </span><span className="text-white">{formatPrice(currentPrice, currency)}</span></div>
+                          <div><span className="text-gray-500">Now </span><span className="text-[var(--text)]">{formatPrice(currentPrice, currency)}</span></div>
                         )}
                       </div>
                     </div>
@@ -462,7 +462,7 @@ export default function PaperTrading({
                         'text-gray-500'
                       }`}>{t.closeReason}</span>
                     </td>
-                    <td className="py-1.5 px-1 text-ink-500">{t.closedAt ? formatLocalDateTime(t.closedAt) : '—'}</td>
+                    <td className="py-1.5 px-1 text-[var(--faint)]">{t.closedAt ? formatLocalDateTime(t.closedAt) : '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -475,7 +475,7 @@ export default function PaperTrading({
       <div className="flex items-center gap-2 pt-1 border-t border-[var(--border)]">
         {!resetConfirm ? (
           <button onClick={() => setResetConfirm(true)}
-                  className="text-xs text-ink-500 hover:text-red-400 transition">
+                  className="text-xs text-[var(--faint)] hover:text-red-400 transition">
             Reset portfolio
           </button>
         ) : (

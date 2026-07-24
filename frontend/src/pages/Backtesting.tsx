@@ -256,7 +256,7 @@ export default function BacktestingPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <SEO
         title="ICT/SMC Backtesting Engine"
-        description="Professional-grade ICT & Smart Money Concepts backtesting engine with 8 strategies, news filter, and multi-symbol universe rankings."
+        description="Backtest 8 ICT/SMC strategies with real market data — news filter, universe rankings, and Sharpe-based leaderboard."
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',
@@ -271,7 +271,7 @@ export default function BacktestingPage() {
           <BarChart2 size={28} className="text-gold" /> ICT/SMC Backtesting Engine
         </h1>
         <p className="text-ink-500 mt-1 text-sm">
-          Professional-grade backtesting with ICT & Smart Money Concepts — 8 strategies, news filter, 5-year data
+          Backtest 8 ICT/SMC strategies — news filter, 5-year data, leaderboard rankings
         </p>
       </div>
 

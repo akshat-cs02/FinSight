@@ -147,7 +147,7 @@ export default function PredictionsPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
       <SEO
         title="AI Predictions"
-        description="LSTM + XGBoost ensemble AI predictions for stock markets. Train models, view prediction history, and get buy/sell signals with confidence scores."
+        description="LSTM + XGBoost ensemble predictions for stocks — train models, view history, and get buy/sell signals with confidence scores."
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',

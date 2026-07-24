@@ -70,12 +70,12 @@ export default function WatchlistPanel({ onSearch }: Props) {
               }`}
             >
               <Bell size={12} className={a.signal === 'BUY' ? 'text-emerald-400' : 'text-red-400'} />
-              <span className="text-white font-bold">{a.symbol}</span>
+              <span className="text-[var(--text)] font-bold">{a.symbol}</span>
               <span className={a.signal === 'BUY' ? 'text-emerald-400' : 'text-red-400'}>
                 {a.signal} signal
               </span>
-              <span className="text-white/40">({a.strategy})</span>
-              <span className="ml-auto text-white/40">Confidence {a.confidence.toFixed(0)}%</span>
+              <span className="text-[var(--dim)]">({a.strategy})</span>
+              <span className="ml-auto text-[var(--dim)]">Confidence {a.confidence.toFixed(0)}%</span>
             </div>
           ))}
         </div>

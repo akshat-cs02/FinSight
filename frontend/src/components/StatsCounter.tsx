@@ -104,12 +104,12 @@ export default function StatsCounter() {
           )}
         </div>
         <h2 className="text-3xl md:text-4xl font-bold font-display text-[var(--text)] tracking-tight">
-          Built for <span className="text-gold">Performance</span>
+          Numbers that <span className="text-gold">matter</span>
         </h2>
         <p className="text-ink-400 mt-3 max-w-xl mx-auto text-sm">
           {stats
             ? `Real-time data processing with sub-${stats.prediction_latency}ms latency across ${stats.markets_covered}${stats.markets_covered > 100 ? '+' : ''} markets`
-            : 'Real-time data processing with sub-50ms latency across global markets'}
+            : '          Raw performance stats — not marketing fluff'}
         </p>
       </div>
 

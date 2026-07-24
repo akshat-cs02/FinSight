@@ -16,15 +16,15 @@ export default function CTASection() {
           <div className="flex-1 text-center md:text-left">
             <div className="flex items-center gap-2 text-gold text-sm font-semibold mb-3 justify-center md:justify-start">
               <Sparkles size={16} />
-              <span>Predictive Intelligence</span>
+              <span>Smarter Signals</span>
             </div>
             <h2 className="text-2xl md:text-3xl font-bold font-display text-white tracking-tight">
-              Ready to elevate your{' '}
-              <span className="text-gold">trading strategy</span>?
+              Stop guessing.{' '}
+              <span className="text-gold">Start trading with data.</span>
             </h2>
             <p className="text-ink-400 mt-3 text-sm max-w-lg">
-              Get real-time ICT signals, multi-model AI predictions, and institutional-grade
-              backtesting — all in one platform.
+              ICT signals, AI-powered predictions, and backtesting that actually
+              shows you what works — no fluff, just numbers.
             </p>
           </div>
 

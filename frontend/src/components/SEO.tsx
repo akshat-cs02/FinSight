@@ -23,8 +23,8 @@ export default function SEO({
   noindex = false,
   jsonLd,
 }: SEOProps) {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — AI-Powered Markets`
-  const desc = description || 'Real-time markets, ICT/SMC signals, and AI predictions in one place.'
+  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Trade Smarter`
+  const desc = description || 'Live market data, ICT/SMC signals, and AI predictions — built by traders, for traders.'
   const ogImage = image || DEFAULT_IMAGE
   const ogUrl = url || SITE_URL
 

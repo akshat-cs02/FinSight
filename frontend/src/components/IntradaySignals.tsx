@@ -32,6 +32,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
   const [allSignals, setAllSignals] = useState<IntradaySignal[]>([])
   const [loading, setLoading] = useState(false)      // only true on FIRST load / manual refresh
   const [lastUpdate, setLastUpdate] = useState<string | null>(null)
+  const [firstLoadDone, setFirstLoadDone] = useState(false)
   const sigKeyRef = useRef<string>('')               // signature of the last data we rendered
 
   // Filter the full signal set down to the selected market/asset class.
@@ -53,6 +54,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
       // silently fail — stale data still shown
     } finally {
       if (!silent) setLoading(false)
+      setFirstLoadDone(true)
     }
   }
 
@@ -121,8 +123,17 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
         )
       })()}
 
-      {/* No signals state */}
-      {!loading && signals.length === 0 && (
+      {/* Loading state — only on first load */}
+      {loading && !firstLoadDone && (
+        <div className="text-center py-8 text-[var(--dim)]">
+          <RefreshCw size={24} className="mx-auto mb-2 animate-spin opacity-40" />
+          <p className="text-sm">Generating signals...</p>
+          <p className="text-xs mt-1">Analyzing market data across 24 symbols</p>
+        </div>
+      )}
+
+      {/* No signals state — only after first load */}
+      {!loading && firstLoadDone && signals.length === 0 && (
         <div className="text-center py-8 text-[var(--dim)]">
           <Clock size={32} className="mx-auto mb-2 opacity-40" />
           <p className="text-sm">

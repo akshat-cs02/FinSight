@@ -67,7 +67,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
 
       <div ref={subtitleRef} className="mt-2">
         <p className="text-sm text-ink-400 font-medium tracking-wider uppercase text-[10px]">
-          Market Intelligence
+          Trade Smarter
         </p>
       </div>
 

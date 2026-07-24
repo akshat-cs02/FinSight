@@ -110,11 +110,11 @@ export default function SignalPerformance() {
                       <stop offset="95%" stopColor="#D4AF37" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
-                  <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.15)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'rgba(128,128,128,0.4)' }} />
+                  <YAxis tick={{ fontSize: 9, fill: 'rgba(128,128,128,0.4)' }} />
                   <Tooltip
-                    contentStyle={{ background: '#141414', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
+                    contentStyle={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 11, color: 'var(--text)' }}
                     formatter={(val: number) => [`${val >= 0 ? '+' : ''}${val}R`, 'Cumulative']}
                   />
                   <Area type="monotone" dataKey="cumulative" stroke="#D4AF37" fill="url(#pnlGrad)" strokeWidth={2} dot={false} />
@@ -128,10 +128,10 @@ export default function SignalPerformance() {
               <div className="text-xs text-[var(--dim)] mb-2">Daily Wins vs Losses</div>
               <ResponsiveContainer width="100%" height={80}>
                 <BarChart data={stats.daily_pnl} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
-                  <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'rgba(128,128,128,0.4)' }} />
+                  <YAxis tick={{ fontSize: 9, fill: 'rgba(128,128,128,0.4)' }} />
                   <Tooltip
-                    contentStyle={{ background: '#141414', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
+                    contentStyle={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 11, color: 'var(--text)' }}
                   />
                   <Bar dataKey="wins" fill="#10b981" radius={[2, 2, 0, 0]} />
                   <Bar dataKey="losses" fill="#ef4444" radius={[2, 2, 0, 0]} />

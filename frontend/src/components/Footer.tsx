@@ -50,12 +50,12 @@ export default function Footer() {
               </div>
               <div>
                 <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
-                <div className="text-[10px] text-ink-400">Market Intelligence</div>
+                <div className="text-[10px] text-ink-400">Markets. Signals. Data.</div>
               </div>
             </div>
             <p className="text-xs text-[var(--dim)] leading-relaxed max-w-xs">
-              Real-time market analysis with ICT/SMC signals, multi-model AI predictions,
-              and institutional-grade backtesting tools.
+              Live market data, ICT/SMC signals, and AI predictions
+              built by traders, for traders.
             </p>
             <div className="flex gap-3 mt-4">
               <a href="/api/docs" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-gold/10 flex items-center justify-center text-ink-400 hover:text-gold transition-all" title="API Documentation">
