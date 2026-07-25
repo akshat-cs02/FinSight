@@ -204,7 +204,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
   )
 
   if (!pred && loading) return (
-    <div className="card-layer rounded-xl p-6">
+    <div className="card-layer rounded-xl p-3 sm:p-6">
       <div className="flex items-center gap-2 text-blue-300 animate-pulse">
         <Brain size={18} /> Running ensemble (LSTM + XGBoost)…
       </div>
@@ -212,7 +212,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
   )
 
   if (!pred) return (
-    <div className="card-layer rounded-xl p-6">
+    <div className="card-layer rounded-xl p-3 sm:p-6">
       <button onClick={() => fetch()} className="text-blue-400 hover:text-blue-300 text-sm">Load AI prediction</button>
     </div>
   )
@@ -220,7 +220,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
   const up = pred.change_percent >= 0
 
   return (
-    <div className="bg-gradient-to-br from-blue-900/30 via-gray-800 to-purple-900/20 border border-blue-500/30 rounded-2xl p-6 space-y-5">
+    <div className="bg-gradient-to-br from-blue-900/30 via-gray-800 to-purple-900/20 border border-blue-500/30 rounded-2xl p-3 sm:p-6 space-y-3 sm:space-y-5">
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-2 text-sm text-blue-300 mb-1 font-display">
@@ -254,7 +254,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
         <HorizonTabs horizons={pred.horizons} overall={pred.overall} regime={pred.regime} cur={cur} />
       )}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <div>
           <p className="text-xs text-gray-400">Current</p>
           <p className="text-2xl font-bold text-white">{formatPrice(pred.current_price, cur)}</p>
@@ -272,7 +272,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 items-center">
         <div className="md:col-span-2">
           <ConfidenceMeter confidence={pred.confidence} />
           <div className="flex gap-3 mt-2 text-xs text-gray-400 flex-wrap">
@@ -293,7 +293,7 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
 
       {/* Trade plan: Entry / Stop Loss / Take Profit */}
       {pred.signal !== 'HOLD' && pred.entry_price !== null && (
-        <div className="grid grid-cols-3 gap-3 bg-gray-900/50 border border-gray-700 rounded-xl p-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 bg-gray-900/50 border border-gray-700 rounded-xl p-2.5 sm:p-4">
           <div>
             <p className="text-xs text-gray-400 mb-1">Entry Price (EP)</p>
             <p className="text-lg font-bold text-blue-300">{formatPrice(pred.entry_price!, cur)}</p>

@@ -205,8 +205,8 @@ export default function StockTermSignals({ symbol, masterSignal }: Props) {
   }, [symbol])
 
   return (
-    <div className="mb-5">
-      <div className="flex items-center justify-between mb-3">
+    <div className="mb-3 sm:mb-5">
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
         <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
           Outlook by Timeframe
         </h3>
@@ -218,7 +218,7 @@ export default function StockTermSignals({ symbol, masterSignal }: Props) {
           </span>
         )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
         <TermCard title="Short Term"  timeframe="1 Week – 3 Months"  sig={data?.short ?? null} loading={loading} master={masterSignal} />
         <TermCard title="Mid Term"    timeframe="3 Months – 1 Year"  sig={data?.mid   ?? null} loading={loading} master={masterSignal} />
         <TermCard title="Long Term"   timeframe="1 Year+"            sig={data?.long  ?? null} loading={loading} master={masterSignal} />

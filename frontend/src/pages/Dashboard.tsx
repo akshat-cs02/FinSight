@@ -290,7 +290,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div ref={mainRef} className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1600px] mx-auto">
+    <div ref={mainRef} className="px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 lg:space-y-6 max-w-[1600px] mx-auto">
       <SEO
         title="Dashboard"
         description="Live stock prices, trending markets, top gainers & losers, ICT/SMC signals, AI predictions, and portfolio tracking — all in one view."
@@ -304,7 +304,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <div className="eyebrow">OVERVIEW</div>
-        <h1 className="text-3xl font-bold text-[var(--text)] font-display tracking-tight leading-tight">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] font-display tracking-tight leading-tight">Dashboard</h1>
       </div>
 
       {/* Market Tabs — below heading, left-aligned */}
@@ -338,9 +338,9 @@ export default function DashboardPage() {
       })()}
 
       {/* ── Metrics */}
-      <div ref={metricsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div ref={metricsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
         {/* Portfolio Value */}
-        <Lift className="card-box p-5">
+        <Lift className="card-box p-3 sm:p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="icon-wrap gold"><Wallet size={16} className="text-gold" /></div>
           </div>
@@ -359,7 +359,7 @@ export default function DashboardPage() {
 
         {/* Today's P/L */}
         {portfolio != null ? (
-          <Lift className="card-box p-5">
+          <Lift className="card-box p-3 sm:p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="icon-wrap gold">
                 <TrendingUp size={16} className="text-gold" />
@@ -369,7 +369,7 @@ export default function DashboardPage() {
             <PriceDisplay price={portfolio.today_profit_loss} size="xl" color={portfolio.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
           </Lift>
         ) : (
-          <Lift className="card-box p-5">
+          <Lift className="card-box p-3 sm:p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="icon-wrap gold"><TrendingUp size={16} className="text-gold" /></div>
             </div>
@@ -379,7 +379,7 @@ export default function DashboardPage() {
         )}
 
         {/* Market Status */}
-        <Lift className="card-surface3 p-5">
+        <Lift className="card-surface3 p-3 sm:p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="icon-wrap gold"><Activity size={16} className="text-gold" /></div>
           </div>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
         </Lift>
 
         {/* Holdings */}
-        <Lift className="card-flat p-5">
+        <Lift className="card-flat p-3 sm:p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="icon-wrap gold"><BarChart3 size={16} className="text-gold" /></div>
           </div>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Signals + Watchlist ── */}
-      <div ref={scrollAnimRefs.signals as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-5">
+      <div ref={scrollAnimRefs.signals as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
         <Lift className="card overflow-hidden"><IntradaySignals market={market} /></Lift>
         <Lift className="card overflow-hidden"><WatchlistPanel onSearch={(sym) => navigate(`/stocks/${sym}`)} /></Lift>
       </div>
@@ -448,16 +448,16 @@ export default function DashboardPage() {
       </Suspense>
 
       {/* ── Market Indices ── */}
-      <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
+      <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-3 sm:p-5">
         <div className="section-rule mb-5 text-[var(--text)]">Market Indices</div>
         {errors.indices && <div className="text-rose-400 text-sm">⚠ {errors.indices}</div>}
         {indices === null && !errors.indices && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
             {[1,2,3,4].map((i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
           </div>
         )}
         {indices && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
             {indices.map((i, idx) => (
               <Lift key={i.symbol}><div className="card p-3" style={{ animationDelay: `${idx * 0.05}s` }}>
                 <div className="text-[11px] text-[var(--dim)] font-medium truncate">{i.name}</div>
@@ -472,7 +472,7 @@ export default function DashboardPage() {
       </div></Lift>
 
       {/* ── Trending ── */}
-      <Lift><div ref={scrollAnimRefs.trending as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-5">
+      <Lift><div ref={scrollAnimRefs.trending as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card p-3 sm:p-5">
         <div className="section-rule mb-5 text-[var(--text)]">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
         </div>
@@ -494,9 +494,9 @@ export default function DashboardPage() {
       </div></Lift>
 
       {/* ── Gainers & Losers ── */}
-      <div ref={scrollAnimRefs.gainersLosers as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <Lift className="card-accent card-surface2 p-5">
-          <div className="section-rule mb-5 text-[var(--text)]">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
+      <div ref={scrollAnimRefs.gainersLosers as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4">
+        <Lift className="card-accent card-surface2 p-3 sm:p-5">
+          <div className="section-rule mb-3 sm:mb-5 text-[var(--text)]">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
           {errors.gainers && <div className="text-rose-400 text-sm">⚠ {errors.gainers}</div>}
           {gainers === null && !errors.gainers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
@@ -508,8 +508,8 @@ export default function DashboardPage() {
             </div>
           )}
         </Lift>
-        <Lift className="card-accent card-surface2 p-5">
-          <div className="section-rule mb-5 text-[var(--text)]">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
+        <Lift className="card-accent card-surface2 p-3 sm:p-5">
+          <div className="section-rule mb-3 sm:mb-5 text-[var(--text)]">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
           {errors.losers && <div className="text-rose-400 text-sm">⚠ {errors.losers}</div>}
           {losers === null && !errors.losers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
@@ -528,8 +528,8 @@ export default function DashboardPage() {
       </Suspense>
 
       {/* ── News ── */}
-      <Lift><div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-5">
-        <div className="section-rule mb-5 text-[var(--text)]">Latest Financial News</div>
+      <Lift><div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-3 sm:p-5">
+        <div className="section-rule mb-3 sm:mb-5 text-[var(--text)]">Latest Financial News</div>
         {errors.news && <div className="text-rose-400 text-sm">⚠ {errors.news}</div>}
         {news === null && !errors.news && (
           <div className="space-y-3">{[1,2,3].map((i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>

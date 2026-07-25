@@ -115,13 +115,13 @@ function BottomNav() {
   const location = useLocation()
   return (
     <nav className="fixed bottom-0 inset-x-0 z-30 glass-panel border-t border-white/5 lg:hidden pb-safe">
-      <div className="flex justify-around items-center h-14 px-2">
+      <div className="flex justify-around items-center h-14 sm:h-16 px-1 sm:px-2">
         {bottomItems.map((item) => {
           const Icon = item.icon
           const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
           return (
             <Link key={item.path} to={item.path} onMouseEnter={() => prefetchRoute(item.path)}
-              className={`relative flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all duration-300 ${
+              className={`relative flex flex-col items-center gap-0.5 px-2 sm:px-3 py-1 rounded-lg transition-all duration-300 ${
                 active ? 'text-gold' : 'text-white/40 hover:text-white/60'
               }`}
             >
@@ -207,7 +207,7 @@ function Layout() {
 
       {/* Main content with pt-16 to offset fixed navbar */}
       <div className="relative z-10 pt-16">
-        <main className="flex-1 min-h-screen pb-20 lg:pb-8">
+        <main className="flex-1 min-h-screen pb-20 lg:pb-0">
           <AnimatePresence mode="wait">
             <PageTransition key={sectionKey}>
               <PageContent>
@@ -244,13 +244,11 @@ function Layout() {
       <BottomNav />
 
       {/* Keyboard shortcuts hint */}
-      <KeyboardShortcutsHint show={showShortcuts} />
-
-      {/* Scroll-to-top button */}
-      <button
-        ref={scrollBtnRef}
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-6 right-6 z-50 w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-2 text-black font-bold shadow-lg shadow-gold/20 flex items-center justify-center hover:shadow-gold/30 hover:-translate-y-0.5 transition-all duration-300"
+      <KeyboardShortcutsHint show={showShortcuts} />        {/* Scroll-to-top button */}
+        <button
+          ref={scrollBtnRef}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-[4.5rem] sm:bottom-6 right-4 sm:right-6 z-50 w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-2 text-black font-bold shadow-lg shadow-gold/20 flex items-center justify-center hover:shadow-gold/30 hover:-translate-y-0.5 transition-all duration-300"
         style={{ opacity: 0, y: 16, scale: 0.8, pointerEvents: 'none' }}
       >
         <ChevronDown size={18} className="rotate-180" />
@@ -259,7 +257,7 @@ function Layout() {
       {/* ? button for shortcuts */}
       <button
         onClick={() => setShowShortcuts((prev) => !prev)}
-        className="fixed bottom-6 left-6 z-50 w-9 h-9 rounded-xl bg-[#141414]/80 backdrop-blur-md border border-white/5 text-white/40 hover:text-white/70 hover:border-white/10 flex items-center justify-center transition-all duration-300 shadow-lg"
+        className="fixed bottom-[4.5rem] sm:bottom-6 left-4 sm:left-6 z-50 w-9 h-9 rounded-xl bg-[#141414]/80 backdrop-blur-md border border-white/5 text-white/40 hover:text-white/70 hover:border-white/10 flex items-center justify-center transition-all duration-300 shadow-lg"
       >
         <HelpCircle size={16} />
       </button>

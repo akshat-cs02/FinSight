@@ -28,7 +28,7 @@ export default function NewsPage() {
   const list = articles?.filter((a) => filter === 'ALL' || a.sentiment === filter) || null
 
   return (
-    <div ref={mainRef} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div ref={mainRef} className="p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-5 lg:space-y-6">
       <SEO
         title="Financial News"
         description="Latest financial news with sentiment analysis — market movements, stock trends, and breaking events."
@@ -64,10 +64,10 @@ export default function NewsPage() {
       {list && list.length === 0 && <div className="text-[var(--dim)] text-center py-8">No news matches filter</div>}
 
       {list && (
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {list.map((a, i) => (
             <Lift><a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                className="card-accent card-surface2 p-5 rounded-xl transition flex flex-col cursor-pointer">
+                className="card-accent card-surface2 p-3 sm:p-5 rounded-xl transition flex flex-col cursor-pointer">
               {a.thumbnail && <img src={a.thumbnail} alt="" loading="lazy" className="w-full h-32 object-cover rounded-lg mb-3" />}
               <div className="flex justify-between items-start mb-2 gap-2">
                 <h3 className="text-[var(--text)] font-bold flex-1 font-display">{a.title}</h3>

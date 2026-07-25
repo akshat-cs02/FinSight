@@ -78,7 +78,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
     : 'bg-gray-700/50 border-gray-600'
 
   return (
-    <div className="card-layer rounded-xl p-6">
+    <div className="card-layer rounded-xl p-3 sm:p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2 font-display">
@@ -109,7 +109,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
       )}
 
       {data && data.signals.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
           {data.signals.map((sig) => {
             const meta = STRATEGY_LABELS[sig.strategy] || { label: sig.strategy, icon: '📊' }
             const isLong = sig.signal === 'BUY'

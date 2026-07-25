@@ -222,7 +222,7 @@ export default function PaperTrading({
   }
 
   return (
-    <div className="card-layer rounded-xl p-6 space-y-5">
+    <div className="card-layer rounded-xl p-3 sm:p-6 space-y-3 sm:space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -244,7 +244,7 @@ export default function PaperTrading({
       </div>
 
       {/* Stats bar */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-1.5 sm:gap-2">
         <div className="bg-[var(--raised)] rounded-lg p-3">
           <div className="text-xs text-[var(--faint)]">Capital</div>
           <div className="text-[var(--text)] font-bold">${portfolio.capital.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
@@ -277,7 +277,7 @@ export default function PaperTrading({
         <form onSubmit={openTrade}
               className="bg-[var(--raised)] border border-[var(--border)] rounded-xl p-4 space-y-3">
           <div className="text-sm font-semibold text-[var(--text)]">New Paper Trade — {symbol}</div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {/* Side */}
             <div>
               <label className="text-xs text-[var(--dim)] block mb-1">Direction</label>

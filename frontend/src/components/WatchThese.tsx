@@ -52,7 +52,7 @@ export default function WatchThese() {
   }, [])
 
   if (timedOut && candidates.length === 0) return (
-    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-3 sm:p-5">
       <div className="flex items-center gap-2 mb-3">
         <Eye size={18} className="text-gold" />
         <h2 className="text-lg font-semibold text-[var(--text)]">Watch These Stocks</h2>
@@ -64,7 +64,7 @@ export default function WatchThese() {
   if (!loading && candidates.length === 0) return null
 
   return (
-    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-3 sm:p-5">
       <div className="flex items-center gap-2 mb-4">
         <Eye size={18} className="text-gold" />
         <h2 className="text-lg font-semibold text-[var(--text)]">Watch These Stocks</h2>
@@ -72,7 +72,7 @@ export default function WatchThese() {
       </div>
 
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="h-24 bg-[var(--raised)] animate-pulse rounded-lg" />
           ))}
@@ -80,7 +80,7 @@ export default function WatchThese() {
       )}
 
       {!loading && candidates.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           {candidates.map((c) => (
             <div key={c.symbol} className="card-layer rounded-xl p-3 space-y-2">
               <div className="flex items-start justify-between">

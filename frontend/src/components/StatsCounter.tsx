@@ -25,13 +25,12 @@ function StatCard({ item, loading }: { item: StatItem; loading: boolean }) {
   const Icon = item.icon
 
   return (
-    <div className="group relative">
-      <div className="relative overflow-hidden rounded-2xl border border-gold/10 bg-[var(--panel)] backdrop-blur-xl p-6 transition-all duration-500 hover:border-gold/20 hover:shadow-glow-gold">
+    <div className="group relative">        <div className="relative overflow-hidden rounded-2xl border border-gold/10 bg-[var(--panel)] backdrop-blur-xl p-4 sm:p-6 transition-all duration-500 hover:border-gold/20 hover:shadow-glow-gold">
         <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} mb-4 shadow-lg`}>
           <Icon size={20} className="text-black" />
         </div>
 
-        <div className="text-3xl md:text-4xl font-bold font-display text-[var(--text)] tracking-tight mb-1">
+        <div className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-[var(--text)] tracking-tight mb-1">
           {loading ? (
             <span className="inline-block w-20 h-8 rounded-md bg-[var(--raised)] animate-pulse" />
           ) : (
@@ -86,8 +85,8 @@ export default function StatsCounter() {
       ]
 
   return (
-    <section className="relative py-20 px-4">
-      <div className="text-center mb-12">
+    <section className="relative py-10 sm:py-16 lg:py-20 px-3 sm:px-4">
+      <div className="text-center mb-6 sm:mb-10 lg:mb-12">
         <div className="flex items-center justify-center gap-3 mb-4">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.15em] text-gold bg-gold/10 px-4 py-1.5 rounded-full">
             Platform Stats
@@ -103,7 +102,7 @@ export default function StatsCounter() {
             </button>
           )}
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold font-display text-[var(--text)] tracking-tight">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-[var(--text)] tracking-tight">
           Numbers that <span className="text-gold">matter</span>
         </h2>
         <p className="text-ink-400 mt-3 max-w-xl mx-auto text-sm">
@@ -113,7 +112,7 @@ export default function StatsCounter() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 max-w-5xl mx-auto">
         {items.map((item) => (
           <StatCard key={item.label} item={item} loading={loading} />
         ))}

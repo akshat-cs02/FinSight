@@ -31,7 +31,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError && this.state.error) {
       if (this.props.fallback) return this.props.fallback(this.state.error, this.reset)
       return (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-red-200 flex items-start gap-3 my-4">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 sm:p-6 text-red-200 flex items-start gap-3 my-4">
           <AlertCircle className="text-red-400 mt-0.5 flex-shrink-0" size={20} />
           <div className="flex-1">
             <p className="font-semibold mb-1">Something went wrong rendering this view.</p>

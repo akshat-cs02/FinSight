@@ -61,7 +61,7 @@ export default function AIOutlook() {
   }, [])
 
   return (
-    <div className="card-layer rounded-xl p-6">
+    <div className="card-layer rounded-xl p-3 sm:p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2">
           <Brain size={18} className="text-blue-400" /> AI Market Outlook
@@ -80,7 +80,7 @@ export default function AIOutlook() {
       )}
 
       {items && items.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           {items.map((p) => {
             const up = p.change_percent >= 0
             return (

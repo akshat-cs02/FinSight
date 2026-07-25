@@ -21,6 +21,7 @@ import { useStockCache, useQuote, useIndicators, useNews, useConsensus } from '@
 import toast from 'react-hot-toast'
 import SEO from '@/components/SEO'
 import { Lift } from '@/components/ui/motion'
+import { useResponsiveChartHeight } from '@/hooks/useResponsiveChartHeight'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -184,6 +185,9 @@ function StockDetailsContent() {
     gsap.fromTo(sections, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.06, ease: 'power2.out' })
   }, [])
 
+  // Responsive chart height
+  const chartHeight = useResponsiveChartHeight(680)
+
   // GSAP: ScrollTrigger for sections
   const initScrollTriggers = useRef(false)
   useEffect(() => {
@@ -210,7 +214,7 @@ function StockDetailsContent() {
   }, [])
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-5 lg:space-y-6">
       <SEO
         title={`${SYMBOL} — Stock Details & Analysis`}
         description={`${quote?.name || SYMBOL} stock analysis with live price, AI predictions, ICT/SMC signals, technical indicators, and recent news.`}
@@ -223,10 +227,10 @@ function StockDetailsContent() {
         }}
       />
       {/* Header */}
-      <div ref={headerRef} className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
         <div>
           <div className="eyebrow">Stock Details</div>
-          <h1 className="text-3xl font-bold text-[var(--text)] font-display">{SYMBOL}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] font-display">{SYMBOL}</h1>
           {quote ? (
             <p className="text-[var(--dim)]">
               {quote.name} · {quote.exchange || ''} ·{' '}
@@ -281,7 +285,7 @@ function StockDetailsContent() {
       )}
 
       {/* Action buttons */}
-      <div ref={actionsRef} className="flex flex-wrap gap-3">
+      <div ref={actionsRef} className="flex flex-wrap gap-2 sm:gap-3">
         <button onClick={() => setShowAdd(!showAdd)} className="btn btn-primary">
           <Plus size={16} /> Add to Portfolio
         </button>
@@ -329,7 +333,7 @@ function StockDetailsContent() {
 
       {/* Quote details */}
       {quote && (
-        <div ref={metricsCardsRef} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div ref={metricsCardsRef} className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
           <Lift className="card-flat card-layer rounded-xl p-3">
             <p className="eyebrow">Open</p>
             <PriceDisplay price={quote.open} currency={currency} size="md" color="default" />
@@ -374,8 +378,8 @@ function StockDetailsContent() {
       )}
 
       {/* TradingView Chart */}
-      <Lift className="card-layer rounded-xl p-3"><div ref={chartRef}>
-        <TradingViewWidget symbol={SYMBOL} tvSymbol={TV_SYMBOL} height={680} />
+      <Lift className="card-layer rounded-xl p-2 sm:p-3"><div ref={chartRef}>
+        <TradingViewWidget symbol={SYMBOL} tvSymbol={TV_SYMBOL} height={chartHeight} />
       </div></Lift>
 
       {/* Signal Consensus + Term Signals */}

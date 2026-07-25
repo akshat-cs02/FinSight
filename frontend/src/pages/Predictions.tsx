@@ -144,7 +144,7 @@ export default function PredictionsPage() {
   }, [])
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
+    <div className="p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-5 lg:space-y-6 min-h-screen">
       <SEO
         title="AI Predictions"
         description="LSTM + XGBoost ensemble predictions for stocks — train models, view history, and get buy/sell signals with confidence scores."
@@ -155,9 +155,9 @@ export default function PredictionsPage() {
           description: 'AI-powered stock market predictions using LSTM and XGBoost models.',
         }}
       />
-      <div ref={mainRef} className="flex justify-between items-center flex-wrap gap-3">
+      <div ref={mainRef} className="flex justify-between items-start sm:items-center flex-wrap gap-2 sm:gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--text)] flex items-center gap-2 font-display">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] flex items-center gap-2 font-display">
             <Brain size={28} className="text-gold" /> Predictions
           </h1>
           <p className="text-[var(--dim)] text-sm mt-0.5">LSTM + XGBoost ensemble. Trained per symbol on Yahoo Finance data.</p>
@@ -188,7 +188,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Live TradingView chart */}
-      <div ref={chartRef} className="card-surface2 p-3">
+      <div ref={chartRef} className="card-surface2 p-2 sm:p-3">
         <div className="flex items-center justify-between px-1 pb-2">
           <h2 className="text-sm font-semibold text-[var(--dim)]">Live Chart — <span className="text-[var(--text)]">{selected}</span></h2>
           <span className="text-xs text-[var(--dim)]">TradingView</span>
@@ -202,7 +202,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Model management */}
-      <div ref={modelRef} className="card-accent card p-5">
+      <div ref={modelRef} className="card-accent card p-3 sm:p-5">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-[3px] h-5 rounded-full bg-gold/60" />
           <h2 className="text-base font-bold text-[var(--text)] font-display tracking-tight flex items-center gap-2"><Cpu size={18} /> Model Status</h2>

@@ -76,10 +76,10 @@ export default function ForexCalendar() {
   const isBuiltIn = source === 'Built-in Schedule'
 
   return (
-    <div className="card-layer rounded-xl p-6 space-y-5">
+    <div className="card-layer rounded-xl p-3 sm:p-6 space-y-3 sm:space-y-5">
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Calendar size={20} className="text-blue-400" />
           <h2 className="text-lg font-bold text-[var(--text)] font-display">Forex & Economic Calendar</h2>

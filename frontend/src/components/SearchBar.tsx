@@ -212,7 +212,7 @@ export default function SearchBar() {
     if (!el) return
     if (expanded) {
       gsap.to(el, {
-        width: 400,
+        width: Math.min(400, window.innerWidth - 32),
         duration: 0.35,
         ease: 'power3.out',
       })

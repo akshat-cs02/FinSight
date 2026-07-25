@@ -90,7 +90,7 @@ function TickerItem({ q, navigate }: { q: any; navigate: any }) {
         navigate(`/stocks/${q.symbol}`)
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }}
-      className="flex-shrink-0 flex items-center gap-2.5 bg-[var(--raised)] rounded-lg px-3 py-1.5 border border-[var(--border)] hover:border-green-500/20 hover:bg-[var(--surface-3)] transition-all duration-300 cursor-pointer"
+      className="flex-shrink-0 flex items-center gap-2 bg-[var(--raised)] rounded-lg px-2.5 py-1.5 border border-[var(--border)] hover:border-green-500/20 hover:bg-[var(--surface-3)] transition-all duration-300 cursor-pointer"
     >
       <span className="font-bold text-[var(--text)] text-sm">{display}</span>
       <span className={`text-sm ${up ? 'text-green-400' : 'text-rose-400'}`}>

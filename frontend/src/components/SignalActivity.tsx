@@ -26,7 +26,7 @@ export default function SignalActivity() {
 
   if (loading && all.length === 0) {
     return (
-      <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
+      <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-3 sm:p-5">
         <div className="h-32 flex items-center justify-center text-[var(--faint)] text-sm">Loading activity...</div>
       </div>
     )
@@ -37,7 +37,7 @@ export default function SignalActivity() {
   const activeCount = pending.length
 
   return (
-    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-3 sm:p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -50,7 +50,7 @@ export default function SignalActivity() {
       </div>
 
       {/* Mini stats bar */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
         <div className="bg-[var(--raised)] rounded-lg px-3 py-2 text-center border border-[var(--border)]">
           <div className="text-lg font-bold text-gold">{activeCount}</div>
           <div className="text-[10px] text-[var(--dim)]">Active</div>

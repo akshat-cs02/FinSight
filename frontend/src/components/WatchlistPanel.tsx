@@ -52,8 +52,8 @@ export default function WatchlistPanel({ onSearch }: Props) {
   }
 
   return (
-    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-3 sm:p-5">
+      <div className="flex items-center gap-2 mb-3 sm:mb-4">
         <Star size={18} className="text-gold" />
         <h2 className="text-lg font-semibold text-[var(--text)]">My Watchlist</h2>
         {items.length > 0 && (              <span className="text-xs text-[var(--dim)] bg-[var(--raised)] px-2 py-0.5 rounded-full">{items.length}</span>

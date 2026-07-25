@@ -219,8 +219,7 @@ export default function TradingViewWidget({ symbol, tvSymbol: tvSymbolProp, heig
   }
 
   return (
-    <div className="w-full">
-      <div
+    <div className="w-full">        <div
         className="w-full rounded-xl overflow-hidden card-layer relative"
         style={{ height }}
       >

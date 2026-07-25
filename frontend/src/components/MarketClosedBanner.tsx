@@ -94,7 +94,7 @@ export default function MarketClosedBanner({ marketName, isOpen, nextOpen, nextO
   // ── Open celebration ──────────────────────────────────────────────────────
   if (isOpen && celebrate) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/50 via-gray-900 to-emerald-950/30 p-6">
+      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/50 via-gray-900 to-emerald-950/30 p-4 sm:p-6">
         <Confetti />
         <div className="relative flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center">
@@ -116,7 +116,7 @@ export default function MarketClosedBanner({ marketName, isOpen, nextOpen, nextO
   const red = !!cd && cd.totalSec <= 10 && cd.totalSec > 0
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border p-6 transition-colors ${
+    <div className={`relative overflow-hidden rounded-2xl border p-4 sm:p-6 transition-colors ${
       red ? 'border-red-500/50 bg-gradient-to-br from-gray-900 via-red-950/40 to-gray-900'
           : 'border-indigo-500/30 bg-gradient-to-br from-gray-900 via-indigo-950/40 to-gray-900'
     }`}>
@@ -132,7 +132,7 @@ export default function MarketClosedBanner({ marketName, isOpen, nextOpen, nextO
         ))}
       </div>
 
-      <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+      <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5">
         <div className="flex items-center gap-4">
           <div className={`w-14 h-14 rounded-full flex items-center justify-center border ${
             red ? 'bg-red-500/15 border-red-400/30' : 'bg-indigo-500/15 border-indigo-400/30'

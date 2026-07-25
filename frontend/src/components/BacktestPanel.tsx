@@ -34,7 +34,7 @@ export default function BacktestPanel({ symbol }: Props) {
   }, [symbol, period])
 
   if (err) return (
-    <Lift className="card-layer rounded-xl p-5">
+    <Lift className="card-layer rounded-xl p-3 sm:p-5">
       <div className="flex items-start gap-3">
         <AlertTriangle size={18} className="text-yellow-400 flex-shrink-0 mt-0.5" />
         <div>
@@ -46,7 +46,7 @@ export default function BacktestPanel({ symbol }: Props) {
   )
 
   if (loading) return (
-    <Lift className="card-layer rounded-xl p-5">
+    <Lift className="card-layer rounded-xl p-3 sm:p-5">
       <div className="flex items-center gap-2 text-blue-300 animate-pulse">
         <Activity size={16} /> Running walk-forward backtest…
       </div>
@@ -59,7 +59,7 @@ export default function BacktestPanel({ symbol }: Props) {
   const up = model.strategy_return >= 0
 
   return (
-    <Lift className="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
+    <Lift className="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 space-y-3 sm:space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-blue-300 font-display">
           <BarChart3 size={16} /> ML Model Backtest — {symbol}
@@ -78,7 +78,7 @@ export default function BacktestPanel({ symbol }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         <MetricCard label="Return" value={`${summary.total_return_pct.toFixed(1)}%`} tone={up ? 'text-emerald-400' : 'text-red-400'} />
         <MetricCard label="vs Buy/Hold" value={`${summary.benchmark_return_pct.toFixed(1)}%`} tone="text-[var(--dim)]" />
         <MetricCard label="Max DD" value={`${summary.max_drawdown_pct.toFixed(1)}%`} tone="text-red-400" />
@@ -89,7 +89,7 @@ export default function BacktestPanel({ symbol }: Props) {
         <MetricCard label="MAPE" value={`${model.mape.toFixed(1)}%`} tone={model.mape < 3 ? 'text-emerald-400' : model.mape < 6 ? 'text-yellow-400' : 'text-red-400'} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <MetricCard label="Trades" value={summary.total_trades.toString()} tone="text-[var(--text)]" />
         <MetricCard label="W / L" value={`${summary.winning_trades} / ${summary.losing_trades}`} tone="text-[var(--text)]" />
       </div>

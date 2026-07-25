@@ -70,9 +70,9 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
   const nextKZ = !activeKZ ? (currentHour < 7 ? `London opens at 07:00 UTC` : currentHour < 13 ? `NY opens at 13:00 UTC` : `London opens tomorrow at 07:00 UTC`) : null
 
   return (
-    <div className="card-surface2 rounded-xl border border-[rgba(74,222,128,0.06)] p-5">
+    <div className="card-surface2 rounded-xl border border-[rgba(74,222,128,0.06)] p-3 sm:p-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center gap-2">
           <Zap size={18} className="text-yellow-400" />
           <h2 className="text-lg font-semibold text-[var(--text)]">Intraday Signals</h2>
@@ -152,7 +152,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
 
       {/* Signal grid */}
       {signals.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3">
           {signals.map((sig) => (
             <div
               key={sig.id}

@@ -42,7 +42,7 @@ export default function SignalPerformance() {
   useEffect(() => { load(days) }, [days])
 
   return (
-    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-5">
+    <div className="bg-[var(--panel)] rounded-xl border border-[var(--border)] p-3 sm:p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <BarChart2 size={18} className="text-gold" />
@@ -69,7 +69,7 @@ export default function SignalPerformance() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-5">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-2 mb-3 sm:mb-5">
             <StatCard
               label="Win Rate"
               value={`${stats.win_rate}%`}

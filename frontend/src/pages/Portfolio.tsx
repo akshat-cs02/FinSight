@@ -105,7 +105,7 @@ export default function PortfolioPage() {
   const holdingsRef = useScrollAnimation('fadeUp', { delay: 0.15 })
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
+    <div className="p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-5 lg:space-y-6 min-h-screen">
       <SEO
         title="Portfolio"
         description="Track your stock holdings, view allocation breakdown, and monitor gains & losses across all positions."
@@ -169,35 +169,35 @@ export default function PortfolioPage() {
 
       {summary && (
         <>
-          <div ref={metricsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Lift className="card-box p-5"><div>
+          <div ref={metricsRef} className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+            <Lift className="card-box p-3 sm:p-5"><div>
               <div className="eyebrow">Total Invested</div>
               <PriceDisplay price={summary.total_invested} size="xl" color="default" />
             </div></Lift>
-            <Lift className="card-accent card-surface2 p-5"><div>
+            <Lift className="card-accent card-surface2 p-3 sm:p-5"><div>
               <div className="eyebrow">Current Value</div>
               <PriceDisplay price={summary.total_value} size="xl" color="brand" animate />
             </div></Lift>
-            <Lift className="card p-5"><div>
+            <Lift className="card p-3 sm:p-5"><div>
               <div className="eyebrow">Total Gain/Loss</div>
               <PriceDisplay price={summary.total_gain_loss} size="xl" color={summary.total_gain_loss >= 0 ? 'gains' : 'losses'} showSign />
               <p className={`text-sm mt-0.5 ${summary.total_gain_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {summary.total_gain_loss_percent.toFixed(2)}%
               </p>
             </div></Lift>
-            <Lift className="card-surface3 p-5"><div>
+            <Lift className="card-surface3 p-3 sm:p-5"><div>
               <div className="eyebrow">Today's P/L</div>
               <PriceDisplay price={summary.today_profit_loss} size="xl" color={summary.today_profit_loss >= 0 ? 'gains' : 'losses'} showSign animate />
             </div></Lift>
           </div>
 
-          <div ref={chartRef} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div ref={chartRef} className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             <Lift className="card-accent card-surface2 p-5"><div ref={allocationRef}>
               <div className="eyebrow">Allocation</div>
               <h2 className="section-rule">Asset Allocation</h2>
               <PortfolioChart data={summary.allocation} />
             </div></Lift>
-            <Lift className="card-accent card-surface2 p-5"><div>
+            <Lift className="card-accent card-surface2 p-3 sm:p-5"><div>
               <div className="eyebrow">Breakdown</div>
               <h2 className="section-rule">Allocation Breakdown</h2>
               {summary.allocation.length === 0 ? (
@@ -218,7 +218,7 @@ export default function PortfolioPage() {
             </div></Lift>
           </div>
 
-          <Lift className="card p-5"><div ref={holdingsRef as React.RefObject<HTMLDivElement>}>
+          <Lift className="card p-3 sm:p-5"><div ref={holdingsRef as React.RefObject<HTMLDivElement>}>
             <div className="eyebrow">Holdings</div>
             <h2 className="section-rule">Holdings</h2>
             {summary.holdings.length === 0 ? (

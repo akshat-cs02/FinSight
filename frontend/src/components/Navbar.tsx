@@ -196,13 +196,12 @@ export default function Navbar() {
         ref={navRef}
         className="fixed top-0 inset-x-0 z-50 bg-[var(--panel)]/80 backdrop-blur-xl border-b border-[var(--border)]"
       >
-        <div className="max-w-[1600px] mx-auto px-4 lg:px-6 h-16 flex items-center gap-4">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 h-16 flex items-center gap-2 sm:gap-4">
           {/* Logo */}
-          <Link to="/dashboard" className="flex items-center gap-2.5 flex-shrink-0">
+          <Link to="/dashboard" className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center font-bold text-sm text-black shadow-lg shadow-gold/20">
               FS
-            </div>
-            <div className="hidden sm:block leading-tight">
+            </div>              <div className="hidden md:block leading-tight">
               <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
               <div className="text-[9px] uppercase tracking-widest text-[var(--dim)] font-medium">Trade Smarter</div>
             </div>
