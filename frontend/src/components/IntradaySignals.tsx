@@ -72,8 +72,8 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
   return (
     <div className="card-surface2 rounded-xl border border-[rgba(74,222,128,0.06)] p-3 sm:p-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
           <Zap size={18} className="text-yellow-400" />
           <h2 className="text-lg font-semibold text-[var(--text)]">Intraday Signals</h2>
           {market !== 'ALL' && (
@@ -88,7 +88,7 @@ export default function IntradaySignals({ market = 'ALL' }: Props) {
           )}
         </div>
         <div className="flex items-center gap-3">
-          {lastUpdate &&          <span className="text-xs text-[rgba(74,222,128,0.4)]">Updated {lastUpdate}</span>}
+          {lastUpdate && <span className="text-xs text-[rgba(74,222,128,0.4)]">Updated {lastUpdate}</span>}
           <button
             onClick={() => load(false)}
             disabled={loading}

@@ -416,15 +416,15 @@ function StockDetailsContent() {
 
       {/* Technical Indicators */}
       {indicators && (
-        <Lift className="card-accent card-surface2 p-5"><div ref={technicalRef}>
+        <Lift className="card-accent card-surface2 p-3 sm:p-5"><div ref={technicalRef}>
           <div className="eyebrow">Analysis</div>
           <h2 className="section-rule mb-4 text-[var(--text)]">Technical Indicators</h2>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
             <p className="text-xs text-white/50">
               This bias comes from RSI / MACD / Bollinger only. The <strong className="text-green-400">AI Prediction</strong> above
               is the authoritative recommendation — it combines these indicators with the LSTM+XGBoost forecast.
             </p>
-            <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-xs text-[var(--dim)]">Technical-only bias:</span>
               <span className={`badge ${
                 indicators.signal === 'BUY' ? 'badge-gains' :
@@ -445,7 +445,7 @@ function StockDetailsContent() {
       )}
 
       {/* News */}
-      <Lift className="card-surface2 p-5 rounded-xl"><div ref={newsRef}>
+      <Lift className="card-surface2 p-3 sm:p-5 rounded-xl"><div ref={newsRef}>
         <div className="eyebrow">Latest</div>
         <h2 className="text-lg mb-4 text-[var(--text)] font-display font-bold">Recent News</h2>
         {news === null && <div className="text-[var(--dim)] text-sm">Loading news…</div>}

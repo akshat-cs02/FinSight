@@ -87,7 +87,7 @@ function HorizonTabs({ horizons, overall, regime, cur }: {
   const cfg = DIR_CFG[h.direction]
 
   return (
-    <div className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 space-y-3">
+    <div className="bg-gray-800/60 border border-gray-700 rounded-xl p-3 sm:p-4 space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2 text-sm font-semibold text-white">
           <Activity size={15} className="text-blue-400" /> Multi-Horizon Outlook
@@ -100,17 +100,17 @@ function HorizonTabs({ horizons, overall, regime, cur }: {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-900/60 rounded-lg p-1">
+      <div className="flex gap-0.5 sm:gap-1 bg-gray-900/60 rounded-lg p-1">
         {HORIZON_ORDER.map((k) => {
           const hz = horizons[k]
           const kc = hz ? DIR_CFG[hz.direction] : DIR_CFG.neutral
           return (
             <button key={k} onClick={() => setActive(k)}
-              className={`flex-1 px-2 py-1.5 rounded-md text-xs font-medium transition flex items-center justify-center gap-1 ${
+              className={`flex-1 px-1 sm:px-2 py-1.5 rounded-md text-[10px] sm:text-xs font-medium transition flex items-center justify-center gap-1 min-w-0 ${
                 active === k ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200'
               }`}>
-              <span className={`inline-block w-1.5 h-1.5 rounded-full`} style={{ backgroundColor: kc.stroke }} />
-              {HORIZON_TABS[k]}
+              <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: kc.stroke }} />
+              <span className="truncate">{HORIZON_TABS[k]}</span>
             </button>
           )
         })}
@@ -133,7 +133,7 @@ function HorizonTabs({ horizons, overall, regime, cur }: {
 
         <Sparkline h={h} />
 
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           <Level label="Entry" value={h.entry_price} cur={cur} tone="text-white" />
           <Level label="Stop" value={h.stop_loss} cur={cur} tone="text-red-400" />
           <Level label="Target" value={h.take_profit} cur={cur} tone="text-emerald-400" />
@@ -221,16 +221,16 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
 
   return (
     <div className="bg-gradient-to-br from-blue-900/30 via-gray-800 to-purple-900/20 border border-blue-500/30 rounded-2xl p-3 sm:p-6 space-y-3 sm:space-y-5">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-2 text-sm text-blue-300 mb-1 font-display">
-            <Brain size={16} /> AI Prediction — {pred.symbol}
+      <div className="flex justify-between items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-blue-300 mb-1 font-display">
+            <Brain size={14} className="flex-shrink-0" /> <span className="truncate">AI Prediction — {pred.symbol}</span>
           </div>
-          <p className="text-xs text-gray-400">
-            Ensemble of {pred.models_used.join(' + ').toUpperCase()} · Generated {formatLocalTime(pred.generated_at)}
+          <p className="text-[10px] sm:text-xs text-gray-400 truncate">
+            {pred.models_used.join(' + ').toUpperCase()} · {formatLocalTime(pred.generated_at)}
           </p>
         </div>
-        <button onClick={() => fetch(true)} disabled={loading} title="Refresh prediction" className="text-gray-400 hover:text-white disabled:opacity-50">
+        <button onClick={() => fetch(true)} disabled={loading} title="Refresh prediction" className="text-gray-400 hover:text-white disabled:opacity-50 flex-shrink-0">
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
@@ -256,18 +256,18 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
 
       <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <div>
-          <p className="text-xs text-gray-400">Current</p>
-          <p className="text-2xl font-bold text-white">{formatPrice(pred.current_price, cur)}</p>
+          <p className="text-[10px] sm:text-xs text-gray-400">Current</p>
+          <p className="text-lg sm:text-2xl font-bold text-white truncate">{formatPrice(pred.current_price, cur)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Predicted (next close)</p>
-          <p className="text-2xl font-bold text-white">{formatPrice(pred.predicted_price, cur)}</p>
+          <p className="text-[10px] sm:text-xs text-gray-400">Predicted</p>
+          <p className="text-lg sm:text-2xl font-bold text-white truncate">{formatPrice(pred.predicted_price, cur)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Change</p>
-          <p className={`text-2xl font-bold flex items-center gap-1 ${up ? 'text-emerald-400' : 'text-red-400'}`}>
-            {up ? <ArrowUp size={20} /> : <ArrowDown size={20} />}
-            {Math.abs(pred.change_percent).toFixed(2)}%
+          <p className="text-[10px] sm:text-xs text-gray-400">Change</p>
+          <p className={`text-lg sm:text-2xl font-bold flex items-center gap-0.5 sm:gap-1 ${up ? 'text-emerald-400' : 'text-red-400'}`}>
+            {up ? <ArrowUp size={16} className="flex-shrink-0" /> : <ArrowDown size={16} className="flex-shrink-0" />}
+            <span className="truncate">{Math.abs(pred.change_percent).toFixed(2)}%</span>
           </p>
         </div>
       </div>
@@ -293,23 +293,23 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
 
       {/* Trade plan: Entry / Stop Loss / Take Profit */}
       {pred.signal !== 'HOLD' && pred.entry_price !== null && (
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 bg-gray-900/50 border border-gray-700 rounded-xl p-2.5 sm:p-4">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 bg-gray-900/50 border border-gray-700 rounded-xl p-2.5 sm:p-4">
+          <div className="min-w-0">
             <p className="text-xs text-gray-400 mb-1">Entry Price (EP)</p>
-            <p className="text-lg font-bold text-blue-300">{formatPrice(pred.entry_price!, cur)}</p>
+            <p className="text-base sm:text-lg font-bold text-blue-300 truncate">{formatPrice(pred.entry_price!, cur)}</p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs text-gray-400 mb-1">Stop Loss (SL)</p>
-            <p className="text-lg font-bold text-red-400">{formatPrice(pred.stop_loss!, cur)}</p>
+            <p className="text-base sm:text-lg font-bold text-red-400 truncate">{formatPrice(pred.stop_loss!, cur)}</p>
             <p className="text-xs text-gray-500">
               {pred.stop_loss && pred.entry_price
                 ? `${((Math.abs(pred.stop_loss - pred.entry_price) / pred.entry_price) * 100).toFixed(2)}% risk`
                 : ''}
             </p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs text-gray-400 mb-1">Take Profit (TP)</p>
-            <p className="text-lg font-bold text-emerald-400">{formatPrice(pred.take_profit!, cur)}</p>
+            <p className="text-base sm:text-lg font-bold text-emerald-400 truncate">{formatPrice(pred.take_profit!, cur)}</p>
             <p className="text-xs text-gray-500">
               {pred.take_profit && pred.entry_price
                 ? `${((Math.abs(pred.take_profit - pred.entry_price) / pred.entry_price) * 100).toFixed(2)}% target`
@@ -410,14 +410,14 @@ export default function PredictionCard({ symbol, autoLoad = true, currency }: Pr
                 const pct = Math.abs(v) * 100
                 return (
                   <div key={feat} className="flex items-center gap-2 text-xs">
-                    <span className="text-gray-400 w-28 truncate">{feat.replace(/_/g, ' ')}</span>
+                    <span className="text-gray-400 w-20 sm:w-28 truncate">{feat.replace(/_/g, ' ')}</span>
                     <div className="flex-1 bg-gray-700 rounded-full h-1.5 overflow-hidden">
                       <div
                         className={`h-full rounded-full ${v >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}
                         style={{ width: `${Math.min(100, pct * 10)}%` }}
                       />
                     </div>
-                    <span className={`w-14 text-right ${v >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={`w-12 sm:w-14 text-right text-[10px] sm:text-xs ${v >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                       {v >= 0 ? '+' : ''}{v.toFixed(3)}
                     </span>
                   </div>

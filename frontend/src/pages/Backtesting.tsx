@@ -267,16 +267,16 @@ export default function BacktestingPage() {
 
       {/* Header */}
       <div className="anim-up delay-0">
-        <h1 className="text-3xl font-bold text-ink-50 flex items-center gap-3 font-display">
-          <BarChart2 size={28} className="text-gold" /> ICT/SMC Backtesting Engine
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-ink-50 flex items-center gap-2 sm:gap-3 font-display">
+          <BarChart2 size={24} className="text-gold flex-shrink-0" /> <span className="truncate">ICT/SMC Backtesting Engine</span>
         </h1>
-        <p className="text-ink-500 mt-1 text-sm">
+        <p className="text-ink-500 mt-1 text-xs sm:text-sm">
           Backtest 8 ICT/SMC strategies — news filter, 5-year data, leaderboard rankings
         </p>
       </div>
 
       {/* Controls */}
-      <div className="card-accent card p-5 anim-up delay-1">
+      <div className="card-accent card p-3 sm:p-5 anim-up delay-1">
         <div className="section-rule">
           <h2 className="font-display text-ink-50">Configure Backtest</h2>
         </div>
@@ -383,30 +383,30 @@ export default function BacktestingPage() {
 
         {/* Mode tabs */}
         <div className="border-t border-gray-700 pt-4">
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
             <button
               onClick={() => setMode('leaderboard')}
-              className={`px-4 py-2 text-sm rounded-lg font-medium transition flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg font-medium transition flex items-center gap-1.5 sm:gap-2 ${
                 mode === 'leaderboard' ? 'bg-gold text-black' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
               }`}
             >
-              <Trophy size={14} /> Leaderboard (All 8 Strategies)
+              <Trophy size={14} /> <span className="hidden sm:inline">Leaderboard (All 8)</span><span className="sm:hidden">Leaderboard</span>
             </button>
             <button
               onClick={() => setMode('single')}
-              className={`px-4 py-2 text-sm rounded-lg font-medium transition flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg font-medium transition flex items-center gap-1.5 sm:gap-2 ${
                 mode === 'single' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
               }`}
             >
-              <Zap size={14} /> Single Strategy
+              <Zap size={14} /> Single
             </button>
             <button
               onClick={() => setMode('universe')}
-              className={`px-4 py-2 text-sm rounded-lg font-medium transition flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg font-medium transition flex items-center gap-1.5 sm:gap-2 ${
                 mode === 'universe' ? 'bg-gold text-black' : 'bg-gray-700 text-ink-300 hover:bg-gray-600'
               }`}
             >
-              <Shield size={14} /> Universe Rankings
+              <Shield size={14} /> Universe
             </button>
           </div>
 

@@ -44,27 +44,32 @@ function SignalChip({ signal }: { signal: string }) {
   return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-700 text-gray-400">NEUTRAL</span>
 }
 
-// ─── Score meter (5-zone gradient bar + needle) ───────────────────────────────
-function ScoreMeter({ score }: { score: number }) {
-  // score: -100 to +100 → pct: 0 to 100
-  const pct = Math.round(((score + 100) / 200) * 100)
+// ─── Score meter zones (shared between desktop & mobile) ──────────────────────
+const SCORE_ZONES = [
+  { label: 'Strong Sell', w: 22.5, color: 'bg-red-800' },
+  { label: 'Sell',        w: 17.5, color: 'bg-red-500' },
+  { label: 'Neutral',     w: 20,   color: 'bg-gray-600' },
+  { label: 'Buy',         w: 17.5, color: 'bg-emerald-500' },
+  { label: 'Strong Buy',  w: 22.5, color: 'bg-emerald-700' },
+]
 
-  const ZONES = [
-    { label: 'Strong Sell', w: 22.5, color: 'bg-red-800' },
-    { label: 'Sell',        w: 17.5, color: 'bg-red-500' },
-    { label: 'Neutral',     w: 20,   color: 'bg-gray-600' },
-    { label: 'Buy',         w: 17.5, color: 'bg-emerald-500' },
-    { label: 'Strong Buy',  w: 22.5, color: 'bg-emerald-700' },
-  ]
+// ─── Score-to-percent helper ──────────────────────────────────────────────────
+function scoreToPct(score: number): number {
+  return Math.round(((score + 100) / 200) * 100)
+}
+
+// ─── Desktop score meter (5-zone gradient bar + needle + labels) ──────────────
+function ScoreMeter({ score }: { score: number }) {
+  const pct = scoreToPct(score)
 
   return (
     <div>
       {/* Zone bar */}
       <div className="relative h-3 flex rounded-full overflow-visible mb-1">
-        {ZONES.map((z, i) => (
+        {SCORE_ZONES.map((z, i) => (
           <div
             key={i}
-            className={`${z.color} ${i === 0 ? 'rounded-l-full' : ''} ${i === ZONES.length - 1 ? 'rounded-r-full' : ''}`}
+            className={`${z.color} ${i === 0 ? 'rounded-l-full' : ''} ${i === SCORE_ZONES.length - 1 ? 'rounded-r-full' : ''}`}
             style={{ width: `${z.w}%` }}
           />
         ))}
@@ -82,6 +87,20 @@ function ScoreMeter({ score }: { score: number }) {
         <span>Buy</span>
         <span>Strong Buy</span>
       </div>
+    </div>
+  )
+}
+
+// ─── Mobile score meter (compact, no text labels) ─────────────────────────────
+function MobileScoreMeter({ score }: { score: number }) {
+  const pct = scoreToPct(score)
+
+  return (
+    <div className="relative h-2.5 flex rounded-full overflow-hidden">
+      {SCORE_ZONES.map((z, i) => (
+        <div key={i} className={`${z.color} ${i === 0 ? 'rounded-l-full' : ''} ${i === SCORE_ZONES.length - 1 ? 'rounded-r-full' : ''}`} style={{ width: `${z.w}%` }} />
+      ))}
+      <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-4 rounded-sm bg-white shadow-lg border border-gray-400 z-10" style={{ left: `${Math.min(Math.max(pct, 2), 98)}%` }} />
     </div>
   )
 }
@@ -150,14 +169,14 @@ export default function SignalConsensus({ result, loading, onRefresh }: Props) {
                     : 'text-gray-500'
 
   return (
-    <div className={`rounded-2xl border p-5 space-y-4 ${cfg.bg}`}>
+    <div className={`rounded-2xl border p-3 sm:p-5 space-y-4 ${cfg.bg}`}>
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wider">
             Signal Consensus
           </div>
-          <div className={`text-3xl font-black tracking-tight ${cfg.color}`}>
+          <div className={`text-2xl sm:text-3xl font-black tracking-tight ${cfg.color}`}>
             {cfg.label}
           </div>
           <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
@@ -196,7 +215,18 @@ export default function SignalConsensus({ result, loading, onRefresh }: Props) {
       </div>
 
       {/* ── Score meter ─────────────────────────────────────────────────────── */}
-      <ScoreMeter score={result.master_score} />
+      <div className="hidden sm:block">
+        <ScoreMeter score={result.master_score} />
+      </div>
+      {/* Mobile: simplified score display */}
+      <div className="sm:hidden">
+        <MobileScoreMeter score={result.master_score} />
+        <div className="flex justify-between text-[9px] text-ink-500 px-0.5 mt-1">
+          <span>-100</span>
+          <span>0</span>
+          <span>+100</span>
+        </div>
+      </div>
 
       {/* ── Component breakdown ─────────────────────────────────────────────── */}
       <div className="space-y-2.5">
@@ -207,14 +237,16 @@ export default function SignalConsensus({ result, loading, onRefresh }: Props) {
           const c = result.components[key]
           if (!c) return null
           return (
-            <div key={key} className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 w-48 flex-shrink-0">
+            <div key={key} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <div className="flex items-center gap-1.5 sm:w-40 flex-shrink-0">
                 <span className="text-gray-500">{COMPONENT_ICONS[key]}</span>
                 <span className="text-xs text-gray-300 truncate">{c.label}</span>
                 <span className="text-xs text-ink-500 ml-auto flex-shrink-0">{c.weight_pct}%</span>
               </div>
-              <SignalChip signal={c.signal} />
-              <ContributionBar contribution={c.contribution} weightPct={c.weight_pct} />
+              <div className="flex items-center gap-2">
+                <SignalChip signal={c.signal} />
+                <ContributionBar contribution={c.contribution} weightPct={c.weight_pct} />
+              </div>
             </div>
           )
         })}

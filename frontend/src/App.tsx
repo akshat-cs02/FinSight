@@ -248,7 +248,7 @@ function Layout() {
         <button
           ref={scrollBtnRef}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-[4.5rem] sm:bottom-6 right-4 sm:right-6 z-50 w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-2 text-black font-bold shadow-lg shadow-gold/20 flex items-center justify-center hover:shadow-gold/30 hover:-translate-y-0.5 transition-all duration-300"
+          className="mobile-fab fixed bottom-[4.5rem] sm:bottom-6 right-4 sm:right-6 z-50 w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-2 text-black font-bold shadow-lg shadow-gold/20 flex items-center justify-center hover:shadow-gold/30 hover:-translate-y-0.5 transition-all duration-300"
         style={{ opacity: 0, y: 16, scale: 0.8, pointerEvents: 'none' }}
       >
         <ChevronDown size={18} className="rotate-180" />
@@ -257,7 +257,7 @@ function Layout() {
       {/* ? button for shortcuts */}
       <button
         onClick={() => setShowShortcuts((prev) => !prev)}
-        className="fixed bottom-[4.5rem] sm:bottom-6 left-4 sm:left-6 z-50 w-9 h-9 rounded-xl bg-[#141414]/80 backdrop-blur-md border border-white/5 text-white/40 hover:text-white/70 hover:border-white/10 flex items-center justify-center transition-all duration-300 shadow-lg"
+        className="mobile-fab fixed bottom-[4.5rem] sm:bottom-6 left-4 sm:left-6 z-50 w-9 h-9 rounded-xl bg-[#141414]/80 backdrop-blur-md border border-white/5 text-white/40 hover:text-white/70 hover:border-white/10 flex items-center justify-center transition-all duration-300 shadow-lg"
       >
         <HelpCircle size={16} />
       </button>
@@ -285,7 +285,7 @@ function KeyboardShortcutsHint({ show }: { show: boolean }) {
   return (
     <div
       ref={ref}
-      className="fixed bottom-20 right-6 z-50 card-surface3 rounded-xl border border-white/5 shadow-xl p-4 min-w-[180px]"
+      className="mobile-fab fixed bottom-20 right-6 z-50 card-surface3 rounded-xl border border-white/5 shadow-xl p-4 min-w-[180px]"
     >
       <div className="text-xs font-semibold text-white/70 mb-2">Keyboard Shortcuts</div>
       <div className="space-y-1.5 text-[11px]">

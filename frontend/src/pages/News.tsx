@@ -39,15 +39,15 @@ export default function NewsPage() {
           description: 'Latest financial news with AI-powered sentiment analysis.',
         }}
       />
-      <div className="flex justify-between items-center flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h1 className="text-[28px] font-bold font-display text-[var(--text)]">Financial News</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--text)]">Financial News</h1>
           <p className="eyebrow mt-0.5">Latest market news and analysis</p>
         </div>
-        <Lift className="flex gap-2 card p-1 rounded-xl">
+        <Lift className="flex gap-1 sm:gap-2 card p-1 rounded-xl overflow-x-auto">
           {(['ALL', 'POSITIVE', 'NEGATIVE', 'NEUTRAL'] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
                       filter === f
                         ? f === 'POSITIVE' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
                         : f === 'NEGATIVE' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20'
@@ -70,8 +70,8 @@ export default function NewsPage() {
                 className="card-accent card-surface2 p-3 sm:p-5 rounded-xl transition flex flex-col cursor-pointer">
               {a.thumbnail && <img src={a.thumbnail} alt="" loading="lazy" className="w-full h-32 object-cover rounded-lg mb-3" />}
               <div className="flex justify-between items-start mb-2 gap-2">
-                <h3 className="text-[var(--text)] font-bold flex-1 font-display">{a.title}</h3>
-                <span className={`flex-shrink-0 ${
+                <h3 className="text-[var(--text)] font-bold flex-1 font-display min-w-0 line-clamp-2">{a.title}</h3>
+                <span className={`flex-shrink-0 text-[10px] sm:text-xs ${
                   a.sentiment === 'POSITIVE' ? 'badge-gains' :
                   a.sentiment === 'NEGATIVE' ? 'badge-losses' :
                   'badge-neutral'

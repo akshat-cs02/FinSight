@@ -212,13 +212,27 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
     if is_fallback:
         # Fallback signals are in-memory only — useful for the dashboard
         # live feed but not worth persisting (low confidence, transient).
+        #
+        # IMPORTANT: recompute SL/TP from current price + ATR.  The original
+        # `raw` dict was computed with direction=0 (HOLD) so sl==tp==entry.
+        fb_price = float(raw.get("price", 0))
+        fb_atr   = float(raw.get("atr", 0))
+        # Safety: if ATR is 0 (data issue), fall back to ~1% of price
+        if fb_atr <= 0 and fb_price > 0:
+            fb_atr = fb_price * 0.01
+        if sig == "BUY":
+            fb_sl = round(fb_price - 1.5 * fb_atr, 4)
+            fb_tp = round(fb_price + 2.5 * fb_atr, 4)
+        else:  # SELL
+            fb_sl = round(fb_price + 1.5 * fb_atr, 4)
+            fb_tp = round(fb_price - 2.5 * fb_atr, 4)
         return {
             "symbol":       sym,
             "strategy":     strategy,
             "signal":       sig,
-            "entry":        raw.get("entry", 0),
-            "sl":           raw.get("sl", 0),
-            "tp":           raw.get("tp", 0),
+            "entry":        round(fb_price, 4),
+            "sl":           fb_sl,
+            "tp":           fb_tp,
             "confidence":   confidence,
             "timeframe":    "15M",
             "kill_zone":    kill_zone,
