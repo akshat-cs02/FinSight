@@ -2620,15 +2620,25 @@
       @media (max-width: 480px) {
         .nav { padding: 10px clamp(12px, 3vw, 18px); }
         .hero { padding: 56px 0 28px; }
-        .hero-h { font-size: 24px; }
+        .hero-grid { grid-template-columns: 1fr; gap: 24px; }
+        .hero-left { text-align: center; }
+        .hero-left .eyebrow { justify-content: center; }
+        .hero-h { font-size: 24px; margin: 0 auto 18px; }
         .hero-sub { font-size: 13px; margin-top: 10px; }
-        .hero-right { margin-top: 4px; }
+        .hero-cta { justify-content: center; }
+        .trust { text-align: center; }
+        .hero-right { display: none; }
         .btn { padding: 8px 14px; font-size: 12px; }
         .cta .btn { padding: 10px 18px; font-size: 13px; }
         .wrap { padding-left: clamp(12px, 3vw, 20px); padding-right: clamp(12px, 3vw, 20px); }
         section.band { padding: 36px 0; }
+        .sec-head { align-items: center; text-align: center; }
         .sec-head .t { font-size: 20px; }
         .sec-head .i { font-size: 12px; width: 32px; height: 32px; }
+        .showcase-grid { grid-template-columns: 1fr; gap: 20px; }
+        .showcase-sticky { padding: 36px 0 56px; }
+        .hscroll-track { gap: 10px; }
+        .hscroll-track > * { flex: 0 0 180px; }
         .auth-rail { padding: 40px clamp(14px, 3vw, 20px) 20px; }
         .auth-rail .feed { display: none; }
         .auth-rail .feed-stats { display: none; }
@@ -2637,9 +2647,9 @@
         .auth-form { max-width: 100%; }
         .auth-form .t { font-size: 18px; }
         .auth-form .fld { margin-bottom: 10px; }
-        .showcase-sticky { padding: 36px 0 56px; }
-        .foot { padding: 36px 0 20px; }
-        .foot-grid { gap: 20px; }
+        .foot { padding: 36px 0 20px; text-align: center; }
+        .foot-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+        .foot-brand { grid-column: 1 / -1; text-align: center; }
         .foot-col h4 { font-size: 13px; }
         .foot-col a { font-size: 12px; }
         .cap { flex: 0 0 220px; height: 320px; }
@@ -2648,6 +2658,8 @@
         .pre .content { padding: 0 clamp(12px, 3vw, 20px); }
         .auth-screen .tab { font-size: 13px; padding: 8px 12px; }
         .auth-inner { min-height: auto; }
+        .stg { text-align: center; }
+        .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
       }
       html.reduced .pre {
         display: none;
