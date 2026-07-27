@@ -4514,6 +4514,14 @@
         scConf = $("#scConf");
       let capW = 0;
       function measure() {
+        if (innerWidth <= 980) {
+          showcase.style.height = "";
+          hscroll.style.height = "";
+          capTrack.style.transform = "";
+          capW = 0;
+          onScroll();
+          return;
+        }
         if (!reduced) {
           showcase.style.height = innerHeight * 2.6 + "px";
         }
@@ -4561,6 +4569,10 @@
       }
       function onScroll() {
         if (reduced) return;
+        if (innerWidth <= 980) {
+          caps.forEach(cap => cap._in = true);
+          return;
+        }
         const sr = showcase.getBoundingClientRect(),
           sTotal = showcase.offsetHeight - innerHeight;
         if (sTotal > 0) setScrub(clamp(-sr.top / sTotal, 0, 1));
