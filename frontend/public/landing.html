@@ -4518,6 +4518,10 @@
           showcase.style.height = "";
           hscroll.style.height = "";
           capTrack.style.transform = "";
+          scStates.forEach(s => { s.style.opacity = ""; s.style.transform = ""; });
+          [scRaw, scStruct, scOB, scFVG, scFc, scBand, scChip].forEach(el => { if (el) el.style.opacity = ""; });
+          scConf.textContent = "";
+          scIndex.forEach(it => { it.classList.remove("on"); const b = it.querySelector("i"); if (b) b.style.width = ""; });
           capW = 0;
           onScroll();
           return;
