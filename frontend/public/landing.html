@@ -2540,6 +2540,7 @@
           padding: clamp(40px, 8vw, 90px) clamp(16px, 5vw, 40px) clamp(40px, 10vw, 80px);
           position: relative;
           overflow: visible;
+          display: block;
         }
         .sc-text {
           min-height: auto;
@@ -2593,7 +2594,6 @@
           position: static;
           height: auto;
           overflow-x: auto;
-          overflow-y: hidden;
           -webkit-overflow-scrolling: touch;
           padding-top: 12px;
         }
@@ -2602,6 +2602,7 @@
           padding-bottom: 8px;
         }
         .hscroll-hint { display: none; }
+        .hscroll-track > .cap { opacity: 1 !important; transform: none !important; }
         .stats {
           grid-template-columns: 1fr 1fr;
         }
