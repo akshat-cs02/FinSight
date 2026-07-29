@@ -1227,7 +1227,7 @@
       .cap .spec .v {
         color: var(--dim);
       }
-      .cap .top .ic {
+      .cap-top .ic {
         width: 34px;
         height: 34px;
         border: 1px solid var(--accent2-soft);
@@ -1236,7 +1236,7 @@
         place-items: center;
         color: var(--accent2);
       }
-      .cap .top .ic svg {
+      .cap-top .ic svg {
         width: 18px;
         height: 18px;
       }
@@ -2529,6 +2529,7 @@
         .burger {
           display: flex;
         }
+        .hero-sub { margin: 0 auto 30px; max-width: 46ch; }
         .sc-grid {
           grid-template-columns: 1fr;
           gap: 24px;
@@ -2536,8 +2537,9 @@
         .showcase-sticky {
           height: auto;
           min-height: 100vh;
-          padding: clamp(56px, 8vw, 90px) 0 clamp(60px, 10vw, 120px);
+          padding: clamp(40px, 8vw, 90px) clamp(16px, 5vw, 40px) clamp(40px, 10vw, 80px);
           position: relative;
+          overflow: visible;
         }
         .sc-text {
           min-height: auto;
@@ -2550,17 +2552,30 @@
           inset: auto;
           opacity: 1 !important;
           transform: none !important;
-          margin-bottom: 26px;
+          margin-bottom: 32px;
           width: 100%;
+          text-align: center;
+        }
+        .sc-state:last-child { margin-bottom: 0; }
+        .sc-state .k {
+          text-align: center;
+          margin-bottom: 8px;
+          display: block;
         }
         .sc-state h3 {
-          margin-left: auto;
-          margin-right: auto;
-          max-width: 90%;
+          margin: 0 auto 12px;
+          max-width: 100%;
+          text-align: center;
+          font-size: clamp(22px, 6vw, 32px);
+          line-height: 1.1;
         }
         .sc-state p {
-          margin-left: auto;
-          margin-right: auto;
+          margin: 0 auto;
+          text-align: center;
+          font-size: 14px;
+          line-height: 1.55;
+          max-width: 100%;
+          overflow-wrap: break-word;
         }
         .sc-viz {
           display: none;
@@ -2569,18 +2584,24 @@
           position: static;
           margin-top: 8px;
           justify-content: center;
+          flex-wrap: wrap;
+          gap: 14px 20px;
         }
+        .sc-index .it { font-size: 10px; gap: 6px; }
+        .sc-index .it .bar { width: 36px; }
         .hscroll-sticky {
           position: static;
           height: auto;
           overflow-x: auto;
           overflow-y: hidden;
           -webkit-overflow-scrolling: touch;
+          padding-top: 12px;
         }
         .hscroll-track {
           transform: none !important;
           padding-bottom: 8px;
         }
+        .hscroll-hint { display: none; }
         .stats {
           grid-template-columns: 1fr 1fr;
         }
@@ -2639,7 +2660,7 @@
         .hero-left { text-align: center; }
         .hero-left .eyebrow { justify-content: center; }
         .hero-h { font-size: 24px; margin: 0 auto 18px; }
-        .hero-sub { font-size: 13px; margin-top: 10px; }
+        .hero-sub { font-size: 13px; margin: 10px auto 24px; max-width: 46ch; }
         .hero-cta { justify-content: center; }
         .trust { text-align: center; }
         .hero-right { display: none; }
@@ -2651,9 +2672,16 @@
         .sec-head .t { font-size: 20px; }
         .sec-head .i { font-size: 12px; width: 32px; height: 32px; }
         .showcase-grid { grid-template-columns: 1fr; gap: 20px; }
-        .showcase-sticky { padding: 36px 0 56px; }
-        .hscroll-track { gap: 10px; }
-        .hscroll-track > * { flex: 0 0 180px; }
+        .showcase-sticky { padding: 28px clamp(12px, 4vw, 20px) 40px; }
+        .sc-state { margin-bottom: 24px; }
+        .sc-state .k { font-size: 10px; margin-bottom: 6px; }
+        .sc-state h3 { font-size: 20px; margin-bottom: 8px; line-height: 1.15; }
+        .sc-state p { font-size: 13px; line-height: 1.5; }
+        .sc-index { gap: 10px 14px; margin-top: 4px; }
+        .sc-index .it { font-size: 9px; gap: 4px; }
+        .sc-index .it .bar { width: 28px; }
+        .hscroll-track { gap: 8px; }
+        .hscroll-track > * { flex: 0 0 160px; }
         .auth-rail { padding: 40px clamp(14px, 3vw, 20px) 20px; }
         .auth-rail .feed { display: none; }
         .auth-rail .feed-stats { display: none; }
@@ -2670,7 +2698,24 @@
         .foot-col h4 { font-size: 13px; margin-bottom: 10px; }
         .foot-col a { font-size: 12px; display: inline; padding: 0 6px; }
         .foot-bot { flex-direction: column; align-items: center; text-align: center; }
-        .cap { flex: 0 0 220px; height: 320px; }
+        .cap-top .ic { width: 26px; height: 26px; }
+        .cap-top .ic svg { width: 14px; height: 14px; }
+        .cap { flex: 0 0 160px; height: 220px; padding: 14px; }
+        .ghost { font-size: 60px; top: -4px; right: 6px; }
+        .cap h3 { font-size: 14px; margin-bottom: 4px; }
+        .cap p { font-size: 11px; line-height: 1.4; }
+        .cap-in { gap: 8px; }
+        .cap-top { margin-bottom: 2px; }
+        .viz { min-height: 70px; gap: 6px; }
+        .cat { font-size: 9px; }
+        .cap .spec { font-size: 9px; padding-top: 6px; }
+        .lv-price { font-size: 18px !important; }
+        .lv-delta { font-size: 9px !important; }
+        .arc-wrap { transform: scale(0.7); transform-origin: center; }
+        .donut-wrap { transform: scale(0.7); transform-origin: center; }
+        .chip { font-size: 10px; padding: 3px 8px; }
+        .sent { height: 6px; }
+        .headline { font-size: 10px; }
         .sso button { justify-content: center; }
         .sso { gap: 8px; }
         .pre .content { padding: 0 clamp(12px, 3vw, 20px); }
@@ -2678,6 +2723,7 @@
         .auth-inner { min-height: auto; }
         .stg { text-align: center; }
         .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat .num { font-size: 32px; }
       }
       html.reduced .pre {
         display: none;
