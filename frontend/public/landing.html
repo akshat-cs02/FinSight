@@ -4633,7 +4633,7 @@
       function onScroll() {
         if (reduced) return;
         if (innerWidth <= 980) {
-          caps.forEach(cap => cap._in = true);
+          caps.forEach(cap => { if (!cap._in) revealCap(cap); });
           return;
         }
         const sr = showcase.getBoundingClientRect(),
