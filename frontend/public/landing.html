@@ -42,6 +42,7 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <style>
       *,
       *::before,
@@ -2581,19 +2582,11 @@
         .sc-viz {
           display: none;
         }
-        .sc-index {
-          position: static;
-          margin-top: 8px;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: 14px 20px;
-        }
-        .sc-index .it { font-size: 10px; gap: 6px; }
-        .sc-index .it .bar { width: 36px; }
+        .sc-index { display: none; }
         .hscroll-sticky {
           position: static;
           height: auto;
-          overflow-x: auto;
+          overflow: hidden;
           -webkit-overflow-scrolling: touch;
           padding-top: 12px;
         }
@@ -5165,6 +5158,7 @@
           $("#ind").style.transform = `translateX(${a.offsetLeft}px)`;
         }
         measure();
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
       });
 
       function startLivePx() {
@@ -5338,6 +5332,23 @@
           requestAnimationFrame(skewLoop);
         }
         measure();
+        if (innerWidth <= 980 && window.gsap && window.ScrollTrigger && !reduced) {
+          gsap.registerPlugin(ScrollTrigger);
+          const getDist = () => capTrack.scrollWidth - innerWidth;
+          gsap.to(capTrack, {
+            x: () => -getDist(),
+            ease: "none",
+            scrollTrigger: {
+              trigger: hscroll,
+              start: "top top",
+              end: () => "+=" + getDist(),
+              pin: true,
+              scrub: 1,
+              invalidateOnRefresh: true,
+              anticipatePin: 1
+            }
+          });
+        }
         startLivePx();
         startCardLive();
         startHeadlines();
