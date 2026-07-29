@@ -2591,10 +2591,10 @@
           padding-top: 12px;
         }
         .hscroll-track {
-          transform: none !important;
           padding-bottom: 8px;
         }
         .hscroll-hint { display: none; }
+        .ghost { display: none; }
         .hscroll-track > .cap { opacity: 1 !important; transform: none !important; }
         .stats {
           grid-template-columns: 1fr 1fr;
@@ -4570,7 +4570,7 @@
         if (innerWidth <= 980) {
           showcase.style.height = "";
           hscroll.style.height = "";
-          capTrack.style.transform = "";
+          if (!window.gsap || !window.ScrollTrigger) capTrack.style.transform = "";
           scStates.forEach(s => { s.style.opacity = ""; s.style.transform = ""; });
           [scRaw, scStruct, scOB, scFVG, scFc, scBand, scChip].forEach(el => { if (el) el.style.opacity = ""; });
           scConf.textContent = "";
