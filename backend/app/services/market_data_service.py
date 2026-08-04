@@ -2,6 +2,7 @@
 Real market data service using yfinance.
 No mock data - all from Yahoo Finance.
 """
+import asyncio
 import logging
 import re
 import time
@@ -709,3 +710,110 @@ def is_market_open() -> dict:
         "next_open": None if any_open else soonest,
         "timestamp": now.isoformat(),
     }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Background data warming loop — keeps backend alive on Render free tier
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Rotation schedule: each tick fetches a different asset class to spread
+# the load across markets and keep all caches warm.
+_WARMING_ROTATION: list[tuple[str, list[str]]] = [
+    # (label, symbols)
+    ("US_TECH",    ["AAPL", "MSFT", "GOOGL", "NVDA", "TSLA"]),
+    ("US_FIN",     ["JPM", "GS", "BAC", "V", "MA"]),
+    ("INDIA",      ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS"]),
+    ("CRYPTO",     ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD"]),
+    ("FOREX",      ["EURUSD=X", "GBPUSD=X", "USDJPY=X", "USDINR=X"]),
+    ("COMMODITIES",["GC=F", "CL=F", "SI=F", "NG=F"]),
+    ("INDICES",    ["^GSPC", "^IXIC", "^DJI", "^VIX"]),
+    ("US_MEGA",    ["AMZN", "META", "NFLX", "AMD", "INTC"]),
+    ("CRYPTO2",    ["XRP-USD", "ADA-USD", "DOGE-USD", "AVAX-USD"]),
+    ("FOREX2",     ["AUDUSD=X", "USDCAD=X", "NZDUSD=X", "EURJPY=X"]),
+    ("COMMODITIES2",["BZ=F", "HG=F", "PL=F", "ZC=F"]),
+    ("INDIA2",     ["ICICIBANK.NS", "SBIN.NS", "TATAMOTORS.NS", "WIPRO.NS"]),
+]
+
+_warming_tick: int = 0
+_last_warm_at: float = 0.0
+_warming_errors: int = 0
+_warming_successes: int = 0
+_warming_total_fetches: int = 0
+
+
+def get_warming_stats() -> dict:
+    """Return stats about the background warming loop (for /health or debug)."""
+    now = time.monotonic()
+    age = round(now - _last_warm_at, 1) if _last_warm_at else None
+    return {
+        "last_warm_ago_seconds": age,
+        "total_fetches": _warming_total_fetches,
+        "successes": _warming_successes,
+        "errors": _warming_errors,
+        "current_tick": _warming_tick,
+        "rotation_size": len(_WARMING_ROTATION),
+        "cycle_time_seconds": len(_WARMING_ROTATION) * 5,
+    }
+
+
+def _warm_one_tick() -> None:
+    """Fetch one batch of quotes from TradingView (yfinance fallback) and warm cache."""
+    global _warming_tick, _last_warm_at, _warming_errors, _warming_successes, _warming_total_fetches
+
+    label, symbols = _WARMING_ROTATION[_warming_tick % len(_WARMING_ROTATION)]
+    _warming_tick += 1
+
+    try:
+        from app.services import tradingview_service as tv
+        resolved = {resolve_symbol(s): s for s in symbols}
+        batch = tv.get_quotes_batch_sync(list(resolved.keys()))
+        now = time.monotonic()
+        hits = 0
+        for yf_sym, orig in resolved.items():
+            q = batch.get(yf_sym.upper())
+            result = _tv_quote_to_result(orig, yf_sym, q)
+            if result is not None:
+                _price_cache[yf_sym] = (result, now)
+                hits += 1
+        _warming_total_fetches += len(symbols)
+        _warming_successes += hits
+        _last_warm_at = now
+        logger.info("Warming [%s]: %d/%d quotes cached", label, hits, len(symbols))
+    except Exception as exc:
+        _warming_errors += 1
+        logger.warning("Warming [%s] failed: %s", label, exc)
+
+
+def _warming_trend() -> None:
+    """Fetch top movers from TradingView to warm the movers cache."""
+    global _last_warm_at, _warming_total_fetches, _warming_successes, _warming_errors
+    try:
+        from app.services import tradingview_service as tv
+        tv.get_top_movers_sync("gainers", limit=10)
+        tv.get_top_movers_sync("losers", limit=10)
+        _warming_total_fetches += 20  # 10 gainers + 10 losers
+        _warming_successes += 20
+        _last_warm_at = time.monotonic()
+        logger.info("Warming [TREND] top movers refreshed")
+    except Exception as exc:
+        _warming_errors += 1
+        logger.warning("Warming [TREND] failed: %s", exc)
+
+
+async def background_data_warming_loop() -> None:
+    """
+    Infinite asyncio loop — runs every 5 seconds.
+    Rotates through different asset classes to keep all caches warm.
+    Prevents Render free-tier sleep by generating continuous TradingView traffic.
+    """
+    logger.info("Background data warming loop starting (interval=5s, rotation=%d groups)",
+                len(_WARMING_ROTATION))
+    while True:
+        try:
+            await asyncio.get_event_loop().run_in_executor(None, _warm_one_tick)
+            # Every 3rd tick also refresh the top movers cache
+            if _warming_tick % 3 == 0:
+                await asyncio.get_event_loop().run_in_executor(None, _warming_trend)
+        except Exception as exc:
+            logger.error("Background data warming error: %s", exc)
+        await asyncio.sleep(5)

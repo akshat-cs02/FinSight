@@ -23,6 +23,7 @@ from app.api import (
     backtest_ml,
 )
 from app.services.signal_service import background_signals_loop, resolve_signal_outcomes
+from app.services.market_data_service import background_data_warming_loop
 
 # Content-Security-Policy: allow the TradingView advanced-chart script + frames.
 _CSP = (
@@ -79,6 +80,8 @@ async def lifespan(app: FastAPI):
     logger.info("Background signal refresh loop started")
     asyncio.create_task(_keep_alive_loop())
     logger.info("Keep-alive loop started (every 5 min)")
+    asyncio.create_task(background_data_warming_loop())
+    logger.info("Background data warming loop started (every 5s)")
     yield
 
 
@@ -129,7 +132,13 @@ async def db_handler(request: Request, exc: SQLAlchemyError):
 
 @app.get("/health")
 def health():
-    return {"status": "healthy", "service": "FinSight API", "version": "1.0.0"}
+    from app.services.market_data_service import get_warming_stats
+    return {
+        "status": "healthy",
+        "service": "FinSight API",
+        "version": "1.0.0",
+        "data_warming": get_warming_stats(),
+    }
 
 
 @app.get("/")
