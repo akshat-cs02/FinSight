@@ -47,16 +47,16 @@ logger = logging.getLogger("finsight")
 
 
 async def _keep_alive_loop():
-    """Self-ping /health every 5 minutes to prevent Render free-tier sleep."""
+    """Self-ping /health every 5 seconds to prevent Render free-tier sleep."""
     import os
     base = os.environ.get("FINSIGHT_PUBLIC_URL", "http://127.0.0.1:8000")
     url = f"{base.rstrip('/')}/health"
     while True:
-        await asyncio.sleep(300)  # 5 minutes
+        await asyncio.sleep(5)
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 r = await client.get(url)
-                logger.debug("Keep-alive ping %s → %s", url, r.status_code)
+                logger.debug("Keep-alive ping %s -> %s", url, r.status_code)
         except Exception as exc:
             logger.warning("Keep-alive ping failed: %s", exc)
 
@@ -65,21 +65,10 @@ async def _keep_alive_loop():
 async def lifespan(app: FastAPI):
     init_db()
     logger.info("DB initialized")
-    # Kill all stale PENDING signals immediately — one raw SQL, instant
-    try:
-        from app.database import SessionLocal
-        db = SessionLocal()
-        from sqlalchemy import text
-        result = db.execute(text("UPDATE intraday_signals SET outcome='EXPIRED', pnl_r=0.0 WHERE outcome='PENDING'"))
-        db.commit()
-        logger.info("Startup cleanup: %d PENDING signals marked EXPIRED", result.rowcount)
-        db.close()
-    except Exception as e:
-        logger.error("Startup cleanup failed: %s", e)
     asyncio.create_task(background_signals_loop())
     logger.info("Background signal refresh loop started")
     asyncio.create_task(_keep_alive_loop())
-    logger.info("Keep-alive loop started (every 5 min)")
+    logger.info("Keep-alive loop started (every 5s)")
     asyncio.create_task(background_data_warming_loop())
     logger.info("Background data warming loop started (every 5s)")
     yield

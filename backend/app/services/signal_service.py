@@ -398,60 +398,32 @@ def generate_intraday_signals(db: Session, extra_symbols: list[str] | None = Non
 # ─── Resolve outcomes for PENDING signals ─────────────────────────────────────
 def resolve_signal_outcomes(db: Session) -> int:
     """
-    Check PENDING signals: mark TP_HIT / SL_HIT / EXPIRED based on current price.
+    Check PENDING signals: mark TP_HIT / SL_HIT based on High/Low prices.
+    Signals persist until TP or SL is hit — no auto-expiry.
     Returns number of signals updated.
     """
-    # Bulk-expire ALL PENDING signals older than 8 hours in batches (fast)
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=8)
-    bulk_expired = 0
-    while True:
-        batch = (
-            db.query(IntradaySignal)
-            .filter(IntradaySignal.outcome == "PENDING")
-            .filter(IntradaySignal.generated_at < cutoff)
-            .limit(500)
-            .all()
-        )
-        if not batch:
-            break
-        for sig in batch:
-            sig.outcome    = "EXPIRED"
-            sig.pnl_r      = 0.0
-            sig.outcome_at = datetime.now(timezone.utc)
-            db.add(sig)
-        db.commit()
-        bulk_expired += len(batch)
-
-    # Only process recent (<8h) PENDING signals — limit to 20 per tick
+    # Fetch ALL PENDING signals — no limit, no auto-expiry
     pending = (
         db.query(IntradaySignal)
         .filter(IntradaySignal.outcome == "PENDING")
-        .filter(IntradaySignal.generated_at >= cutoff)
-        .limit(20)
         .all()
     )
     updated = 0
     for sig in pending:
-        age = datetime.now(timezone.utc) - sig.generated_at
-        if age.total_seconds() > 8 * 3600:
-            sig.outcome    = "EXPIRED"
-            sig.outcome_at = datetime.now(timezone.utc)
-            sig.pnl_r      = 0.0
-            db.add(sig)
-            updated += 1
-            continue
         try:
             ticker = yf.Ticker(sig.symbol)
             hist   = ticker.history(period="1d", interval="5m")
             if hist.empty:
+                logger.warning("Signal resolution: empty yfinance data for %s (signal #%d)", sig.symbol, sig.id)
                 continue
-            prices = hist["Close"].values
+            highs = hist["High"].values
+            lows  = hist["Low"].values
             if sig.signal == "BUY":
-                hit_tp = any(p >= sig.tp for p in prices)
-                hit_sl = any(p <= sig.sl for p in prices)
+                hit_tp = any(h >= sig.tp for h in highs)
+                hit_sl = any(l <= sig.sl for l in lows)
             else:
-                hit_tp = any(p <= sig.tp for p in prices)
-                hit_sl = any(p >= sig.sl for p in prices)
+                hit_tp = any(l <= sig.tp for l in lows)
+                hit_sl = any(h >= sig.sl for h in highs)
 
             if hit_tp:
                 sig.outcome    = "TP_HIT"
@@ -467,12 +439,12 @@ def resolve_signal_outcomes(db: Session) -> int:
             else:
                 continue
             db.add(sig)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("Signal resolution error for %s (signal #%d): %s", sig.symbol, sig.id, exc)
 
     if updated:
         db.commit()
-    return bulk_expired + updated
+    return updated
 
 
 def cleanup_old_signals(db: Session, keep_days: int = 30) -> int:

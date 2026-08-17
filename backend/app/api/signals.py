@@ -47,11 +47,11 @@ def get_intraday_signal_for_symbol(symbol: str, db: Session = Depends(get_db)):
 
 
 @router.get("/activity")
-def get_signal_activity(limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)):
+def get_signal_activity(limit: int = Query(50, ge=1, le=200), db: Session = Depends(get_db)):
     """Recent signals (PENDING + resolved) — gives the dashboard a live feel.
 
-    Merges the in-memory cache with the last N resolved DB rows so users
-    always see something happening.
+    Merges the in-memory cache with DB rows so users
+    always see something happening. Signals persist until TP/SL hit.
     """
     from app.services.signal_service import _signal_row_to_dict
 
@@ -68,6 +68,21 @@ def get_signal_activity(limit: int = Query(20, ge=1, le=100), db: Session = Depe
         .all()
     )
     resolved_dicts = [_signal_row_to_dict(r) for r in resolved]
+
+    # Also include PENDING signals from DB that aren't in the live cache
+    cached_ids = {s.get("id") for s in pending if "id" in s}
+    pending_from_db = (
+        db.query(IntradaySignal)
+        .filter(IntradaySignal.outcome == "PENDING")
+        .filter(IntradaySignal.is_hidden == False)
+        .filter(IntradaySignal.generated_at >= cutoff)
+        .order_by(IntradaySignal.generated_at.desc())
+        .limit(limit)
+        .all()
+    )
+    for sig in pending_from_db:
+        if sig.id not in cached_ids:
+            resolved_dicts.append(_signal_row_to_dict(sig))
 
     return {
         "pending": pending,
