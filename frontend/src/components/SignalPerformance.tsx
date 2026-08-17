@@ -24,7 +24,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 }
 
 export default function SignalPerformance() {
-  const [days, setDays] = useState<Days>(7)
+  const [days, setDays] = useState<Days>(90)
   const [stats, setStats] = useState<PerformanceStats | null>(null)
   const [loading, setLoading] = useState(false)
 
