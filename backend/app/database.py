@@ -25,9 +25,9 @@ engine = create_engine(
     settings.DATABASE_URL,
     connect_args={"check_same_thread": False} if not _is_pg else {},
     echo=False,
-    pool_pre_ping=True,
+    pool_pre_ping=False,
     # PostgreSQL: pool settings for Neon serverless (connections are transient)
-    **({"pool_size": 5, "max_overflow": 10, "pool_timeout": 30, "pool_recycle": 300} if _is_pg else {}),
+    **({"pool_size": 3, "max_overflow": 5, "pool_timeout": 10, "pool_recycle": 180} if _is_pg else {}),
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

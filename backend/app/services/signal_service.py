@@ -324,6 +324,7 @@ async def _refresh_signals_async() -> None:
 
 async def background_signals_loop() -> None:
     """Infinite loop started in main.py lifespan — refreshes every 6 seconds."""
+    await asyncio.sleep(10)  # Let first request be served before heavy yfinance work
     resolve_tick = 0
     while True:
         try:
@@ -352,40 +353,14 @@ async def background_signals_loop() -> None:
 def get_cached_signals(extra_symbols: list[str] | None = None) -> list[dict]:
     """
     Return the latest cached signals. Never blocks on the hot path.
-    On first call (cold cache) does a one-shot parallel warm-up so the
-    endpoint is not empty before the background loop fires.
+    On cold start returns empty — the background loop populates the cache
+    within 10-20 seconds automatically.
     """
     global _signals_cache, _signals_cache_ts
 
     if not _signals_cache:
-        # Cold start: blocking parallel warm-up via the executor.
-        # Split into small batches to avoid one slow symbol blocking the rest.
-        kill_zone    = _current_kill_zone()
-        all_results: list[dict] = []
-        batch_size = 8  # process 8 symbols at a time
-        for i in range(0, len(SIGNAL_UNIVERSE), batch_size):
-            batch = SIGNAL_UNIVERSE[i:i + batch_size]
-            batch_timeout = 30  # 30s per batch of 8 — generous for yfinance
-            logger.info("Signal warm-up batch %d/%d (%d symbols, timeout=%ds)",
-                        i // batch_size + 1,
-                        (len(SIGNAL_UNIVERSE) + batch_size - 1) // batch_size,
-                        len(batch), batch_timeout)
-            futures_map = {_executor.submit(_process_symbol, sym, kill_zone): sym
-                           for sym in batch}
-            done, _     = futures_wait(futures_map, timeout=batch_timeout)
-            for f in done:
-                try:
-                    r = f.result()
-                    if r:
-                        all_results.append(r)
-                except Exception as exc:
-                    logger.debug("Warm-up worker exception: %s", exc)
-
-        all_results.sort(key=lambda x: x["confidence"], reverse=True)
-        _signals_cache    = all_results
-        _signals_cache_ts = time.monotonic()
-        logger.info("Signal warm-up complete: %d signals generated (from %d symbols)",
-                    len(all_results), len(SIGNAL_UNIVERSE))
+        # Non-blocking: let background_signals_loop populate the cache.
+        return []
 
     return _signals_cache
 

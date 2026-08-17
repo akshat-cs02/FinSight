@@ -808,6 +808,7 @@ async def background_data_warming_loop() -> None:
     """
     logger.info("Background data warming loop starting (interval=5s, rotation=%d groups)",
                 len(_WARMING_ROTATION))
+    await asyncio.sleep(15)  # Let first request be served before warming
     while True:
         try:
             await asyncio.get_event_loop().run_in_executor(None, _warm_one_tick)
