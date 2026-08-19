@@ -529,8 +529,7 @@ def resolve_signal_outcomes(db: Session) -> int:
             except Exception as exc:
                 logger.warning("Signal resolution error for %s (signal #%d): %s", sig.symbol, sig.id, exc)
 
-    if updated:
-        db.commit()
+    db.commit()
     return updated
 
 

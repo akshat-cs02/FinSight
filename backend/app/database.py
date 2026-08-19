@@ -272,7 +272,6 @@ class IntradaySignal(Base):
 def _auto_migrate():
     """Add missing columns to existing tables (safe to re-run)."""
     with engine.connect() as conn:
-        # SQLite-only: ALTER TABLE ADD COLUMN (PostgreSQL uses CREATE IF NOT)
         if not _is_pg:
             for col, typedef in [
                 ("is_hidden", "BOOLEAN DEFAULT 0"),
@@ -285,11 +284,15 @@ def _auto_migrate():
                 except Exception:
                     pass  # Column already exists
         else:
-            # PostgreSQL: ALTER COLUMN SET DEFAULT if column exists but default is missing
-            for col, default in [("is_hidden", "false"), ("best_r", "0.0")]:
+            # PostgreSQL: ADD COLUMN IF NOT EXISTS
+            for col, typedef in [
+                ("is_hidden", "BOOLEAN DEFAULT false"),
+                ("best_r", "FLOAT DEFAULT 0.0"),
+            ]:
                 try:
-                    conn.execute(text(f"ALTER TABLE intraday_signals ALTER COLUMN {col} SET DEFAULT {default}"))
+                    conn.execute(text(f"ALTER TABLE intraday_signals ADD COLUMN IF NOT EXISTS {col} {typedef}"))
                     conn.commit()
+                    logger.info("Migration (PG): ensured %s on intraday_signals", col)
                 except Exception:
                     pass
 
@@ -302,8 +305,7 @@ def init_db():
         with engine.connect() as conn:
             conn.execute(text("CREATE INDEX IF NOT EXISTS ix_outcome_generated_at ON intraday_signals(outcome, generated_at)"))
             conn.commit()
-        if not _is_pg:
-            _auto_migrate()
+        _auto_migrate()
         logger.info("Database tables created successfully (%s)", "PostgreSQL" if _is_pg else "SQLite")
         return True
     except Exception as e:
