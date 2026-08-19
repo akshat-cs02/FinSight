@@ -208,24 +208,53 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
         sig = "BUY" if fallback_dir == 1 else "SELL"
         confidence = 35.0  # weak signal — below the 45% display threshold
         is_fallback = True
+    # ── ML confirmation filter ──────────────────────────────────────────────
+    # If trained ML models exist, use their prediction to confirm or reject
+    # the ICT signal.  This reduces false signals from indicator-only logic.
+    ml_confirmed = True  # default: allow signal if ML unavailable
+    ml_signal = "NEUTRAL"
+    try:
+        from app.services.prediction_service import predict_stock, has_trained_models
+        ml_models = has_trained_models(sym)
+        if ml_models.get("xgb") or ml_models.get("lstm"):
+            ml_result = predict_stock(sym, auto_train=False)
+            ml_signal = ml_result.get("signal", "NEUTRAL")
+            ml_conf = float(ml_result.get("confidence", 0))
+            # ML must agree with ICT direction, or at least not strongly disagree
+            if ml_signal in ("BUY", "SELL") and ml_conf >= 50:
+                if ml_signal != sig:
+                    # ML disagrees with ICT → reduce confidence, but don't block
+                    confidence = max(confidence - 15, 0)
+                    logger.debug("ML disagrees with ICT for %s: ICT=%s ML=%s — confidence reduced", sig, sym, ml_signal)
+            elif ml_signal == "HOLD" and confidence < 60:
+                # ML says HOLD and ICT confidence is weak → skip
+                logger.debug("ML says HOLD + weak ICT for %s — skipping", sym)
+                return None
+    except Exception as exc:
+        logger.debug("ML confirmation skipped for %s: %s", sym, exc)
+
     # ── Persist to DB (skip HOLD and fallback signals — too weak to track) ──
     if is_fallback:
         # Fallback signals are in-memory only — useful for the dashboard
         # live feed but not worth persisting (low confidence, transient).
         #
-        # IMPORTANT: recompute SL/TP from current price + ATR.  The original
-        # `raw` dict was computed with direction=0 (HOLD) so sl==tp==entry.
+        # Use the structure-aware levels from get_live_signal if available,
+        # otherwise fall back to ATR-based levels.
         fb_price = float(raw.get("price", 0))
         fb_atr   = float(raw.get("atr", 0))
-        # Safety: if ATR is 0 (data issue), fall back to ~1% of price
         if fb_atr <= 0 and fb_price > 0:
             fb_atr = fb_price * 0.01
-        if sig == "BUY":
-            fb_sl = round(fb_price - 1.5 * fb_atr, 4)
-            fb_tp = round(fb_price + 2.5 * fb_atr, 4)
-        else:  # SELL
-            fb_sl = round(fb_price + 1.5 * fb_atr, 4)
-            fb_tp = round(fb_price - 2.5 * fb_atr, 4)
+        # get_live_signal now returns structure-aware SL/TP
+        fb_sl = raw.get("sl")
+        fb_tp = raw.get("tp")
+        if fb_sl is None or fb_tp is None:
+            # ATR fallback (shouldn't happen with new code, but safety net)
+            if sig == "BUY":
+                fb_sl = round(fb_price - 1.5 * fb_atr, 4)
+                fb_tp = round(fb_price + 2.5 * fb_atr, 4)
+            else:
+                fb_sl = round(fb_price + 1.5 * fb_atr, 4)
+                fb_tp = round(fb_price - 2.5 * fb_atr, 4)
         return {
             "symbol":       sym,
             "strategy":     strategy,
@@ -264,8 +293,8 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
             strategy     = strategy,
             signal       = sig,
             entry        = raw["entry"],
-            sl           = raw["sl"],
-            tp           = raw["tp"],
+            sl           = raw.get("sl") or (raw["entry"] - 1.5 * raw.get("atr", 0) if sig == "BUY" else raw["entry"] + 1.5 * raw.get("atr", 0)),
+            tp           = raw.get("tp") or (raw["entry"] + 2.5 * raw.get("atr", 0) if sig == "BUY" else raw["entry"] - 2.5 * raw.get("atr", 0)),
             confidence   = confidence,
             timeframe    = "15M",
             kill_zone    = kill_zone,
@@ -300,6 +329,7 @@ def _signal_row_to_dict(row: IntradaySignal) -> dict:
         "generated_at": row.generated_at.isoformat() + "Z",
         "outcome":      row.outcome,
         "pnl_r":        row.pnl_r,
+        "best_r":       getattr(row, 'best_r', 0.0),
         "is_hidden":    getattr(row, 'is_hidden', False),
     }
 
@@ -332,7 +362,9 @@ async def background_signals_loop() -> None:
         except Exception as exc:
             logger.error("Background signal refresh error: %s", exc)
         resolve_tick += 1
-        if resolve_tick >= 10:
+        # Resolve outcomes every 3rd tick (~18 seconds) instead of every 10th tick (~60s)
+        # so TP/SL hits are detected quickly and performance stats stay accurate.
+        if resolve_tick >= 3:
             resolve_tick = 0
             try:
                 db = SessionLocal()
@@ -376,46 +408,126 @@ def resolve_signal_outcomes(db: Session) -> int:
     Check PENDING signals: mark TP_HIT / SL_HIT based on High/Low prices.
     Signals persist until TP or SL is hit — no auto-expiry.
     Returns number of signals updated.
+
+    FIX: Previously used period="1d" which only returns today's candles,
+    so signals older than 1 day could NEVER resolve. Now we compute the
+    lookback window based on signal age and use the appropriate interval:
+      - ≤60 days old → 15m bars (yfinance max for 15m is 60d)
+      - >60 days old  → 1h bars (yfinance max for 1h is 730d)
     """
+    from app.services.backtesting_service import _fetch_ohlcv
+
     # Fetch ALL PENDING signals — no limit, no auto-expiry
     pending = (
         db.query(IntradaySignal)
         .filter(IntradaySignal.outcome == "PENDING")
         .all()
     )
-    updated = 0
-    for sig in pending:
-        try:
-            ticker = yf.Ticker(sig.symbol)
-            hist   = ticker.history(period="1d", interval="5m")
-            if hist.empty:
-                logger.warning("Signal resolution: empty yfinance data for %s (signal #%d)", sig.symbol, sig.id)
-                continue
-            highs = hist["High"].values
-            lows  = hist["Low"].values
-            if sig.signal == "BUY":
-                hit_tp = any(h >= sig.tp for h in highs)
-                hit_sl = any(l <= sig.sl for l in lows)
-            else:
-                hit_tp = any(l <= sig.tp for l in lows)
-                hit_sl = any(h >= sig.sl for h in highs)
+    if not pending:
+        return 0
 
-            if hit_tp:
-                sig.outcome    = "TP_HIT"
-                sig.outcome_at = datetime.now(timezone.utc)
-                rr = abs(sig.tp - sig.entry) / abs(sig.entry - sig.sl) if sig.entry != sig.sl else 2.0
-                sig.pnl_r = round(rr, 2)
-                updated  += 1
-            elif hit_sl:
-                sig.outcome    = "SL_HIT"
-                sig.outcome_at = datetime.now(timezone.utc)
-                sig.pnl_r      = -1.0
-                updated       += 1
-            else:
-                continue
-            db.add(sig)
+    # Group signals by symbol to avoid re-fetching data for the same symbol
+    symbol_signals: dict[str, list] = {}
+    for sig in pending:
+        symbol_signals.setdefault(sig.symbol, []).append(sig)
+
+    now = datetime.now(timezone.utc)
+    updated = 0
+
+    for symbol, sigs in symbol_signals.items():
+        # Determine the maximum lookback needed across all pending signals
+        max_age_days = 1
+        for sig in sigs:
+            age = (now - sig.generated_at.replace(tzinfo=timezone.utc)).days
+            if age > max_age_days:
+                max_age_days = age
+
+        # Choose interval based on how far back we need to look
+        # yfinance limits: 15m → 60d, 1h → 730d
+        if max_age_days <= 55:
+            # Use 15m for best granularity within yfinance limits
+            period = f"{min(max_age_days + 2, 55)}d"
+            interval = "15m"
+        else:
+            # Fall back to 1h for older signals
+            period = f"{min(max_age_days + 5, 720)}d"
+            interval = "1h"
+
+        try:
+            df = _fetch_ohlcv(symbol, period, interval=interval)
         except Exception as exc:
-            logger.warning("Signal resolution error for %s (signal #%d): %s", sig.symbol, sig.id, exc)
+            logger.warning("Signal resolution: data fetch failed for %s: %s", symbol, exc)
+            continue
+
+        if df.empty:
+            logger.warning("Signal resolution: empty data for %s", symbol)
+            continue
+
+        highs = df["high"].values
+        lows  = df["low"].values
+        close = df["close"].values
+
+        # Trailing SL config
+        BE_TRIGGER_R = 1.5  # Move SL to breakeven when unrealized R >= 1.5
+
+        for sig in sigs:
+            try:
+                risk = abs(sig.entry - sig.sl)
+                if risk <= 0:
+                    risk = abs(sig.entry * 0.01)  # safety: 1% of price
+
+                # ── Compute best unrealized R from price history ──────────────
+                if sig.signal == "BUY":
+                    best_high = float(max(highs))
+                    worst_low = float(min(lows))
+                    unrealized_r = (best_high - sig.entry) / risk if risk > 0 else 0
+                    worst_r = (worst_low - sig.entry) / risk if risk > 0 else 0
+                else:  # SELL
+                    best_low = float(min(lows))
+                    worst_high = float(max(highs))
+                    unrealized_r = (sig.entry - best_low) / risk if risk > 0 else 0
+                    worst_r = (sig.entry - worst_high) / risk if risk > 0 else 0
+
+                # Update peak R if we've been more profitable this cycle
+                current_best = sig.best_r or 0.0
+                if unrealized_r > current_best:
+                    sig.best_r = round(unrealized_r, 2)
+
+                # ── Trailing SL: move to breakeven if peak R >= BE_TRIGGER_R ──
+                effective_sl = sig.sl
+                if (sig.best_r or 0) >= BE_TRIGGER_R:
+                    effective_sl = sig.entry  # SL moves to breakeven
+
+                # ── Check TP/SL with effective levels ────────────────────────
+                if sig.signal == "BUY":
+                    hit_tp = any(h >= sig.tp for h in highs)
+                    hit_sl = any(l <= effective_sl for l in lows)
+                else:
+                    hit_tp = any(l <= sig.tp for l in lows)
+                    hit_sl = any(h >= effective_sl for h in highs)
+
+                if hit_tp:
+                    sig.outcome    = "TP_HIT"
+                    sig.outcome_at = now
+                    rr = abs(sig.tp - sig.entry) / risk if risk > 0 else 2.0
+                    sig.pnl_r = round(rr, 2)
+                    updated  += 1
+                elif hit_sl:
+                    sig.outcome    = "SL_HIT"
+                    sig.outcome_at = now
+                    # If SL was moved to breakeven, this is a 0R exit (not -1R)
+                    if abs(effective_sl - sig.entry) < risk * 0.01:  # SL at breakeven
+                        sig.pnl_r = 0.0
+                    else:
+                        sig.pnl_r = -1.0
+                    updated += 1
+                else:
+                    # Neither TP nor SL hit — update best_r and leave as PENDING
+                    db.add(sig)
+                    continue
+                db.add(sig)
+            except Exception as exc:
+                logger.warning("Signal resolution error for %s (signal #%d): %s", sig.symbol, sig.id, exc)
 
     if updated:
         db.commit()
@@ -458,6 +570,9 @@ def get_performance_stats(days: int, db: Session) -> dict:
     tp_hit   = sum(1 for r in resolved if r.outcome == "TP_HIT")
     sl_hit   = sum(1 for r in resolved if r.outcome == "SL_HIT")
     expired  = sum(1 for r in resolved if r.outcome == "EXPIRED")
+    # Breakeven exits: SL_HIT where trailing SL moved to entry (pnl_r == 0)
+    be_exit  = sum(1 for r in resolved if r.outcome == "SL_HIT" and (r.pnl_r or -1) == 0.0)
+    real_sl  = sl_hit - be_exit  # actual losing SL hits
     closed   = tp_hit + sl_hit
     win_rate = round(tp_hit / closed * 100, 1) if closed > 0 else 0.0
     pnl_vals = [r.pnl_r for r in resolved if r.pnl_r is not None and r.outcome in ("TP_HIT", "SL_HIT")]
@@ -472,8 +587,13 @@ def get_performance_stats(days: int, db: Session) -> dict:
             daily[day]["wins"] += 1
             daily[day]["pnl"]  += (r.pnl_r or 2.0)
         elif r.outcome == "SL_HIT":
-            daily[day]["losses"] += 1
-            daily[day]["pnl"]    -= 1.0
+            pnl = r.pnl_r if r.pnl_r is not None else -1.0
+            if pnl >= 0:
+                # Breakeven exit — count as neither win nor loss, no P&L impact
+                daily[day]["pnl"] += pnl
+            else:
+                daily[day]["losses"] += 1
+                daily[day]["pnl"]    += pnl
 
     sorted_days = sorted(daily.keys())
     cumulative  = 0.0
@@ -502,6 +622,8 @@ def get_performance_stats(days: int, db: Session) -> dict:
         "pending":        pending,
         "tp_hit":         tp_hit,
         "sl_hit":         sl_hit,
+        "breakeven":      be_exit,
+        "real_losses":    real_sl,
         "expired":        expired,
         "win_rate":       win_rate,
         "avg_pnl_r":      avg_pnl_r,

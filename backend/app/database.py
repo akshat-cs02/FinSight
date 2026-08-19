@@ -261,6 +261,7 @@ class IntradaySignal(Base):
     outcome      = Column(String(20), default="PENDING")  # TP_HIT/SL_HIT/EXPIRED/PENDING
     outcome_at   = Column(DateTime, nullable=True)
     pnl_r        = Column(Float, nullable=True)
+    best_r       = Column(Float, default=0.0)  # Peak unrealized R (for trailing SL to breakeven)
     is_hidden    = Column(Boolean, default=False)  # Admin can hide signals from main site
 
     __table_args__ = (
@@ -273,19 +274,24 @@ def _auto_migrate():
     with engine.connect() as conn:
         # SQLite-only: ALTER TABLE ADD COLUMN (PostgreSQL uses CREATE IF NOT)
         if not _is_pg:
-            try:
-                conn.execute(text("ALTER TABLE intraday_signals ADD COLUMN is_hidden BOOLEAN DEFAULT 0"))
-                conn.commit()
-                logger.info("Migration: added is_hidden to intraday_signals")
-            except Exception:
-                pass  # Column already exists
+            for col, typedef in [
+                ("is_hidden", "BOOLEAN DEFAULT 0"),
+                ("best_r", "REAL DEFAULT 0.0"),
+            ]:
+                try:
+                    conn.execute(text(f"ALTER TABLE intraday_signals ADD COLUMN {col} {typedef}"))
+                    conn.commit()
+                    logger.info("Migration: added %s to intraday_signals", col)
+                except Exception:
+                    pass  # Column already exists
         else:
             # PostgreSQL: ALTER COLUMN SET DEFAULT if column exists but default is missing
-            try:
-                conn.execute(text("ALTER TABLE intraday_signals ALTER COLUMN is_hidden SET DEFAULT false"))
-                conn.commit()
-            except Exception:
-                pass
+            for col, default in [("is_hidden", "false"), ("best_r", "0.0")]:
+                try:
+                    conn.execute(text(f"ALTER TABLE intraday_signals ALTER COLUMN {col} SET DEFAULT {default}"))
+                    conn.commit()
+                except Exception:
+                    pass
 
 
 def init_db():

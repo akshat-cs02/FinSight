@@ -73,7 +73,7 @@ export default function SignalPerformance() {
             <StatCard
               label="Win Rate"
               value={`${stats.win_rate}%`}
-              sub={`${stats.tp_hit} TP / ${stats.sl_hit} SL`}
+              sub={`${stats.tp_hit} TP / ${stats.real_losses ?? stats.sl_hit} SL${stats.breakeven ? ` / ${stats.breakeven} BE` : ''}`}
             />
             <StatCard
               label="Total Signals"

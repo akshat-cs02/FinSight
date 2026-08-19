@@ -35,6 +35,8 @@ export interface PerformanceStats {
   pending: number
   tp_hit: number
   sl_hit: number
+  breakeven: number
+  real_losses: number
   expired: number
   win_rate: number
   avg_pnl_r: number

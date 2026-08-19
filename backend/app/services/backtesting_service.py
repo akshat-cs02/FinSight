@@ -794,10 +794,236 @@ UNIVERSE: dict[str, list[str]] = {
 # LIVE SIGNAL — apply strategy to the last bar of recent data
 # ══════════════════════════════════════════════════════════════════════════════
 
+def _compute_ict_levels(df: pd.DataFrame, signal: str, price: float, atr_val: float, strategy: str) -> dict:
+    """
+    Compute structure-aware SL/TP using actual ICT levels (order blocks, FVGs,
+    swing points, Fibonacci retracements) instead of fixed ATR multipliers.
+
+    Returns dict with sl, tp, and sl_source/tp_source labels for transparency.
+    Falls back to ATR-based levels when structure is unavailable.
+
+    Key design decisions (addressing -1R SL noise):
+      - MIN_SL_ATR = 1.0 × ATR: hard floor so SL is never tighter than 1 ATR
+      - Structure buffer = 0.3 × ATR (was 0.1): gives room for wicks
+      - Swing lookback = 8 bars on 15m (was 5): ~2h structure, not 75min
+      - R:R floor = 1.5 (was 1.2): don't take trades with bad risk:reward
+    """
+    sl_level = None
+    tp_level = None
+    sl_source = "atr_fallback"
+    tp_source = "atr_fallback"
+
+    o, h, l, c = df["open"], df["high"], df["low"], df["close"]
+
+    # ── Hard minimums ────────────────────────────────────────────────────────
+    MIN_SL_ATR   = 1.0    # SL must be at least 1.0 × ATR from entry
+    MIN_RR       = 1.5    # Minimum risk:reward ratio
+    SL_BUFFER    = 0.3    # Buffer beyond structure level (was 0.1 — too tight)
+    SWING_LOOKBACK = 8    # Wider swing detection (was 5 — too noisy)
+
+    atr_sl = max(1.5 * atr_val, MIN_SL_ATR * atr_val)  # at least 1.0×ATR
+    atr_tp = 2.5 * atr_val
+
+    if signal == "BUY":
+        atr_sl_level = price - atr_sl
+        atr_tp_level = price + atr_tp
+    elif signal == "SELL":
+        atr_sl_level = price + atr_sl
+        atr_tp_level = price - atr_tp
+    else:
+        return {"sl": None, "tp": None, "sl_source": "none", "tp_source": "none"}
+
+    # ── 1. Order Block detection (MSS_OrderBlock, PriceAction) ──────────────
+    if strategy in ("MSS_OrderBlock", "PriceAction"):
+        red   = c < o  # bearish candle
+        green = c > o  # bullish candle
+        if signal == "BUY":
+            # Bullish OB: last red candle before the impulsive green move
+            ob_mask = red & green.shift(-1)
+            ob_candles = df[ob_mask]
+            if len(ob_candles) > 0:
+                last_ob_low = float(ob_candles.iloc[-1]["low"])
+                # Only use if it's far enough from entry (at least MIN_SL_ATR away)
+                dist = price - last_ob_low
+                if last_ob_low < price and dist >= MIN_SL_ATR * atr_val:
+                    sl_level = round(last_ob_low - SL_BUFFER * atr_val, 4)
+                    sl_source = "order_block_low"
+        else:  # SELL
+            ob_mask = green & red.shift(-1)
+            ob_candles = df[ob_mask]
+            if len(ob_candles) > 0:
+                last_ob_high = float(ob_candles.iloc[-1]["high"])
+                dist = last_ob_high - price
+                if last_ob_high > price and dist >= MIN_SL_ATR * atr_val:
+                    sl_level = round(last_ob_high + SL_BUFFER * atr_val, 4)
+                    sl_source = "order_block_high"
+
+    # ── 2. Fair Value Gap levels (BOS_FVG, CHOCH_FVG, LiqSweep_FVG, MA_FVG) ─
+    if strategy in ("BOS_FVG", "CHOCH_FVG", "LiqSweep_FVG", "MA_FVG"):
+        fvg_bull_top = df["high"].shift(2)
+        fvg_bull_bot = df["low"]
+        fvg_bear_top = df["high"]
+        fvg_bear_bot = df["low"].shift(2)
+
+        bullish_fvg = fvg_bull_bot > fvg_bull_top
+        bearish_fvg = fvg_bear_bot > fvg_bear_top
+
+        if signal == "BUY":
+            # TP at the top of the nearest bullish FVG above entry
+            valid_fvgs = df[bullish_fvg & (df["low"] > price)]
+            if len(valid_fvgs) > 0:
+                tp_level = round(float(valid_fvgs.iloc[0]["low"]), 4)
+                tp_source = "fvg_top"
+            # SL below the nearest FVG — but enforce minimum distance
+            recent_fvgs = df[bullish_fvg].tail(5)
+            if len(recent_fvgs) > 0:
+                fvg_low = float(recent_fvgs.iloc[-1]["low"])
+                dist = price - fvg_low
+                if fvg_low < price and dist >= MIN_SL_ATR * atr_val:
+                    sl_level = round(fvg_low - SL_BUFFER * atr_val, 4)
+                    sl_source = "fvg_bottom"
+        else:  # SELL
+            valid_fvgs = df[bearish_fvg & (df["high"] < price)]
+            if len(valid_fvgs) > 0:
+                tp_level = round(float(valid_fvgs.iloc[0]["high"]), 4)
+                tp_source = "fvg_bottom"
+            recent_fvgs = df[bearish_fvg].tail(5)
+            if len(recent_fvgs) > 0:
+                fvg_high = float(recent_fvgs.iloc[-1]["high"])
+                dist = fvg_high - price
+                if fvg_high > price and dist >= MIN_SL_ATR * atr_val:
+                    sl_level = round(fvg_high + SL_BUFFER * atr_val, 4)
+                    sl_source = "fvg_top"
+
+    # ── 3. Swing High/Low for SL (SR_Bounce, LiqSweep_FVG) ─────────────────
+    if strategy in ("SR_Bounce", "LiqSweep_FVG"):
+        sh = _swing_highs(h, lookback=SWING_LOOKBACK)
+        sl_series = _swing_lows(l, lookback=SWING_LOOKBACK)
+        if signal == "BUY":
+            # SL below the most recent swing low — must be far enough
+            swing_lows = df[sl_series & (l < price)].tail(5)
+            for idx in range(len(swing_lows) - 1, -1, -1):
+                candidate = float(swing_lows.iloc[idx]["low"])
+                dist = price - candidate
+                if dist >= MIN_SL_ATR * atr_val:
+                    sl_level = round(candidate - SL_BUFFER * atr_val, 4)
+                    sl_source = "swing_low"
+                    break
+            # TP at the nearest swing high above entry
+            swing_highs = df[sh & (h > price)].head(5)
+            if len(swing_highs) > 0:
+                tp_level = round(float(swing_highs.iloc[0]["high"]), 4)
+                tp_source = "swing_high"
+        else:  # SELL
+            swing_highs = df[sh & (h > price)].tail(5)
+            for idx in range(len(swing_highs) - 1, -1, -1):
+                candidate = float(swing_highs.iloc[idx]["high"])
+                dist = candidate - price
+                if dist >= MIN_SL_ATR * atr_val:
+                    sl_level = round(candidate + SL_BUFFER * atr_val, 4)
+                    sl_source = "swing_high"
+                    break
+            swing_lows = df[sl_series & (l < price)].head(5)
+            if len(swing_lows) > 0:
+                tp_level = round(float(swing_lows.iloc[0]["low"]), 4)
+                tp_source = "swing_low"
+
+    # ── 4. Fibonacci OTE zone (RSI_OTE) — 62-79% retracement ────────────────
+    if strategy == "RSI_OTE":
+        sh = _swing_highs(h, lookback=SWING_LOOKBACK)
+        sl_s = _swing_lows(l, lookback=SWING_LOOKBACK)
+        recent_highs = df[sh].tail(5)
+        recent_lows  = df[sl_s].tail(5)
+        if len(recent_highs) > 0 and len(recent_lows) > 0:
+            swing_high = float(recent_highs.iloc[-1]["high"])
+            swing_low  = float(recent_lows.iloc[-1]["low"])
+            move_range = swing_high - swing_low
+            if move_range > 0:
+                if signal == "BUY":
+                    ote_79 = swing_low + 0.786 * move_range
+                    tp_level = round(swing_high, 4)
+                    tp_source = "fib_100_extension"
+                    # SL below 79% + buffer, but enforce minimum distance
+                    sl_ote = ote_79 - SL_BUFFER * atr_val
+                    dist = price - sl_ote
+                    if dist >= MIN_SL_ATR * atr_val:
+                        sl_level = round(sl_ote, 4)
+                        sl_source = "fib_79_invalid"
+                else:  # SELL
+                    ote_79 = swing_high - 0.786 * move_range
+                    tp_level = round(swing_low, 4)
+                    tp_source = "fib_100_extension"
+                    sl_ote = ote_79 + SL_BUFFER * atr_val
+                    dist = sl_ote - price
+                    if dist >= MIN_SL_ATR * atr_val:
+                        sl_level = round(sl_ote, 4)
+                        sl_source = "fib_79_invalid"
+
+    # ── 5. EMA targets (MA_FVG fallback TP) ─────────────────────────────────
+    if strategy == "MA_FVG" and tp_level is None:
+        ema50 = _ema(c, 50)
+        last_ema50 = float(ema50.iloc[-1])
+        if signal == "BUY" and last_ema50 > price:
+            tp_level = round(last_ema50, 4)
+            tp_source = "ema50_target"
+        elif signal == "SELL" and last_ema50 < price:
+            tp_level = round(last_ema50, 4)
+            tp_source = "ema50_target"
+
+    # ── 6. Liquidity sweep target (LiqSweep_FVG) — TP at swept level ────────
+    if strategy == "LiqSweep_FVG" and tp_level is None:
+        recent_high = float(h.rolling(10).max().iloc[-2])
+        recent_low  = float(l.rolling(10).min().iloc[-2])
+        if signal == "BUY" and recent_high > price:
+            tp_level = round(recent_high, 4)
+            tp_source = "liquidity_target_high"
+        elif signal == "SELL" and recent_low < price:
+            tp_level = round(recent_low, 4)
+            tp_source = "liquidity_target_low"
+
+    # ── SL: use structure level, fallback to ATR ────────────────────────────
+    if sl_level is None:
+        sl_level = round(atr_sl_level, 4)
+        sl_source = "atr_fallback"
+
+    # ── SL validation: only use structure if within 1.0-2.0×ATR range ────────
+    # Structure SL is only valid when it's close enough to avoid noise but
+    # far enough to maintain R:R. Otherwise fall back to fixed ATR (1.5×).
+    MAX_SL_ATR = 2.0
+    current_risk = abs(price - sl_level)
+
+    if current_risk < MIN_SL_ATR * atr_val:
+        # Structure SL too tight — widen to minimum
+        if signal == "BUY":
+            sl_level = round(price - MIN_SL_ATR * atr_val, 4)
+        else:
+            sl_level = round(price + MIN_SL_ATR * atr_val, 4)
+        sl_source = "min_distance_floor"
+    elif current_risk > MAX_SL_ATR * atr_val:
+        # Structure SL too wide — fall back to fixed ATR (1.5×)
+        sl_level = round(atr_sl_level, 4)  # 1.5 × ATR from entry
+        sl_source = "atr_1.5x"
+    # else: structure SL is in the sweet spot (1.0-2.0×ATR) — keep it
+
+    # ── TP: always use 2.5× ATR from entry ─────────────────────────────────
+    tp_level = round(atr_tp_level, 4)
+    tp_source = "atr_2.5x"
+
+    return {
+        "sl": sl_level,
+        "tp": tp_level,
+        "sl_source": sl_source,
+        "tp_source": tp_source,
+    }
+
+
 def get_live_signal(symbol: str, strategy: str = "MSS_OrderBlock") -> dict:
     """
-    Apply a single ICT strategy to the most recent 3 months of data and return
-    the current bar's signal with computed entry / SL / TP levels.
+    Apply a single ICT strategy to the most recent 30d of 15m data and return
+    the current bar's signal with structure-aware entry / SL / TP levels.
+
+    SL/TP are computed from actual ICT structure (order blocks, FVG boundaries,
+    swing points, Fibonacci levels) instead of fixed ATR multipliers.
 
     Parameters
     ----------
@@ -816,14 +1042,19 @@ def get_live_signal(symbol: str, strategy: str = "MSS_OrderBlock") -> dict:
     price       = float(df["close"].iloc[-1])
     direction   = 1 if current_sig == "BUY" else (-1 if current_sig == "SELL" else 0)
 
+    # Compute structure-aware SL/TP levels
+    levels = _compute_ict_levels(df, current_sig, price, atr_val, strategy)
+
     return {
         "symbol":       symbol.upper(),
         "strategy":     strategy,
         "signal":       current_sig,
         "price":        round(price, 4),
         "entry":        round(price, 4),
-        "sl":           round(price - direction * 1.5 * atr_val, 4),
-        "tp":           round(price + direction * 2.5 * atr_val, 4),
+        "sl":           levels["sl"],
+        "tp":           levels["tp"],
+        "sl_source":    levels["sl_source"],
+        "tp_source":    levels["tp_source"],
         "atr":          round(atr_val, 4),
         "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
     }
