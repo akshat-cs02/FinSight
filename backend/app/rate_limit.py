@@ -39,4 +39,4 @@ def _user_or_ip(request):
     return get_remote_address(request)
 
 
-limiter = Limiter(key_func=get_remote_address, default_limits=[])
+limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])

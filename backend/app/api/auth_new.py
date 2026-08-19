@@ -62,6 +62,18 @@ class RegisterIn(BaseModel):
     last_name: Optional[str] = None
     admin_key: Optional[str] = None
 
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain an uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain a lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain a digit")
+        return v
+
 
 class LoginIn(BaseModel):
     email: str
@@ -206,6 +218,17 @@ async def register(req: RegisterIn, request: Request, response: Response, backgr
     email_norm = req.email.lower().strip()
     username   = (req.username or email_norm.split("@")[0]).lower().strip()
 
+    # Password complexity validation
+    pwd = req.password
+    if len(pwd) < 8:
+        raise HTTPException(400, "Password must be at least 8 characters")
+    if not re.search(r"[A-Z]", pwd):
+        raise HTTPException(400, "Password must contain an uppercase letter")
+    if not re.search(r"[a-z]", pwd):
+        raise HTTPException(400, "Password must contain a lowercase letter")
+    if not re.search(r"\d", pwd):
+        raise HTTPException(400, "Password must contain a digit")
+
     # Validation
     if not _USERNAME_RE.match(username):
         raise HTTPException(400, "Username must be 3–32 chars [a-z0-9_.-]")
@@ -348,6 +371,15 @@ async def forgot_password(request: Request, req: ForgotIn, background: Backgroun
 
 @router.post("/reset-password")
 async def reset_password(req: ResetIn):
+    pwd = req.new_password
+    if len(pwd) < 8:
+        raise HTTPException(400, "Password must be at least 8 characters")
+    if not re.search(r"[A-Z]", pwd):
+        raise HTTPException(400, "Password must contain an uppercase letter")
+    if not re.search(r"[a-z]", pwd):
+        raise HTTPException(400, "Password must contain a lowercase letter")
+    if not re.search(r"\d", pwd):
+        raise HTTPException(400, "Password must contain a digit")
     user = _lookup_by_token_field(req.token, "password_reset")
     if not user:
         raise HTTPException(400, "Invalid or expired reset token.")

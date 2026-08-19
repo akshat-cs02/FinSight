@@ -2,10 +2,24 @@ import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
+function getCsrfToken(): string {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+  return match ? match[1] : ''
+}
+
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   timeout: 15000, // 15s timeout
   withCredentials: true,
+})
+
+// Attach CSRF token on state-changing requests
+api.interceptors.request.use((config) => {
+  const method = (config.method || 'get').toLowerCase()
+  if (!['get', 'head', 'options'].includes(method)) {
+    config.headers['X-CSRF-Token'] = getCsrfToken()
+  }
+  return config
 })
 
 // ─── Retry with exponential backoff ───

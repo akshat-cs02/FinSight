@@ -3,6 +3,8 @@ FinSight Backend — public API serving real market data, portfolio, news, indic
 """
 import asyncio
 import logging
+import os
+import secrets
 import httpx
 from contextlib import asynccontextmanager
 
@@ -30,15 +32,18 @@ _CSP = (
     "default-src 'self'; "
     "script-src 'self' 'unsafe-inline' https://s3.tradingview.com; "
     "frame-src https://www.tradingview.com https://s.tradingview.com; "
+    "frame-ancestors 'none'; "
     "img-src 'self' data: https:; "
     "connect-src 'self' https: wss:; "
-    "style-src 'self' 'unsafe-inline'"
+    "style-src 'self' 'unsafe-inline'; "
+    "upgrade-insecure-requests"
 )
 _SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
     "Content-Security-Policy": _CSP,
 }
 
@@ -94,12 +99,34 @@ app.add_middleware(SlowAPIMiddleware)
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
     for k, v in _SECURITY_HEADERS.items():
-        response.headers.setdefault(k, v)
+        response.headers[k] = v
     # HSTS only over HTTPS (respect proxy's X-Forwarded-Proto for TLS termination).
     proto = request.headers.get("x-forwarded-proto", request.url.scheme)
     if proto == "https":
-        response.headers.setdefault(
-            "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    return response
+
+
+# ── CSRF double-submit cookie protection ─────────────────────────────────────
+_CSRF_SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+_CSRF_EXEMPT_PATHS = {"/health", "/api/docs", "/api/redoc", "/api/openapi.json", "/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/forgot-password", "/api/auth/reset-password"}
+
+@app.middleware("http")
+async def csrf_protection(request: Request, call_next):
+    # Validate CSRF on state-changing requests (skip safe methods and exempt paths)
+    if request.method not in _CSRF_SAFE_METHODS and request.url.path not in _CSRF_EXEMPT_PATHS:
+        cookie_token = request.cookies.get("csrf_token", "")
+        header_token = request.headers.get("x-csrf-token", "")
+        # Skip if no cookie was set yet (first request) or token matches
+        if cookie_token and cookie_token != header_token:
+            return JSONResponse(status_code=403, content={"detail": "CSRF token mismatch"})
+    response = await call_next(request)
+    # Always set csrf_token cookie if not present
+    if "csrf_token" not in request.cookies:
+        token = secrets.token_hex(32)
+        response.set_cookie(
+            key="csrf_token", value=token,
+            httponly=False, secure=True, samesite="lax", max_age=86400, path="/",
         )
     return response
 
