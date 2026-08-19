@@ -105,6 +105,35 @@ export interface ConsensusResult {
   computed_at: string
 }
 
+export interface PaperAccount {
+  balance: number
+  initial_balance: number
+  total_pnl: number
+  total_pnl_pct: number
+  total_trades: number
+  wins: number
+  losses: number
+  win_rate: number
+  open_positions: number
+}
+
+export interface PaperPosition {
+  id: number
+  symbol: string
+  direction: 'BUY' | 'SELL'
+  entry_price: number
+  quantity: number
+  stop_loss: number
+  take_profit: number
+  status: 'OPEN' | 'CLOSED_TP' | 'CLOSED_SL' | 'CLOSED_MANUAL'
+  entry_time: string
+  exit_time: string | null
+  exit_price: number | null
+  pnl: number
+  pnl_percent: number
+  signal_id: number | null
+}
+
 const signalService = {
   async getIntraday(): Promise<IntradaySignal[]> {
     const res = await api.get('/signals/intraday')
@@ -139,6 +168,29 @@ const signalService = {
 
   async getConsensus(symbol: string): Promise<ConsensusResult> {
     const res = await api.get(`/signals/consensus/${symbol}`)
+    return res.data
+  },
+
+  // ── Paper Trading ──
+  async getPaperAccount(): Promise<PaperAccount> {
+    const res = await api.get('/paper/account')
+    return res.data
+  },
+
+  async getPaperPositions(status?: string): Promise<PaperPosition[]> {
+    const params: Record<string, string | number> = { limit: 50 }
+    if (status) params.status = status
+    const res = await api.get('/paper/positions', { params })
+    return res.data
+  },
+
+  async getPaperHistory(): Promise<PaperPosition[]> {
+    const res = await api.get('/paper/history', { params: { limit: 50 } })
+    return res.data
+  },
+
+  async resetPaperAccount(): Promise<{ message: string; balance: number }> {
+    const res = await api.post('/paper/reset')
     return res.data
   },
 }

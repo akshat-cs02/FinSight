@@ -29,6 +29,7 @@ const ForexCalendar = lazy(() => import('@/components/ForexCalendar'))
 const SignalPerformance = lazy(() => import('@/components/SignalPerformance'))
 const WatchThese = lazy(() => import('@/components/WatchThese'))
 const SignalActivity = lazy(() => import('@/components/SignalActivity'))
+const PaperTrading = lazy(() => import('@/components/PaperTradingDashboard'))
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -436,6 +437,10 @@ export default function DashboardPage() {
           <SignalPerformance />
         </Suspense>
       </div>
+
+      <Suspense fallback={<div className="skeleton h-40 rounded-xl" />}>
+        <PaperTrading />
+      </Suspense>
 
       <Suspense fallback={<div className="skeleton h-48 rounded-xl" />}>
         <WatchThese />
