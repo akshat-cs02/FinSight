@@ -305,6 +305,12 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
         db.add(row)
         db.commit()
         db.refresh(row)
+        # Auto-place paper trades for all users
+        try:
+            from app.services.paper_trading_service import auto_trade_all_users
+            auto_trade_all_users(db, row)
+        except Exception as exc:
+            logger.debug("Paper trading auto-trade skipped: %s", exc)
         return _signal_row_to_dict(row)
     except Exception as exc:
         logger.warning("Signal worker failed for %s: %s", sym, exc)
@@ -466,6 +472,15 @@ def resolve_signal_outcomes(db: Session) -> int:
         highs = df["high"].values
         lows  = df["low"].values
         close = df["close"].values
+
+        # Resolve paper trading positions for this symbol
+        try:
+            from app.services.paper_trading_service import resolve_paper_positions
+            paper_closed = resolve_paper_positions(db, symbol, highs, lows)
+            if paper_closed:
+                logger.info("Paper positions closed for %s: %d", symbol, paper_closed)
+        except Exception as exc:
+            logger.debug("Paper position resolution skipped for %s: %s", symbol, exc)
 
         # Trailing SL config
         BE_TRIGGER_R = 1.5  # Move SL to breakeven when unrealized R >= 1.5

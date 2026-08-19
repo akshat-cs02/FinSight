@@ -269,6 +269,44 @@ class IntradaySignal(Base):
     )
 
 
+class PaperAccount(Base):
+    """Paper trading account — one per user, tracks virtual balance."""
+    __tablename__ = "paper_accounts"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    user_id         = Column(String(100), unique=True, index=True, nullable=False)
+    balance         = Column(Float, default=10000.0)
+    initial_balance = Column(Float, default=10000.0)
+    total_pnl       = Column(Float, default=0.0)
+    total_trades    = Column(Integer, default=0)
+    wins            = Column(Integer, default=0)
+    losses          = Column(Integer, default=0)
+    created_at      = Column(DateTime, default=_utcnow)
+    updated_at      = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class PaperPosition(Base):
+    """A paper trade — auto-placed when signal is generated."""
+    __tablename__ = "paper_positions"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    user_id     = Column(String(100), index=True, nullable=False)
+    signal_id   = Column(Integer, index=True, nullable=True)
+    symbol      = Column(String(30), nullable=False, index=True)
+    direction   = Column(String(4), nullable=False)   # BUY / SELL
+    entry_price = Column(Float, nullable=False)
+    quantity    = Column(Float, nullable=False)
+    stop_loss   = Column(Float, nullable=False)
+    take_profit = Column(Float, nullable=False)
+    status      = Column(String(20), default="OPEN", index=True)  # OPEN/CLOSED_TP/CLOSED_SL/CLOSED_MANUAL
+    entry_time  = Column(DateTime, default=_utcnow)
+    exit_time   = Column(DateTime, nullable=True)
+    exit_price  = Column(Float, nullable=True)
+    pnl         = Column(Float, default=0.0)
+    pnl_percent = Column(Float, default=0.0)
+    notes       = Column(String(500), nullable=True)
+
+
 def _auto_migrate():
     """Add missing columns to existing tables (safe to re-run)."""
     with engine.connect() as conn:
