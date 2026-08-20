@@ -473,10 +473,10 @@ def resolve_signal_outcomes(db: Session) -> int:
         lows  = df["low"].values
         close = df["close"].values
 
-        # Resolve paper trading positions for this symbol
+        # Resolve paper trading positions for this symbol (only candles after entry)
         try:
             from app.services.paper_trading_service import resolve_paper_positions
-            paper_closed = resolve_paper_positions(db, symbol, highs, lows)
+            paper_closed = resolve_paper_positions(db, symbol, df)
             if paper_closed:
                 logger.info("Paper positions closed for %s: %d", symbol, paper_closed)
         except Exception as exc:

@@ -13,6 +13,8 @@ logger = logging.getLogger("finsight.paper")
 DEFAULT_BALANCE = 10000.0
 POSITION_SIZE_PCT = 2.0  # risk 2% of balance per trade
 MAX_OPEN_POSITIONS = 10
+MAX_LEVERAGE = 5.0        # never exceed 5:1 notional-to-equity
+MIN_NOTIONAL = 50.0       # skip if notional < $50
 
 
 def get_or_create_account(db: Session, user_id: str) -> PaperAccount:
@@ -52,7 +54,7 @@ def place_paper_trade(db: Session, user_id: str, signal: IntradaySignal) -> Pape
         if existing:
             return None
 
-    # Position sizing: risk X% of balance
+    # Position sizing: risk X% of balance, capped at MAX_LEVERAGE
     risk_amount = acct.balance * (POSITION_SIZE_PCT / 100)
     risk_per_unit = abs(signal.entry - signal.sl)
     if risk_per_unit <= 0:
@@ -60,6 +62,17 @@ def place_paper_trade(db: Session, user_id: str, signal: IntradaySignal) -> Pape
 
     quantity = round(risk_amount / risk_per_unit, 2)
     if quantity <= 0:
+        return None
+
+    # Leverage cap: notional = quantity × entry_price must not exceed MAX_LEVERAGE × balance
+    notional = quantity * signal.entry
+    max_notional = acct.balance * MAX_LEVERAGE
+    if notional > max_notional:
+        quantity = round(max_notional / signal.entry, 2)
+        notional = quantity * signal.entry
+
+    # Skip if notional too small to be meaningful
+    if notional < MIN_NOTIONAL:
         return None
 
     position = PaperPosition(
@@ -93,11 +106,14 @@ def auto_trade_all_users(db: Session, signal: IntradaySignal):
             logger.warning("Paper trade failed for user %s: %s", acct.user_id, exc)
 
 
-def resolve_paper_positions(db: Session, symbol: str, highs, lows) -> int:
+def resolve_paper_positions(db: Session, symbol: str, df) -> int:
     """
-    Resolve open paper positions for a symbol using High/Low price data.
+    Resolve open paper positions for a symbol using OHLCV DataFrame.
+    Only uses candle data AFTER the position's entry_time (avoids same-candle resolution).
     Returns number of positions closed.
     """
+    import pandas as pd
+
     open_positions = db.query(PaperPosition).filter(
         PaperPosition.symbol == symbol,
         PaperPosition.status == "OPEN",
@@ -106,18 +122,47 @@ def resolve_paper_positions(db: Session, symbol: str, highs, lows) -> int:
     if not open_positions:
         return 0
 
+    # Ensure datetime index for filtering
+    idx = df.index
+    if not isinstance(idx, pd.DatetimeIndex):
+        try:
+            idx = pd.to_datetime(idx)
+        except Exception:
+            pass
+
     closed = 0
+    now = datetime.now(timezone.utc)
+
     for pos in open_positions:
         risk = abs(pos.entry_price - pos.stop_loss)
         if risk <= 0:
             risk = pos.entry_price * 0.01
 
-        if pos.direction == "BUY":
-            hit_tp = any(h >= pos.take_profit for h in highs)
-            hit_sl = any(l <= pos.stop_loss for l in lows)
+        # Filter: only use candles that closed AFTER the position was opened
+        # This prevents same-candle resolution (signal and TP/SL on same candle)
+        entry_dt = pos.entry_time
+        if hasattr(entry_dt, 'tzinfo') and entry_dt.tzinfo is None:
+            entry_dt = entry_dt.replace(tzinfo=timezone.utc)
+
+        if isinstance(idx, pd.DatetimeIndex):
+            # Only candles after entry_time (give 1 candle grace period)
+            mask = idx > entry_dt
+            if mask.sum() == 0:
+                # No new candles since entry — don't resolve yet
+                continue
+            post_highs = df["high"].values[mask.values]
+            post_lows = df["low"].values[mask.values]
         else:
-            hit_tp = any(l <= pos.take_profit for l in lows)
-            hit_sl = any(h >= pos.stop_loss for h in highs)
+            # Fallback: use all data (but this may cause same-candle issues)
+            post_highs = df["high"].values
+            post_lows = df["low"].values
+
+        if pos.direction == "BUY":
+            hit_tp = any(h >= pos.take_profit for h in post_highs)
+            hit_sl = any(l <= pos.stop_loss for l in post_lows)
+        else:
+            hit_tp = any(l <= pos.take_profit for l in post_lows)
+            hit_sl = any(h >= pos.stop_loss for h in post_highs)
 
         if hit_tp:
             # TP hit
