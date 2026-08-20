@@ -57,12 +57,9 @@ export default function Navbar() {
   const isGuest = user?.email === 'guest@finsight.app' || user?.id === '0'
   const isRealUser = !isGuest && user !== null && !!user?.email && user.email !== 'guest@finsight.app'
 
-  const displayName =
-    [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
-    visitor?.guest_username ||
-    user?.username ||
-    user?.email ||
-    'Guest'
+  const displayName = isRealUser
+    ? [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username || user?.email?.split('@')[0] || 'User'
+    : visitor?.guest_username || 'Guest'
 
   const displayEmail = isRealUser ? user?.email : (visitor?.ip_address ? `${visitor.ip_address} · Guest` : 'guest@finsight.app')
 
