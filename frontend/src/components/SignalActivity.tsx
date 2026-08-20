@@ -80,6 +80,12 @@ export default function SignalActivity() {
   )
 }
 
+function formatTime(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+}
+
 function SignalRow({ signal }: { signal: IntradaySignal }) {
   const isBuy = signal.signal === 'BUY'
   const Icon = isBuy ? TrendingUp : TrendingDown
@@ -120,10 +126,22 @@ function SignalRow({ signal }: { signal: IntradaySignal }) {
       }`}
     >
       <Icon size={14} className={`${iconColor} shrink-0`} />
-      <span className="font-semibold text-[var(--text)] min-w-[60px]">{signal.symbol}</span>
-      <span className={`text-[10px] font-medium ${iconColor} min-w-[30px]`}>
-        {isBuy ? 'BUY' : 'SELL'}
-      </span>
+      <div className="flex flex-col min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-[var(--text)]">{signal.symbol}</span>
+          <span className={`text-[10px] font-medium ${iconColor}`}>
+            {isBuy ? 'BUY' : 'SELL'}
+          </span>
+          <span className="text-[9px] text-[var(--faint)]">
+            {formatTime(signal.generated_at)}
+          </span>
+        </div>
+        {signal.outcome !== 'PENDING' && signal.outcome_at && (
+          <div className="text-[9px] text-[var(--faint)]">
+            Closed: {formatTime(signal.outcome_at)}
+          </div>
+        )}
+      </div>
       <div className="ml-auto flex items-center gap-2">{outcomeBadge}</div>
     </div>
   )

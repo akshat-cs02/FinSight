@@ -16,6 +16,11 @@ MAX_OPEN_POSITIONS = 10
 MAX_LEVERAGE = 5.0        # never exceed 5:1 notional-to-equity
 MIN_NOTIONAL = 50.0       # skip if notional < $50
 
+# Fixed lot sizing: $10K = 0.1 lot (10,000 units for forex)
+BASE_BALANCE = 10000.0
+BASE_FOREX_LOT = 0.1       # 0.1 standard lot at $10K
+FOREX_LOT_UNITS = 100000   # 1 standard lot = 100,000 units
+
 
 def get_or_create_account(db: Session, user_id: str) -> PaperAccount:
     """Get or create a paper trading account for a user."""
@@ -54,21 +59,28 @@ def place_paper_trade(db: Session, user_id: str, signal: IntradaySignal) -> Pape
         if existing:
             return None
 
-    # Position sizing: risk X% of balance, capped at MAX_LEVERAGE
-    risk_amount = acct.balance * (POSITION_SIZE_PCT / 100)
-    risk_per_unit = abs(signal.entry - signal.sl)
-    if risk_per_unit <= 0:
-        risk_per_unit = signal.entry * 0.01  # fallback: 1% of price
+    # Fixed lot sizing: scales with balance via compounding
+    # $10K = 0.1 lot (10,000 units for forex), proportional to balance
+    lot_multiplier = acct.balance / BASE_BALANCE
+    base_lot = BASE_FOREX_LOT * lot_multiplier
 
-    quantity = round(risk_amount / risk_per_unit, 2)
+    if symbol.endswith("=X"):
+        # Forex pair: 1 lot = 100,000 units
+        quantity = round(base_lot * FOREX_LOT_UNITS, 2)
+    else:
+        # Non-forex: equivalent notional ($10K per 0.1 lot)
+        notional_per_lot = BASE_FOREX_LOT * FOREX_LOT_UNITS  # $10,000
+        target_notional = notional_per_lot * lot_multiplier
+        quantity = round(target_notional / signal.entry, 4) if signal.entry > 0 else 0
+
     if quantity <= 0:
         return None
 
-    # Leverage cap: notional = quantity × entry_price must not exceed MAX_LEVERAGE × balance
+    # Leverage cap: notional must not exceed MAX_LEVERAGE × balance
     notional = quantity * signal.entry
     max_notional = acct.balance * MAX_LEVERAGE
     if notional > max_notional:
-        quantity = round(max_notional / signal.entry, 2)
+        quantity = round(max_notional / signal.entry, 4) if signal.entry > 0 else 0
         notional = quantity * signal.entry
 
     # Skip if notional too small to be meaningful

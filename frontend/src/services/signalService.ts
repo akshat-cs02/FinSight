@@ -14,6 +14,7 @@ export interface IntradaySignal {
   htf_bias: string | null
   generated_at: string
   outcome: 'PENDING' | 'TP_HIT' | 'SL_HIT' | 'EXPIRED'
+  outcome_at: string | null
   pnl_r: number | null
 }
 
