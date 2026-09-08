@@ -64,7 +64,7 @@ def place_paper_trade(db: Session, user_id: str, signal: IntradaySignal) -> Pape
     lot_multiplier = acct.balance / BASE_BALANCE
     base_lot = BASE_FOREX_LOT * lot_multiplier
 
-    if symbol.endswith("=X"):
+    if signal.symbol.endswith("=X"):
         # Forex pair: 1 lot = 100,000 units
         quantity = round(base_lot * FOREX_LOT_UNITS, 2)
     else:
