@@ -2827,9 +2827,9 @@
           <a href="#showcase">How it works</a><a href="#caps">Platform</a
           ><a href="#wins">Signals</a><a href="#stats">Performance</a>
         </nav>
-        <div class="nav-cta">
-          <button class="lk" data-open-auth data-tab="signin">Sign in</button>
-          <button class="btn btn-p" data-open-auth data-tab="create">
+        <div class="nav-cta" id="navCta">
+          <button class="lk" data-open-auth data-tab="signin" id="signinBtnDesktop">Sign in</button>
+          <button class="btn btn-p" data-open-auth data-tab="create" id="getStartedBtnDesktop">
             Get started
           </button>
           <button class="theme-tg" id="themeToggle" aria-label="Toggle theme">
@@ -2847,12 +2847,13 @@
       ><a href="#caps">Platform <span class="ix">02</span></a>
       <a href="#wins">Signals <span class="ix">03</span></a
       ><a href="#stats">Performance <span class="ix">04</span></a>
-      <div class="mfoot">
+      <div class="mfoot" id="mfootCta">
         <button
           class="btn btn-g"
           data-open-auth
           data-tab="signin"
           style="flex: 1"
+          id="signinBtnMob"
         >
           Sign in</button
         ><button
@@ -2860,6 +2861,7 @@
           data-open-auth
           data-tab="create"
           style="flex: 1"
+          id="getStartedBtnMob"
         >
           Get started
         </button>
@@ -5592,6 +5594,23 @@
         else
           addEventListener("load", autoOpen);
       }
+
+      /* ── Check auth state and update nav ── */
+      (function() {
+        var api = "https://finsight-backend-mnn6.onrender.com/api";
+        fetch(api + "/auth/me", { credentials: "include" })
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(user) {
+            if (!user || !user.id || user.email === "guest@tickerscope.xyz") return;
+            /* Logged in — swap desktop nav */
+            var nc = document.getElementById("navCta");
+            if (nc) nc.innerHTML = '<a href="/dashboard" class="btn btn-p">Dashboard</a>';
+            /* Swap mobile nav */
+            var mf = document.getElementById("mfootCta");
+            if (mf) mf.innerHTML = '<a href="/dashboard" class="btn btn-p" style="flex:1;text-align:center">Dashboard</a>';
+          })
+          .catch(function(){});
+      })();
     </script>
   </body>
 </html>
