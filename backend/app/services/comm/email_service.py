@@ -151,25 +151,25 @@ def _send_smtp_fallback(to: str, subject: str, html: str) -> MessageSent:
 
 def send_email(to: str, subject: str, html_body: str, cta: Optional[tuple[str, str]] = None) -> MessageSent:
     """Public entry point. Tries:
-       1) SMTP (if configured) — Gmail / SendGrid / etc.
-       2) Resend (if configured)
+       1) Resend (HTTPS — works everywhere including Render)
+       2) SMTP (local dev only — Render blocks port 587)
        3) DRY_RUN outbox under `data/outbox/` for local dev.
     """
     full_html = _build_email_html(subject, html_body, cta)
-    # Try SMTP first if configured
-    if os.environ.get("SMTP_HOST") and os.environ.get("SMTP_USER") and os.environ.get("SMTP_PASS"):
-        sm = _send_smtp_fallback(to, subject, full_html)
-        if sm.ok:
-            logger.info("Email sent via SMTP to %s", to)
-            return sm
-        logger.warning("SMTP failed for %s: %s", to, sm.error)
-    # Try Resend if configured
+    # Try Resend first (HTTPS, works on Render)
     if os.environ.get("RESEND_API_KEY"):
         r = _send_resend(to, subject, full_html)
         if r.ok:
             logger.info("Email sent via Resend to %s (id=%s)", to, r.message_id)
             return r
         logger.warning("Resend failed for %s: %s", to, r.error)
+    # Try SMTP (only works locally, Render blocks port 587)
+    if os.environ.get("SMTP_HOST") and os.environ.get("SMTP_USER") and os.environ.get("SMTP_PASS"):
+        sm = _send_smtp_fallback(to, subject, full_html)
+        if sm.ok:
+            logger.info("Email sent via SMTP to %s", to)
+            return sm
+        logger.warning("SMTP failed for %s: %s", to, sm.error)
     # Fallback to outbox
     fp = _save_outbox(to, subject, full_html)
     logger.warning("No email provider worked — OTP saved to outbox: %s", fp)
