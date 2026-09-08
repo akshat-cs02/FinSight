@@ -97,7 +97,7 @@ def _send_resend(to: str, subject: str, html: str) -> MessageSent:
     api_key = os.environ.get("RESEND_API_KEY", "")
     if not api_key:
         return MessageSent(ok=False, provider="resend", error="RESEND_API_KEY not set")
-    sender = os.environ.get("FINSIGHT_FROM_EMAIL", "TickerScope <onboarding@resend.dev>")
+    sender = os.environ.get("FINSIGHT_FROM_EMAIL", "TickerScope <noreply@contact.tickerscope.xyz>")
     body = json.dumps({
         "from":    sender,
         "to":      [to],

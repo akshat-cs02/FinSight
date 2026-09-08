@@ -69,7 +69,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
-    SENDER_EMAIL: str = "noreply@tickerscope.xyz"
+    SENDER_EMAIL: str = "noreply@contact.tickerscope.xyz"
     SENDER_NAME: str = "TickerScope Team"
 
     # API Keys
