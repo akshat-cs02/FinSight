@@ -7,53 +7,27 @@ interface ProtectedRouteProps {
   adminOnly?: boolean
 }
 
-/**
- * Protected route that checks authentication via httpOnly cookie.
- * On mount, it calls /auth/me to verify the session is still valid.
- * Shows a loading spinner while checking, redirects to /login if not authenticated.
- */
 export default function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
-  const { user, initialized, bootstrap } = useAuthStore()
+  const { user, bootstrap } = useAuthStore()
   const [checking, setChecking] = useState(true)
   const [authenticated, setAuthenticated] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    let bootstrapped = false
     const checkAuth = async () => {
-      try {
-        // Fast path: if user is already a real logged-in user, skip everything.
-        const currentUser = useAuthStore.getState().user
-        if (currentUser && currentUser.id !== '0' && currentUser.email !== 'guest@tickerscope.xyz') {
-          if (!cancelled) { setAuthenticated(true); setChecking(false) }
-          return
-        }
-        // Guest user: only allow if they came from landing page (sessionStorage flag)
-        if (currentUser && currentUser.email === 'guest@tickerscope.xyz') {
-          const fromLanding = sessionStorage.getItem('tickerscope_from_landing')
-          if (!fromLanding) {
-            // Direct URL hit — redirect to landing
-            if (!cancelled) { setAuthenticated(false); setChecking(false) }
-            return
-          }
-        }
-        // Only call bootstrap once (prevents double-calls from App.tsx + ProtectedRoute)
-        if (!bootstrapped) {
-          bootstrapped = true
-          await bootstrap()
-        }
-        if (!cancelled) {
-          // Allow both real users and guest users
-          const finalUser = useAuthStore.getState().user
-          setAuthenticated(!!finalUser)
-          setChecking(false)
-        }
-      } catch {
-        if (!cancelled) {
-          setAuthenticated(false)
-          setChecking(false)
-        }
+      // Always bootstrap to recover session from httpOnly cookie
+      try { await bootstrap() } catch { /* ignore */ }
+      if (cancelled) return
+
+      const u = useAuthStore.getState().user
+      const isReal = u && u.id !== '0' && u.email !== 'guest@tickerscope.xyz'
+      if (isReal) {
+        setAuthenticated(true)
+      } else {
+        // Guest — only allowed if they came through the landing page
+        setAuthenticated(!!sessionStorage.getItem('tickerscope_from_landing'))
       }
+      setChecking(false)
     }
     checkAuth()
     return () => { cancelled = true }
