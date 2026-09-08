@@ -34,9 +34,10 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
           await bootstrap()
         }
         if (!cancelled) {
-          // Allow both real users and guest users
+          // Only allow real logged-in users (not guest)
           const finalUser = useAuthStore.getState().user
-          setAuthenticated(!!finalUser)
+          const isRealUser = finalUser && finalUser.id !== '0' && finalUser.email !== 'guest@tickerscope.xyz'
+          setAuthenticated(!!isRealUser)
           setChecking(false)
         }
       } catch {
