@@ -28,16 +28,24 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
           if (!cancelled) { setAuthenticated(true); setChecking(false) }
           return
         }
+        // Guest user: only allow if they came from landing page (sessionStorage flag)
+        if (currentUser && currentUser.email === 'guest@tickerscope.xyz') {
+          const fromLanding = sessionStorage.getItem('tickerscope_from_landing')
+          if (!fromLanding) {
+            // Direct URL hit — redirect to landing
+            if (!cancelled) { setAuthenticated(false); setChecking(false) }
+            return
+          }
+        }
         // Only call bootstrap once (prevents double-calls from App.tsx + ProtectedRoute)
         if (!bootstrapped) {
           bootstrapped = true
           await bootstrap()
         }
         if (!cancelled) {
-          // Only allow real logged-in users (not guest)
+          // Allow both real users and guest users
           const finalUser = useAuthStore.getState().user
-          const isRealUser = finalUser && finalUser.id !== '0' && finalUser.email !== 'guest@tickerscope.xyz'
-          setAuthenticated(!!isRealUser)
+          setAuthenticated(!!finalUser)
           setChecking(false)
         }
       } catch {

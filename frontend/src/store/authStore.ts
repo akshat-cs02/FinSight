@@ -125,6 +125,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {
       // Even if server call fails, clear local state
     }
+    sessionStorage.removeItem('tickerscope_from_landing')
     set({ user: GUEST_USER, token: null })
   },
 
