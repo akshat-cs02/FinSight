@@ -5154,7 +5154,7 @@
             $("#siPasswordSection").style.display = "none";
             $("#siOtpSection").style.display = "";
             lblSignin.textContent = "Verify OTP";
-            $("#siOtpBoxes .otp-digit")[0].focus();
+            document.querySelector("#siOtpBoxes .otp-digit").focus();
             startOtpTimer();
           } catch (e) {
             btnSignin.classList.remove("load");
@@ -5214,7 +5214,7 @@
             credentials: "include",
           });
           $("#siOtpBoxes").querySelectorAll(".otp-digit").forEach(b => { b.value = ""; });
-          $("#siOtpBoxes .otp-digit")[0].focus();
+          document.querySelector("#siOtpBoxes .otp-digit").focus();
           startOtpTimer();
         } catch (e) { showErr("Failed to resend"); }
       });
@@ -5293,7 +5293,7 @@
             const createPane = $('[data-pane="create"]');
             createPane.querySelectorAll(".str, .str-l, .row2").forEach(f => f.style.display = "none");
             $("#caOtpSection").style.display = "";
-            $("#caOtpBoxes .otp-digit")[0].focus();
+            document.querySelector("#caOtpBoxes .otp-digit").focus();
             // Timer
             let s = 60;
             const timerEl = $("#caOtpTimer"), resendBtn = $("#caResendOtp");
@@ -5304,7 +5304,7 @@
               await fetch("/api/auth/otp/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }), credentials: "include" });
               s = 60; resendBtn.style.display = "none"; timerEl.textContent = "Resend in 60s";
               $("#caOtpBoxes").querySelectorAll(".otp-digit").forEach(b => { b.value = ""; });
-              $("#caOtpBoxes .otp-digit")[0].focus();
+              document.querySelector("#caOtpBoxes .otp-digit").focus();
               const iv2 = setInterval(() => { s--; if (s <= 0) { clearInterval(iv2); timerEl.textContent = ""; resendBtn.style.display = ""; } else timerEl.textContent = "Resend in " + s + "s"; }, 1000);
             };
           } catch (e) {
