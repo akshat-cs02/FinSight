@@ -59,6 +59,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3001",
         "https://finsight-backend-mnn6.onrender.com",
         "https://fin-sight-blush.vercel.app",
+        "https://tickerscope.xyz",
+        "https://www.tickerscope.xyz",
     ]
     CORS_CREDENTIALS: bool = True
     CORS_METHODS: List[str] = ["*"]
