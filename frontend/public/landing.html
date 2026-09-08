@@ -5063,139 +5063,63 @@
           requestAnimationFrame(() => (p.style.strokeDashoffset = 0));
         }
       }
-      async function submit(btn, fields, needAgree) {
-        if (btn.classList.contains("load") || btn.classList.contains("ok"))
-          return;
-        hideErr();
-        let ok = true;
-        fields.forEach((f) => {
-          if (!f.value.trim()) {
-            ok = false;
-            shake(f.closest(".fld"));
-            const ul = f.closest(".fld").querySelector(".ul");
-            ul.style.background = DN;
-            ul.style.transform = "scaleX(1)";
-            setTimeout(() => {
-              ul.style.background = "";
-            }, 1300);
-          }
-        });
-        if (needAgree && !$("#agree").checked) {
-          ok = false;
-          showErr("Please accept the Terms & Privacy Policy.");
-          shake($("#agree").closest(".chk"));
-        }
-        if (!ok) {
-          if (!err.textContent) showErr("Please complete all required fields.");
-          return;
-        }
-        btn.classList.add("load");
-        const isLogin = btn.id === "btnSignin";
-        const url = isLogin ? "/api/auth/login" : "/api/auth/register";
-        let body;
-        if (isLogin) {
-          body = { email: fields[0].value, password: fields[1].value };
-        } else {
-          body = {
-            email: fields[1].value,
-            password: fields[2].value,
-            first_name: fields[0].value,
-          };
-        }
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 45000);
-        try {
-          const r = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-            credentials: "include",
-            signal: ctrl.signal,
-          });
-          clearTimeout(timer);
-          if (!r.ok) {
-            const d = await r.json().catch(() => ({}));
-            throw new Error(d.detail || "Request failed (" + r.status + ")");
-          }
-          btn.classList.remove("load");
-          btn.classList.add("ok");
-          drawCk(btn);
-          setTimeout(() => {
-            window.location.href = "/dashboard";
-          }, 800);
-        } catch (e) {
-          clearTimeout(timer);
-          btn.classList.remove("load");
-          if (e.name === "AbortError") {
-            showErr("Server is warming up — please try again in a moment.");
-          } else {
-            showErr(e.message || "Connection failed. Please try again.");
-          }
-        }
-      }
-      $("#btnSignin").addEventListener("click", () =>
-        submit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false),
-      );
-      $("#btnCreate").addEventListener("click", () =>
-        submit(
-          $("#btnCreate"),
-          [$("#caName"), $("#caEmail"), $("#caPw")],
-          true,
-        ),
-      );
-      $$('[data-pane="signin"] .fld input').forEach((el) =>
-        el.addEventListener("keydown", (e) => {
-          if (e.key === "Enter")
-            submit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false);
-        }),
-      );
-      $$('[data-pane="create"] .fld input').forEach((el) =>
-        el.addEventListener("keydown", (e) => {
-          if (e.key === "Enter")
-            submit(
-              $("#btnCreate"),
-              [$("#caName"), $("#caEmail"), $("#caPw")],
-              true,
-            );
-        }),
-      );
-
       // ── OTP Login Flow ──────────────────────────────────────────────────
-      let otpMode = false;
+      let otpStep = 0; // 0 = email, 1 = otp sent, 2 = verify
       let otpTimer = null;
+      const btnSignin = $("#btnSignin");
+      const lblSignin = btnSignin.querySelector(".lbl");
 
       $("#siToggleOtp").addEventListener("click", () => {
-        otpMode = !otpMode;
-        $("#siPasswordSection").style.display = otpMode ? "none" : "";
-        $("#siOtpSection").style.display = otpMode ? "" : "none";
-        $("#siToggleOtp").textContent = otpMode
-          ? "Login with password instead"
-          : "Login with OTP instead";
-        $("#btnSignin span.lbl").textContent = otpMode ? "Send OTP" : "Sign in securely";
+        const isPw = $("#siPasswordSection").style.display !== "none";
+        $("#siPasswordSection").style.display = isPw ? "none" : "";
+        $("#siOtpSection").style.display = isPw ? "" : "none";
+        $("#siToggleOtp").textContent = isPw ? "Login with password instead" : "Login with OTP instead";
+        lblSignin.textContent = isPw ? "Send OTP" : "Sign in securely";
+        otpStep = isPw ? 0 : -1;
         hideErr();
       });
 
-      // Override submit for OTP mode
-      const origSubmit = submit;
-      async function otpSubmit(btn, fields, needAgree) {
-        if (!otpMode) return origSubmit(btn, fields, needAgree);
-
-        if (btn.classList.contains("load") || btn.classList.contains("ok")) return;
+      btnSignin.addEventListener("click", async () => {
+        if (btnSignin.classList.contains("load") || btnSignin.classList.contains("ok")) return;
         hideErr();
 
-        const email = fields[0].value.trim();
-        if (!email) {
-          shake(fields[0].closest(".fld"));
-          showErr("Please enter your email.");
+        const email = $("#siEmail").value.trim();
+        if (!email) { shake($("#siEmail").closest(".fld")); showErr("Enter your email."); return; }
+
+        // Password mode
+        if ($("#siPasswordSection").style.display !== "none") {
+          const pw = $("#siPw").value;
+          if (!pw) { shake($("#siPw").closest(".fld")); showErr("Enter your password."); return; }
+          btnSignin.classList.add("load");
+          try {
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), 45000);
+            const r = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password: pw }),
+              credentials: "include",
+              signal: ctrl.signal,
+            });
+            clearTimeout(t);
+            if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail || "Login failed"); }
+            btnSignin.classList.remove("load");
+            btnSignin.classList.add("ok");
+            drawCk(btnSignin);
+            setTimeout(() => { window.location.href = "/dashboard"; }, 800);
+          } catch (e) {
+            btnSignin.classList.remove("load");
+            showErr(e.name === "AbortError" ? "Server warming up..." : (e.message || "Login failed"));
+          }
           return;
         }
 
-        // Step 1: Send OTP
-        if (!$("#siOtpSection").style.display || $("#siOtpSection").style.display === "none") {
-          btn.classList.add("load");
+        // OTP mode — Step 1: Send OTP
+        if (otpStep === 0) {
+          btnSignin.classList.add("load");
           try {
             const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 45000);
+            const t = setTimeout(() => ctrl.abort(), 45000);
             const r = await fetch("/api/auth/otp/send", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -5203,38 +5127,29 @@
               credentials: "include",
               signal: ctrl.signal,
             });
-            clearTimeout(timer);
-            if (!r.ok) {
-              const d = await r.json().catch(() => ({}));
-              throw new Error(d.detail || "Failed to send OTP");
-            }
-            btn.classList.remove("load");
-            // Show OTP input
+            clearTimeout(t);
+            if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail || "Failed to send OTP"); }
+            btnSignin.classList.remove("load");
+            otpStep = 1;
             $("#siPasswordSection").style.display = "none";
             $("#siOtpSection").style.display = "";
-            $("#btnSignin span.lbl").textContent = "Verify OTP";
+            lblSignin.textContent = "Verify OTP";
             $("#siOtp").focus();
-            // Start countdown
             startOtpTimer();
           } catch (e) {
-            btn.classList.remove("load");
-            showErr(e.name === "AbortError" ? "Server is warming up — try again." : (e.message || "Failed to send OTP"));
+            btnSignin.classList.remove("load");
+            showErr(e.name === "AbortError" ? "Server warming up..." : (e.message || "Failed to send OTP"));
           }
           return;
         }
 
-        // Step 2: Verify OTP
+        // OTP mode — Step 2: Verify
         const otp = $("#siOtp").value.trim();
-        if (!otp || otp.length !== 6) {
-          shake($("#siOtp").closest(".fld"));
-          showErr("Please enter the 6-digit code.");
-          return;
-        }
-
-        btn.classList.add("load");
+        if (!otp || otp.length !== 6) { shake($("#siOtp").closest(".fld")); showErr("Enter the 6-digit code."); return; }
+        btnSignin.classList.add("load");
         try {
           const ctrl = new AbortController();
-          const timer = setTimeout(() => ctrl.abort(), 45000);
+          const t = setTimeout(() => ctrl.abort(), 45000);
           const r = await fetch("/api/auth/otp/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -5242,39 +5157,28 @@
             credentials: "include",
             signal: ctrl.signal,
           });
-          clearTimeout(timer);
-          if (!r.ok) {
-            const d = await r.json().catch(() => ({}));
-            throw new Error(d.detail || "Invalid OTP");
-          }
-          btn.classList.remove("load");
-          btn.classList.add("ok");
-          drawCk(btn);
-          setTimeout(() => {
-            window.location.href = "/dashboard";
-          }, 800);
+          clearTimeout(t);
+          if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail || "Invalid OTP"); }
+          btnSignin.classList.remove("load");
+          btnSignin.classList.add("ok");
+          drawCk(btnSignin);
+          setTimeout(() => { window.location.href = "/dashboard"; }, 800);
         } catch (e) {
-          btn.classList.remove("load");
-          showErr(e.name === "AbortError" ? "Server is warming up — try again." : (e.message || "Invalid OTP"));
+          btnSignin.classList.remove("load");
+          showErr(e.name === "AbortError" ? "Server warming up..." : (e.message || "Invalid OTP"));
         }
-      }
+      });
 
       function startOtpTimer() {
-        let secs = 60;
-        const el = $("#siOtpTimer");
-        const resend = $("#siResendOtp");
-        resend.style.display = "none";
-        el.textContent = `Resend in ${secs}s`;
+        let s = 60;
+        const el = $("#siOtpTimer"), rs = $("#siResendOtp");
+        rs.style.display = "none";
+        el.textContent = "Resend in " + s + "s";
         clearInterval(otpTimer);
         otpTimer = setInterval(() => {
-          secs--;
-          if (secs <= 0) {
-            clearInterval(otpTimer);
-            el.textContent = "";
-            resend.style.display = "";
-          } else {
-            el.textContent = `Resend in ${secs}s`;
-          }
+          s--;
+          if (s <= 0) { clearInterval(otpTimer); el.textContent = ""; rs.style.display = ""; }
+          else el.textContent = "Resend in " + s + "s";
         }, 1000);
       }
 
@@ -5283,34 +5187,61 @@
         if (!email) return showErr("Enter your email first.");
         hideErr();
         try {
-          const r = await fetch("/api/auth/otp/send", {
+          await fetch("/api/auth/otp/send", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
             credentials: "include",
           });
-          if (!r.ok) throw new Error("Failed to resend");
           startOtpTimer();
-          showErr(""); // clear
-        } catch (e) {
-          showErr(e.message || "Failed to resend OTP");
-        }
+        } catch (e) { showErr("Failed to resend"); }
       });
 
-      // Replace btnSignin handler with OTP-aware version
-      $("#btnSignin").removeEventListener("click", () =>
-        submit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false)
-      );
-      $("#btnSignin").addEventListener("click", () =>
-        otpSubmit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false)
-      );
-      // Enter key in OTP field
       $("#siOtp").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") otpSubmit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false);
+        if (e.key === "Enter") btnSignin.click();
+      });
+
+      // Enter key on email field
+      $("#siEmail").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") btnSignin.click();
       });
 
       const toast = $("#toast");
       let toastT = null;
+
+      // Register handler
+      $("#btnCreate").addEventListener("click", async () => {
+        const btn = $("#btnCreate");
+        if (btn.classList.contains("load") || btn.classList.contains("ok")) return;
+        hideErr();
+        const name = $("#caName").value.trim();
+        const email = $("#caEmail").value.trim();
+        const pw = $("#caPw").value;
+        if (!name || !email || !pw) { showErr("Fill all fields."); return; }
+        if (!$("#agree").checked) { showErr("Please accept Terms & Privacy."); shake($("#agree").closest(".chk")); return; }
+        btn.classList.add("load");
+        try {
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 45000);
+          const r = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password: pw, first_name: name }),
+            credentials: "include",
+            signal: ctrl.signal,
+          });
+          clearTimeout(t);
+          if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail || "Registration failed"); }
+          btn.classList.remove("load");
+          btn.classList.add("ok");
+          drawCk(btn);
+          setTimeout(() => { window.location.href = "/dashboard"; }, 800);
+        } catch (e) {
+          btn.classList.remove("load");
+          showErr(e.name === "AbortError" ? "Server warming up..." : (e.message || "Registration failed"));
+        }
+      });
+
       function guest() {
         sessionStorage.setItem('finsight_splash', 'true');
         window.location.href = "/dashboard";
