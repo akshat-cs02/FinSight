@@ -5251,9 +5251,11 @@
             btn.classList.remove("load");
             btn.dataset.otpPending = "1";
             btn.querySelector(".lbl").textContent = "Verify OTP";
-            // Show OTP section, hide other fields
+            // Show OTP section, hide registration fields
+            $("#caName").closest(".fld").style.display = "none";
+            $("#caEmail").closest(".fld").style.display = "none";
+            $("#caPw").closest(".fld").style.display = "none";
             const createPane = $('[data-pane="create"]');
-            createPane.querySelectorAll(".fld").forEach(f => f.style.display = "none");
             createPane.querySelectorAll(".str, .str-l, .row2").forEach(f => f.style.display = "none");
             $("#caOtpSection").style.display = "";
             $("#caOtp").focus();
