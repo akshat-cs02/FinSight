@@ -76,10 +76,31 @@ export const useAuthStore = create<AuthState>((set) => ({
         },
       })
     }
+    // Re-ping with real user's name if logged in
+    const u = useAuthStore.getState().user
+    if (u && u.id !== '0' && u.email !== 'guest@tickerscope.xyz') {
+      const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || u.email?.split('@')[0]
+      const pinged = await pingVisitor(undefined, name)
+      if (pinged) {
+        set({
+          visitor: {
+            guest_username: pinged.guest_username,
+            ip_address: pinged.ip_address,
+            page_views: pinged.page_views ?? 1,
+            first_seen: pinged.first_seen ?? null,
+          },
+        })
+      }
+    }
   },
 
   pingVisitor: async (path?: string) => {
-    const data = await pingVisitor(path)
+    const u = useAuthStore.getState().user
+    const isReal = u && u.id !== '0' && u.email !== 'guest@tickerscope.xyz'
+    const name = isReal
+      ? ([u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || u.email?.split('@')[0])
+      : undefined
+    const data = await pingVisitor(path, name)
     if (data) {
       set({
         visitor: {

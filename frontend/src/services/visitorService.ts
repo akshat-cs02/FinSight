@@ -38,13 +38,14 @@ export interface VisitorInfo {
   page_views?: number
 }
 
-export async function pingVisitor(path?: string): Promise<VisitorInfo | null> {
+export async function pingVisitor(path?: string, username?: string): Promise<VisitorInfo | null> {
   try {
     const params: Record<string, string> = {}
     const token = getToken()
     const name = getName()
     if (token) params.token = token
-    if (name) params.guest_username = name
+    if (username) params.guest_username = username
+    else if (name) params.guest_username = name
     if (path) params.path = path
 
     const { data } = await axios.post<VisitorInfo>(`${API_URL}/api/visitor/ping`, null, { params })

@@ -5137,7 +5137,6 @@
             btnSignin.classList.remove("load");
             btnSignin.classList.add("ok");
             drawCk(btnSignin);
-            sessionStorage.setItem('tickerscope_from_landing', '1');
             setTimeout(() => { window.location.href = "/dashboard"; }, 800);
           } catch (e) {
             btnSignin.classList.remove("load");
@@ -5195,7 +5194,6 @@
           btnSignin.classList.remove("load");
           btnSignin.classList.add("ok");
           drawCk(btnSignin);
-          sessionStorage.setItem('tickerscope_from_landing', '1');
           setTimeout(() => { window.location.href = "/dashboard"; }, 800);
         } catch (e) {
           btnSignin.classList.remove("load");
@@ -5347,7 +5345,6 @@
           btn.classList.remove("load");
           btn.classList.add("ok");
           drawCk(btn);
-          sessionStorage.setItem('tickerscope_from_landing', '1');
           setTimeout(() => { window.location.href = "/dashboard"; }, 800);
         } catch (e) {
           btn.classList.remove("load");
