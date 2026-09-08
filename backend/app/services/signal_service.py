@@ -310,7 +310,7 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
             from app.services.paper_trading_service import auto_trade_all_users
             auto_trade_all_users(db, row)
         except Exception as exc:
-            logger.debug("Paper trading auto-trade skipped: %s", exc)
+            logger.warning("Paper trading auto-trade failed for signal %s: %s", sym, exc)
         return _signal_row_to_dict(row)
     except Exception as exc:
         logger.warning("Signal worker failed for %s: %s", sym, exc)

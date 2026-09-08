@@ -239,10 +239,9 @@ def get_account_summary(db: Session, user_id: str) -> dict:
     ).all()
 
     # Calculate unrealized P&L for open positions
+    # pos.pnl is only set when position closes; for OPEN positions it's always 0.
+    # Real-time unrealized P&L requires current market prices (calculated on frontend).
     unrealized_pnl = 0.0
-    for pos in open_positions:
-        # Use entry price as approximation (real-time price would need market data)
-        unrealized_pnl += pos.pnl
 
     return {
         "balance": round(acct.balance, 2),
