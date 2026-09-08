@@ -112,8 +112,14 @@ def _send_resend(to: str, subject: str, html: str) -> MessageSent:
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
+            logger.info("Resend API response: %s", data)
             return MessageSent(ok=True, provider="resend", message_id=data.get("id"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+        logger.error("Resend HTTP %d: %s", exc.code, body)
+        return MessageSent(ok=False, provider="resend", error=f"HTTP {exc.code}: {body[:200]}")
     except Exception as exc:
+        logger.error("Resend error: %s", exc)
         return MessageSent(ok=False, provider="resend", error=str(exc))
 
 
@@ -150,16 +156,20 @@ def send_email(to: str, subject: str, html_body: str, cta: Optional[tuple[str, s
     if os.environ.get("RESEND_API_KEY"):
         r = _send_resend(to, subject, full_html)
         if r.ok:
+            logger.info("Email sent via Resend to %s (id=%s)", to, r.message_id)
             return r
-        logger.warning("Resend failed (%s); trying SMTP fallback", r.error)
+        logger.warning("Resend failed for %s: %s; trying SMTP fallback", to, r.error)
         sm = _send_smtp_fallback(to, subject, full_html)
         if sm.ok:
             return sm
-        logger.warning("SMTP also failed (%s); saving to outbox", sm.error)
+        logger.warning("SMTP also failed for %s: %s; saving to outbox", to, sm.error)
+    else:
+        logger.warning("No RESEND_API_KEY set — emails will go to outbox only")
     sm = _send_smtp_fallback(to, subject, full_html)
     if sm.ok:
         return sm
     fp = _save_outbox(to, subject, full_html)
+    logger.warning("No email provider worked — OTP saved to outbox: %s", fp)
     return MessageSent(ok=True, provider="outbox", message_id=fp)
 
 

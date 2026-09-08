@@ -116,7 +116,11 @@ def _otp_email_html(otp: str) -> str:
 def _send_otp_email(email: str, otp: str) -> None:
     """Send OTP via email (background task)."""
     html = _otp_email_html(otp)
-    send_email(email, "Your FinSight Login Code", html)
+    result = send_email(email, "Your FinSight Login Code", html)
+    if result.ok:
+        logger.info("OTP email sent to %s via %s (id=%s)", email, result.provider, result.message_id)
+    else:
+        logger.error("OTP email FAILED for %s: %s", email, result.error)
 
 
 def _email_provider_configured() -> bool:
@@ -332,9 +336,6 @@ async def register(req: RegisterIn, request: Request, background: BackgroundTask
     background.add_task(_send_otp_email, email_norm, otp)
 
     resp = {"ok": True, "email": email_norm, "message": "OTP sent. Verify to activate account."}
-    if not _email_provider_configured():
-        resp["dev_otp"] = otp  # show on screen when no email provider
-        logger.warning("No email provider — OTP for %s: %s", email_norm, otp)
     return resp
 
 
@@ -434,9 +435,6 @@ async def otp_send(request: Request, req: OtpSendIn, background: BackgroundTasks
 
     logger.info("OTP sent to %s", email_norm)
     resp = {"ok": True, "email": email_norm}
-    if not _email_provider_configured():
-        resp["dev_otp"] = otp
-        logger.warning("No email provider — OTP for %s: %s", email_norm, otp)
     return resp
 
 

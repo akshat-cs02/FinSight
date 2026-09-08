@@ -3611,7 +3611,6 @@
                 </div>
                 <!-- OTP section (hidden by default) -->
                 <div id="siOtpSection" style="display:none">
-                  <div id="siDevOtp" style="display:none;background:var(--accent);color:#000;text-align:center;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px;letter-spacing:3px"></div>
                   <div class="fld">
                     <label class="lab">Enter 6-digit code</label>
                     <div class="otp-boxes" id="siOtpBoxes" style="display:flex;gap:8px;justify-content:center;margin-top:8px">
@@ -3716,7 +3715,6 @@
                 </div>
                 <!-- Registration OTP section (hidden by default) -->
                 <div id="caOtpSection" style="display:none">
-                  <div id="caDevOtp" style="display:none;background:var(--accent);color:#000;text-align:center;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px;letter-spacing:3px"></div>
                   <div class="fld">
                     <label class="lab">Enter 6-digit code sent to your email</label>
                     <div class="otp-boxes" id="caOtpBoxes" style="display:flex;gap:8px;justify-content:center;margin-top:8px">
@@ -5156,7 +5154,6 @@
             $("#siPasswordSection").style.display = "none";
             $("#siOtpSection").style.display = "";
             lblSignin.textContent = "Verify OTP";
-            if (d.dev_otp) { const el = $("#siDevOtp"); el.textContent = "Dev OTP: " + d.dev_otp; el.style.display = ""; }
             $("#siOtpBoxes .otp-digit")[0].focus();
             startOtpTimer();
           } catch (e) {
@@ -5296,7 +5293,6 @@
             const createPane = $('[data-pane="create"]');
             createPane.querySelectorAll(".str, .str-l, .row2").forEach(f => f.style.display = "none");
             $("#caOtpSection").style.display = "";
-            if (d.dev_otp) { const el = $("#caDevOtp"); el.textContent = "Dev OTP: " + d.dev_otp; el.style.display = ""; }
             $("#caOtpBoxes .otp-digit")[0].focus();
             // Timer
             let s = 60;
