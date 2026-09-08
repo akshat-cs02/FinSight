@@ -2790,6 +2790,16 @@
       html.reduced .cur-ring {
         display: none;
       }
+      .otp-digit {
+        text-align: center !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-variant-numeric: tabular-nums !important;
+      }
+      .otp-digit::placeholder { color: transparent; }
+      .otp-digit:focus { border-color: var(--gold) !important; box-shadow: 0 0 0 2px rgba(212,168,83,0.2); }
     </style>
   </head>
   <body>
