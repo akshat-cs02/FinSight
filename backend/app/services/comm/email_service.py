@@ -125,11 +125,13 @@ def _send_resend(to: str, subject: str, html: str) -> MessageSent:
 
 def _send_smtp_fallback(to: str, subject: str, html: str) -> MessageSent:
     """Mail-server fallback (Gmail / SMTP) for local dev or alternative providers."""
-    user     = os.environ.get("SMTP_USER", "")
-    password = os.environ.get("SMTP_PASS", "")
-    host     = os.environ.get("SMTP_HOST", "")
-    port     = int(os.environ.get("SMTP_PORT", "587"))
+    user     = os.environ.get("SMTP_USER", "").strip()
+    password = os.environ.get("SMTP_PASS", "").strip()
+    host     = os.environ.get("SMTP_HOST", "").strip()
+    port     = int(os.environ.get("SMTP_PORT", "587").strip())
+    logger.info("SMTP config: host=%s port=%s user=%s pass_len=%d", host, port, user, len(password))
     if not (user and password and host):
+        logger.warning("SMTP not configured: host=%r user=%r pass_set=%r", bool(host), bool(user), bool(password))
         return MessageSent(ok=False, provider="none", error="No provider configured")
     msg = MIMEMultipart("alternative")
     msg["From"]    = user
@@ -148,26 +150,26 @@ def _send_smtp_fallback(to: str, subject: str, html: str) -> MessageSent:
 
 def send_email(to: str, subject: str, html_body: str, cta: Optional[tuple[str, str]] = None) -> MessageSent:
     """Public entry point. Tries:
-       1) Resend (transactional, free tier)
-       2) SMTP fallback (Gmail / SendGrid / etc.)
+       1) SMTP (if configured) — Gmail / SendGrid / etc.
+       2) Resend (if configured)
        3) DRY_RUN outbox under `data/outbox/` for local dev.
     """
     full_html = _build_email_html(subject, html_body, cta)
+    # Try SMTP first if configured
+    if os.environ.get("SMTP_HOST") and os.environ.get("SMTP_USER") and os.environ.get("SMTP_PASS"):
+        sm = _send_smtp_fallback(to, subject, full_html)
+        if sm.ok:
+            logger.info("Email sent via SMTP to %s", to)
+            return sm
+        logger.warning("SMTP failed for %s: %s", to, sm.error)
+    # Try Resend if configured
     if os.environ.get("RESEND_API_KEY"):
         r = _send_resend(to, subject, full_html)
         if r.ok:
             logger.info("Email sent via Resend to %s (id=%s)", to, r.message_id)
             return r
-        logger.warning("Resend failed for %s: %s; trying SMTP fallback", to, r.error)
-        sm = _send_smtp_fallback(to, subject, full_html)
-        if sm.ok:
-            return sm
-        logger.warning("SMTP also failed for %s: %s; saving to outbox", to, sm.error)
-    else:
-        logger.warning("No RESEND_API_KEY set — emails will go to outbox only")
-    sm = _send_smtp_fallback(to, subject, full_html)
-    if sm.ok:
-        return sm
+        logger.warning("Resend failed for %s: %s", to, r.error)
+    # Fallback to outbox
     fp = _save_outbox(to, subject, full_html)
     logger.warning("No email provider worked — OTP saved to outbox: %s", fp)
     return MessageSent(ok=True, provider="outbox", message_id=fp)
