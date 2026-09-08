@@ -107,7 +107,8 @@ def _send_resend(to: str, subject: str, html: str) -> MessageSent:
     req = urllib.request.Request(
         "https://api.resend.com/emails", data=body, method="POST",
         headers={"Authorization": f"Bearer {api_key}",
-                 "Content-Type": "application/json"},
+                 "Content-Type": "application/json",
+                 "User-Agent": "FinSight/1.0"},
     )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
