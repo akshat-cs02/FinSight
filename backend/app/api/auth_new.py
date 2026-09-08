@@ -119,6 +119,11 @@ def _send_otp_email(email: str, otp: str) -> None:
     send_email(email, "Your FinSight Login Code", html)
 
 
+def _email_provider_configured() -> bool:
+    """Check if any email provider is set up."""
+    return bool(os.environ.get("RESEND_API_KEY")) or bool(os.environ.get("SMTP_HOST"))
+
+
 def _hash_token(raw: str) -> str:
     """We store SHA-256(token) in DB so even with read access the raw token
     cannot be replayed."""
@@ -326,7 +331,11 @@ async def register(req: RegisterIn, request: Request, background: BackgroundTask
     _store_otp(email_norm, otp)
     background.add_task(_send_otp_email, email_norm, otp)
 
-    return {"ok": True, "email": email_norm, "message": "OTP sent to your email. Verify to activate account."}
+    resp = {"ok": True, "email": email_norm, "message": "OTP sent. Verify to activate account."}
+    if not _email_provider_configured():
+        resp["dev_otp"] = otp  # show on screen when no email provider
+        logger.warning("No email provider — OTP for %s: %s", email_norm, otp)
+    return resp
 
 
 class RegisterVerifyIn(BaseModel):
@@ -424,7 +433,11 @@ async def otp_send(request: Request, req: OtpSendIn, background: BackgroundTasks
     background.add_task(_send_otp_email, email_norm, otp)
 
     logger.info("OTP sent to %s", email_norm)
-    return {"ok": True, "email": email_norm}
+    resp = {"ok": True, "email": email_norm}
+    if not _email_provider_configured():
+        resp["dev_otp"] = otp
+        logger.warning("No email provider — OTP for %s: %s", email_norm, otp)
+    return resp
 
 
 @router.post("/otp/verify", response_model=TokenOut)

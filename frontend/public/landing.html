@@ -3611,15 +3611,19 @@
                 </div>
                 <!-- OTP section (hidden by default) -->
                 <div id="siOtpSection" style="display:none">
+                  <div id="siDevOtp" style="display:none;background:var(--accent);color:#000;text-align:center;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px;letter-spacing:3px"></div>
                   <div class="fld">
-                    <label class="lab">Enter 6-digit code</label
-                    ><input id="siOtp" type="text" inputmode="numeric" maxlength="6"
-                      placeholder="000000" autocomplete="one-time-code"
-                      style="letter-spacing:6px;text-align:center;font-size:20px;font-family:monospace" /><span
-                      class="ul"
-                    ></span>
+                    <label class="lab">Enter 6-digit code</label>
+                    <div class="otp-boxes" id="siOtpBoxes" style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="0" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="1" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="2" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="3" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="4" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="5" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                    </div>
                   </div>
-                  <div id="siOtpTimer" style="text-align:center;font-size:12px;color:var(--dim);margin-top:8px"></div>
+                  <div id="siOtpTimer" style="text-align:center;font-size:12px;color:var(--dim);margin-top:12px"></div>
                   <button id="siResendOtp" type="button" style="display:none;background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;margin-top:4px">Resend OTP</button>
                 </div>
                 <!-- Toggle between password and OTP -->
@@ -3712,15 +3716,19 @@
                 </div>
                 <!-- Registration OTP section (hidden by default) -->
                 <div id="caOtpSection" style="display:none">
+                  <div id="caDevOtp" style="display:none;background:var(--accent);color:#000;text-align:center;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px;letter-spacing:3px"></div>
                   <div class="fld">
-                    <label class="lab">Enter 6-digit code sent to your email</label
-                    ><input id="caOtp" type="text" inputmode="numeric" maxlength="6"
-                      placeholder="000000" autocomplete="one-time-code"
-                      style="letter-spacing:6px;text-align:center;font-size:20px;font-family:monospace" /><span
-                      class="ul"
-                    ></span>
+                    <label class="lab">Enter 6-digit code sent to your email</label>
+                    <div class="otp-boxes" id="caOtpBoxes" style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="0" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="1" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="2" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="3" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="4" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" data-idx="5" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s" />
+                    </div>
                   </div>
-                  <div id="caOtpTimer" style="text-align:center;font-size:12px;color:var(--dim);margin-top:8px"></div>
+                  <div id="caOtpTimer" style="text-align:center;font-size:12px;color:var(--dim);margin-top:12px"></div>
                   <button id="caResendOtp" type="button" style="display:none;background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;margin-top:4px">Resend OTP</button>
                 </div>
                 <button class="btn btn-p" id="btnCreate">
@@ -5142,12 +5150,14 @@
             });
             clearTimeout(t);
             if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail || "Failed to send OTP"); }
+            const d = await r.json();
             btnSignin.classList.remove("load");
             otpStep = 1;
             $("#siPasswordSection").style.display = "none";
             $("#siOtpSection").style.display = "";
             lblSignin.textContent = "Verify OTP";
-            $("#siOtp").focus();
+            if (d.dev_otp) { const el = $("#siDevOtp"); el.textContent = "Dev OTP: " + d.dev_otp; el.style.display = ""; }
+            $("#siOtpBoxes .otp-digit")[0].focus();
             startOtpTimer();
           } catch (e) {
             btnSignin.classList.remove("load");
@@ -5157,8 +5167,8 @@
         }
 
         // OTP mode — Step 2: Verify
-        const otp = $("#siOtp").value.trim();
-        if (!otp || otp.length !== 6) { shake($("#siOtp").closest(".fld")); showErr("Enter the 6-digit code."); return; }
+        const otp = [...$("#siOtpBoxes").querySelectorAll(".otp-digit")].map(i => i.value).join("");
+        if (otp.length !== 6) { shake($("#siOtpBoxes")); showErr("Enter the 6-digit code."); return; }
         btnSignin.classList.add("load");
         try {
           const ctrl = new AbortController();
@@ -5206,13 +5216,40 @@
             body: JSON.stringify({ email }),
             credentials: "include",
           });
+          $("#siOtpBoxes").querySelectorAll(".otp-digit").forEach(b => { b.value = ""; });
+          $("#siOtpBoxes .otp-digit")[0].focus();
           startOtpTimer();
         } catch (e) { showErr("Failed to resend"); }
       });
 
-      $("#siOtp").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") btnSignin.click();
-      });
+      // OTP boxes — auto-advance, backspace, paste
+      function setupOtpBoxes(containerId, onFull) {
+        const boxes = document.querySelectorAll("#" + containerId + " .otp-digit");
+        boxes.forEach((box, i) => {
+          box.addEventListener("input", () => {
+            box.value = box.value.replace(/[^0-9]/g, "").slice(0, 1);
+            if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+            const full = [...boxes].map(b => b.value).join("");
+            if (full.length === 6 && onFull) onFull(full);
+          });
+          box.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !box.value && i > 0) { boxes[i - 1].focus(); boxes[i - 1].value = ""; }
+            if (e.key === "Enter") { const full = [...boxes].map(b => b.value).join(""); if (full.length === 6 && onFull) onFull(full); }
+          });
+          box.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+            pasted.split("").forEach((ch, j) => { if (boxes[j]) boxes[j].value = ch; });
+            if (pasted.length > 0) boxes[Math.min(pasted.length, boxes.length - 1)].focus();
+          });
+          box.addEventListener("focus", () => box.select());
+          box.addEventListener("style", () => {}); // keep focus ring
+          box.addEventListener("focus", () => { box.style.borderColor = "var(--accent)"; });
+          box.addEventListener("blur", () => { box.style.borderColor = ""; });
+        });
+      }
+      setupOtpBoxes("siOtpBoxes", () => btnSignin.click());
+      setupOtpBoxes("caOtpBoxes", () => $("#btnCreate").click());
 
       // Enter key on email field
       $("#siEmail").addEventListener("keydown", (e) => {
@@ -5248,6 +5285,7 @@
             });
             clearTimeout(t);
             if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail || "Registration failed"); }
+            const d = await r.json();
             btn.classList.remove("load");
             btn.dataset.otpPending = "1";
             btn.querySelector(".lbl").textContent = "Verify OTP";
@@ -5258,7 +5296,8 @@
             const createPane = $('[data-pane="create"]');
             createPane.querySelectorAll(".str, .str-l, .row2").forEach(f => f.style.display = "none");
             $("#caOtpSection").style.display = "";
-            $("#caOtp").focus();
+            if (d.dev_otp) { const el = $("#caDevOtp"); el.textContent = "Dev OTP: " + d.dev_otp; el.style.display = ""; }
+            $("#caOtpBoxes .otp-digit")[0].focus();
             // Timer
             let s = 60;
             const timerEl = $("#caOtpTimer"), resendBtn = $("#caResendOtp");
@@ -5268,6 +5307,8 @@
             resendBtn.onclick = async () => {
               await fetch("/api/auth/otp/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }), credentials: "include" });
               s = 60; resendBtn.style.display = "none"; timerEl.textContent = "Resend in 60s";
+              $("#caOtpBoxes").querySelectorAll(".otp-digit").forEach(b => { b.value = ""; });
+              $("#caOtpBoxes .otp-digit")[0].focus();
               const iv2 = setInterval(() => { s--; if (s <= 0) { clearInterval(iv2); timerEl.textContent = ""; resendBtn.style.display = ""; } else timerEl.textContent = "Resend in " + s + "s"; }, 1000);
             };
           } catch (e) {
@@ -5278,8 +5319,8 @@
         }
 
         // Step 2: Verify OTP
-        const otp = $("#caOtp") ? $("#caOtp").value.trim() : "";
-        if (!otp || otp.length !== 6) { showErr("Enter the 6-digit code."); return; }
+        const otp = [...$("#caOtpBoxes").querySelectorAll(".otp-digit")].map(i => i.value).join("");
+        if (otp.length !== 6) { shake($("#caOtpBoxes")); showErr("Enter the 6-digit code."); return; }
         btn.classList.add("load");
         try {
           const ctrl = new AbortController();
