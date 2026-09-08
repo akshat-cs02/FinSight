@@ -1,5 +1,5 @@
 """
-Authentication API: register, login, refresh, verify-email, forgot/reset password,
+Authentication API: register, login, OTP login, refresh, verify-email, forgot/reset password,
 logout, me.
 
 User records live in MongoDB when MONGODB_URI is set, otherwise in SQLite (the
@@ -17,7 +17,10 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+import random
 import re
+import threading
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -42,6 +45,78 @@ router = APIRouter()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto",
                            bcrypt__rounds=settings.BCRYPT_LOG_ROUNDS)
+
+
+# ── OTP Store (in-memory, thread-safe) ───────────────────────────────────────
+_otp_store: dict[str, dict] = {}  # {email: {"otp": "123456", "expires_at": float, "attempts": int}}
+_otp_lock = threading.Lock()
+OTP_EXPIRY_SECONDS = 300   # 5 minutes
+OTP_MAX_ATTEMPTS = 5       # max wrong attempts per OTP
+OTP_RATE_LIMIT = 3         # max OTPs sent per email per 10 minutes
+OTP_RATE_WINDOW = 600      # 10 minutes
+
+
+def _generate_otp() -> str:
+    """Generate a 6-digit OTP."""
+    return f"{random.randint(0, 999999):06d}"
+
+
+def _store_otp(email: str, otp: str) -> None:
+    """Store OTP with expiry. Rate-limited."""
+    now = time.time()
+    with _otp_lock:
+        entry = _otp_store.get(email)
+        # Rate limit: check how many OTPs sent in window
+        if entry and "send_times" in entry:
+            recent = [t for t in entry["send_times"] if now - t < OTP_RATE_WINDOW]
+            if len(recent) >= OTP_RATE_LIMIT:
+                raise HTTPException(429, "Too many OTP requests. Wait a few minutes.")
+            entry["send_times"] = recent + [now]
+        else:
+            _otp_store[email] = {"send_times": [now]}
+
+        _otp_store[email]["otp"] = otp
+        _otp_store[email]["expires_at"] = now + OTP_EXPIRY_SECONDS
+        _otp_store[email]["attempts"] = 0
+
+
+def _verify_otp(email: str, otp: str) -> bool:
+    """Verify OTP. Returns True if valid."""
+    with _otp_lock:
+        entry = _otp_store.get(email)
+        if not entry:
+            return False
+        if time.time() > entry.get("expires_at", 0):
+            _otp_store.pop(email, None)
+            return False
+        if entry.get("attempts", 0) >= OTP_MAX_ATTEMPTS:
+            _otp_store.pop(email, None)
+            return False
+        entry["attempts"] = entry.get("attempts", 0) + 1
+        return entry.get("otp") == otp
+
+
+def _consume_otp(email: str) -> None:
+    """Remove OTP after successful verification."""
+    with _otp_lock:
+        _otp_store.pop(email, None)
+
+
+def _otp_email_html(otp: str) -> str:
+    """Render OTP email body."""
+    return (
+        f"Your FinSight login code is:<br><br>"
+        f"<div style='font-size:32px;font-weight:700;letter-spacing:8px;color:#2563eb;"
+        f"background:#1e293b;padding:16px 24px;border-radius:8px;text-align:center;"
+        f"font-family:monospace'>{otp}</div><br>"
+        f"This code expires in 5 minutes. Do not share it with anyone."
+    )
+
+
+def _send_otp_email(email: str, otp: str) -> None:
+    """Send OTP via email (background task)."""
+    html = _otp_email_html(otp)
+    send_email(email, "Your FinSight Login Code", html)
 
 
 def _hash_token(raw: str) -> str:
@@ -284,6 +359,78 @@ async def login_form(request: Request, response: Response, form: OAuth2PasswordR
         user = user_store.get_user_by_username(form.username.strip())
     if not user or not pwd_context.verify(form.password[:72], user.hashed_password):
         raise HTTPException(401, "Invalid credentials.")
+    return _issue_tokens(user, request, response)
+
+
+# ============ OTP Login ============
+class OtpSendIn(BaseModel):
+    email: EmailStr
+
+
+class OtpVerifyIn(BaseModel):
+    email: EmailStr
+    otp: str = Field(min_length=6, max_length=6)
+
+
+@router.post("/otp/send")
+@limiter.limit("5/minute")
+async def otp_send(request: Request, req: OtpSendIn, background: BackgroundTasks):
+    """Send a 6-digit OTP to the user's email. Auto-creates account if new."""
+    email_norm = req.email.lower().strip()
+
+    # Generate OTP
+    otp = _generate_otp()
+    try:
+        _store_otp(email_norm, otp)
+    except HTTPException:
+        raise
+
+    # Send email in background
+    background.add_task(_send_otp_email, email_norm, otp)
+
+    # Check if user exists — tell frontend whether it's login or register
+    user = user_store.get_user_by_email(email_norm)
+    is_new = user is None
+
+    logger.info("OTP sent to %s (new=%s)", email_norm, is_new)
+    return {"ok": True, "email": email_norm, "is_new": is_new}
+
+
+@router.post("/otp/verify", response_model=TokenOut)
+@limiter.limit("10/minute")
+async def otp_verify(request: Request, req: OtpVerifyIn, response: Response, background: BackgroundTasks):
+    """Verify OTP and log in (or auto-register). Returns JWT tokens."""
+    email_norm = req.email.lower().strip()
+
+    if not _verify_otp(email_norm, req.otp):
+        raise HTTPException(401, "Invalid or expired OTP.")
+
+    # OTP valid — consume it
+    _consume_otp(email_norm)
+
+    # Find or create user
+    user = user_store.get_user_by_email(email_norm)
+    if not user:
+        # Auto-register with email as username
+        username = email_norm.split("@")[0]
+        # Ensure unique username
+        base = username
+        counter = 1
+        while user_store.get_user_by_username(username):
+            username = f"{base}{counter}"
+            counter += 1
+
+        user = await user_store.create_user(
+            email=email_norm,
+            password_hash=_pwd_hash(os.urandom(16).hex()),  # random password (OTP-only account)
+            username=username,
+            first_name=None,
+            last_name=None,
+            is_admin=False,
+        )
+        logger.info("Auto-registered OTP user: %s", email_norm)
+        background.add_task(_send_welcome_email_bg, email_norm, None)
+
     return _issue_tokens(user, request, response)
 
 

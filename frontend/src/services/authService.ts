@@ -33,4 +33,11 @@ export const authService = {
     api.post<TokenResponse>('/auth/refresh', null, { params: { token } }).then((r) => r.data),
 
   logout: () => api.post('/auth/logout').then((r) => r.data),
+
+  // OTP login
+  otpSend: (email: string) =>
+    api.post<{ ok: boolean; email: string; is_new: boolean }>('/auth/otp/send', { email }).then((r) => r.data),
+
+  otpVerify: (email: string, otp: string) =>
+    api.post<TokenResponse>('/auth/otp/verify', { email, otp }).then((r) => r.data),
 }

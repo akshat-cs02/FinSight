@@ -3568,43 +3568,63 @@
                     class="ul"
                   ></span>
                 </div>
-                <div class="fld">
-                  <label class="lab">Password</label
-                  ><input
-                    id="siPw"
-                    type="password"
-                    autocomplete="current-password"
-                  /><button
-                    class="pw-t"
-                    type="button"
-                    aria-label="Show password"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                <!-- Password fields (default login) -->
+                <div id="siPasswordSection">
+                  <div class="fld">
+                    <label class="lab">Password</label
+                    ><input
+                      id="siPw"
+                      type="password"
+                      autocomplete="current-password"
+                    /><button
+                      class="pw-t"
+                      type="button"
+                      aria-label="Show password"
                     >
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg></button
-                  ><span class="ul"></span>
-                </div>
-                <div class="row2">
-                  <label class="chk"
-                    ><input type="checkbox" /><span class="bx"
-                      ><svg
-                        viewBox="0 0 12 12"
+                      <svg
+                        viewBox="0 0 24 24"
                         fill="none"
-                        stroke-width="2"
+                        stroke="currentColor"
+                        stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       >
-                        <path d="M2.5 6.5L5 9 9.5 3" /></svg></span
-                    >Keep me signed in</label
-                  ><a href="#" class="fgt">Forgot?</a>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg></button
+                    ><span class="ul"></span>
+                  </div>
+                  <div class="row2">
+                    <label class="chk"
+                      ><input type="checkbox" /><span class="bx"
+                        ><svg
+                          viewBox="0 0 12 12"
+                          fill="none"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M2.5 6.5L5 9 9.5 3" /></svg></span
+                      >Keep me signed in</label
+                    ><a href="#" class="fgt">Forgot?</a>
+                  </div>
+                </div>
+                <!-- OTP section (hidden by default) -->
+                <div id="siOtpSection" style="display:none">
+                  <div class="fld">
+                    <label class="lab">Enter 6-digit code</label
+                    ><input id="siOtp" type="text" inputmode="numeric" maxlength="6"
+                      placeholder="000000" autocomplete="one-time-code"
+                      style="letter-spacing:6px;text-align:center;font-size:20px;font-family:monospace" /><span
+                      class="ul"
+                    ></span>
+                  </div>
+                  <div id="siOtpTimer" style="text-align:center;font-size:12px;color:var(--dim);margin-top:8px"></div>
+                  <button id="siResendOtp" type="button" style="display:none;background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;margin-top:4px">Resend OTP</button>
+                </div>
+                <!-- Toggle between password and OTP -->
+                <div style="text-align:center;margin:12px 0 4px">
+                  <button id="siToggleOtp" type="button" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px">Login with OTP instead</button>
                 </div>
                 <button class="btn btn-p" id="btnSignin">
                   <span class="lbl">Sign in securely</span
@@ -5139,6 +5159,156 @@
             );
         }),
       );
+
+      // ── OTP Login Flow ──────────────────────────────────────────────────
+      let otpMode = false;
+      let otpTimer = null;
+
+      $("#siToggleOtp").addEventListener("click", () => {
+        otpMode = !otpMode;
+        $("#siPasswordSection").style.display = otpMode ? "none" : "";
+        $("#siOtpSection").style.display = otpMode ? "" : "none";
+        $("#siToggleOtp").textContent = otpMode
+          ? "Login with password instead"
+          : "Login with OTP instead";
+        $("#btnSignin span.lbl").textContent = otpMode ? "Send OTP" : "Sign in securely";
+        hideErr();
+      });
+
+      // Override submit for OTP mode
+      const origSubmit = submit;
+      async function otpSubmit(btn, fields, needAgree) {
+        if (!otpMode) return origSubmit(btn, fields, needAgree);
+
+        if (btn.classList.contains("load") || btn.classList.contains("ok")) return;
+        hideErr();
+
+        const email = fields[0].value.trim();
+        if (!email) {
+          shake(fields[0].closest(".fld"));
+          showErr("Please enter your email.");
+          return;
+        }
+
+        // Step 1: Send OTP
+        if (!$("#siOtpSection").style.display || $("#siOtpSection").style.display === "none") {
+          btn.classList.add("load");
+          try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 45000);
+            const r = await fetch("/api/auth/otp/send", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+              credentials: "include",
+              signal: ctrl.signal,
+            });
+            clearTimeout(timer);
+            if (!r.ok) {
+              const d = await r.json().catch(() => ({}));
+              throw new Error(d.detail || "Failed to send OTP");
+            }
+            btn.classList.remove("load");
+            // Show OTP input
+            $("#siPasswordSection").style.display = "none";
+            $("#siOtpSection").style.display = "";
+            $("#btnSignin span.lbl").textContent = "Verify OTP";
+            $("#siOtp").focus();
+            // Start countdown
+            startOtpTimer();
+          } catch (e) {
+            btn.classList.remove("load");
+            showErr(e.name === "AbortError" ? "Server is warming up — try again." : (e.message || "Failed to send OTP"));
+          }
+          return;
+        }
+
+        // Step 2: Verify OTP
+        const otp = $("#siOtp").value.trim();
+        if (!otp || otp.length !== 6) {
+          shake($("#siOtp").closest(".fld"));
+          showErr("Please enter the 6-digit code.");
+          return;
+        }
+
+        btn.classList.add("load");
+        try {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 45000);
+          const r = await fetch("/api/auth/otp/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp }),
+            credentials: "include",
+            signal: ctrl.signal,
+          });
+          clearTimeout(timer);
+          if (!r.ok) {
+            const d = await r.json().catch(() => ({}));
+            throw new Error(d.detail || "Invalid OTP");
+          }
+          btn.classList.remove("load");
+          btn.classList.add("ok");
+          drawCk(btn);
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 800);
+        } catch (e) {
+          btn.classList.remove("load");
+          showErr(e.name === "AbortError" ? "Server is warming up — try again." : (e.message || "Invalid OTP"));
+        }
+      }
+
+      function startOtpTimer() {
+        let secs = 60;
+        const el = $("#siOtpTimer");
+        const resend = $("#siResendOtp");
+        resend.style.display = "none";
+        el.textContent = `Resend in ${secs}s`;
+        clearInterval(otpTimer);
+        otpTimer = setInterval(() => {
+          secs--;
+          if (secs <= 0) {
+            clearInterval(otpTimer);
+            el.textContent = "";
+            resend.style.display = "";
+          } else {
+            el.textContent = `Resend in ${secs}s`;
+          }
+        }, 1000);
+      }
+
+      $("#siResendOtp").addEventListener("click", async () => {
+        const email = $("#siEmail").value.trim();
+        if (!email) return showErr("Enter your email first.");
+        hideErr();
+        try {
+          const r = await fetch("/api/auth/otp/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include",
+          });
+          if (!r.ok) throw new Error("Failed to resend");
+          startOtpTimer();
+          showErr(""); // clear
+        } catch (e) {
+          showErr(e.message || "Failed to resend OTP");
+        }
+      });
+
+      // Replace btnSignin handler with OTP-aware version
+      $("#btnSignin").removeEventListener("click", () =>
+        submit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false)
+      );
+      $("#btnSignin").addEventListener("click", () =>
+        otpSubmit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false)
+      );
+      // Enter key in OTP field
+      $("#siOtp").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") otpSubmit($("#btnSignin"), [$("#siEmail"), $("#siPw")], false);
+      });
+
       const toast = $("#toast");
       let toastT = null;
       function guest() {

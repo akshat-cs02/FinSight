@@ -109,7 +109,7 @@ async def security_headers(request: Request, call_next):
 
 # ── CSRF double-submit cookie protection ─────────────────────────────────────
 _CSRF_SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
-_CSRF_EXEMPT_PATHS = {"/health", "/api/docs", "/api/redoc", "/api/openapi.json", "/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/forgot-password", "/api/auth/reset-password"}
+_CSRF_EXEMPT_PATHS = {"/health", "/api/docs", "/api/redoc", "/api/openapi.json", "/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/forgot-password", "/api/auth/reset-password", "/api/auth/otp/send", "/api/auth/otp/verify"}
 
 @app.middleware("http")
 async def csrf_protection(request: Request, call_next):
