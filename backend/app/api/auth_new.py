@@ -287,9 +287,10 @@ def _issue_tokens(user: UserRecord, request: Optional[Request], response: Option
 
 
 # ============ Routes ============
-@router.post("/register", response_model=TokenOut, status_code=201)
+@router.post("/register", status_code=201)
 @limiter.limit("5/minute")
-async def register(req: RegisterIn, request: Request, response: Response, background: BackgroundTasks):
+async def register(req: RegisterIn, request: Request, background: BackgroundTasks):
+    """Register new account — sends OTP to email. Account stays inactive until OTP verified."""
     email_norm = req.email.lower().strip()
     username   = (req.username or email_norm.split("@")[0]).lower().strip()
 
@@ -318,20 +319,40 @@ async def register(req: RegisterIn, request: Request, response: Response, backgr
         username=username, first_name=req.first_name, last_name=req.last_name,
         is_admin=is_admin,
     )
-    logger.info("Registered user %s admin=%s", email_norm, is_admin)
+    logger.info("Registered user %s admin=%s (awaiting OTP verification)", email_norm, is_admin)
 
-    # Email verification (if enabled)
-    verify_enabled = os.environ.get("FINSIGHT_VERIFY_EMAIL", "0") == "1"
-    if verify_enabled:
-        token = user_store.generate_secure_token()
-        h = _hash_token(token)
-        user_store.set_verification_token(email_norm, h, ttl_seconds=24 * 3600)
-        background.add_task(_send_verify_email_bg, email_norm, token, req.first_name)
-        # In verify flow the tokens are issued AFTER the user clicks the email link
-        return TokenOut(access_token="", refresh_token="", expires_in=0,
-                        user=UserOut.from_record(user).model_dump())
+    # Always send OTP for email verification
+    otp = _generate_otp()
+    _store_otp(email_norm, otp)
+    background.add_task(_send_otp_email, email_norm, otp)
 
-    background.add_task(_send_welcome_email_bg, email_norm, req.first_name)
+    return {"ok": True, "email": email_norm, "message": "OTP sent to your email. Verify to activate account."}
+
+
+class RegisterVerifyIn(BaseModel):
+    email: EmailStr
+    otp: str = Field(min_length=6, max_length=6)
+
+
+@router.post("/register/verify", response_model=TokenOut)
+@limiter.limit("10/minute")
+async def register_verify(req: RegisterVerifyIn, request: Request, response: Response):
+    """Verify registration OTP — activates account and returns tokens."""
+    email_norm = req.email.lower().strip()
+
+    if not _verify_otp(email_norm, req.otp):
+        raise HTTPException(401, "Invalid or expired OTP.")
+
+    _consume_otp(email_norm)
+
+    user = user_store.get_user_by_email(email_norm)
+    if not user:
+        raise HTTPException(400, "Account not found.")
+
+    # Mark email as verified
+    user_store.mark_email_verified(email_norm)
+
+    logger.info("Email verified for %s", email_norm)
     return _issue_tokens(user, request, response)
 
 
@@ -348,6 +369,8 @@ async def login(req: LoginIn, request: Request, response: Response):
         raise HTTPException(401, "Invalid email or password.")
     if not user.is_active:
         raise HTTPException(403, "This account has been disabled. Please contact support.")
+    if not getattr(user, "is_email_verified", False):
+        raise HTTPException(403, "Email not verified. Please verify your email first.")
     return _issue_tokens(user, request, response)
 
 
@@ -359,6 +382,10 @@ async def login_form(request: Request, response: Response, form: OAuth2PasswordR
         user = user_store.get_user_by_username(form.username.strip())
     if not user or not pwd_context.verify(form.password[:72], user.hashed_password):
         raise HTTPException(401, "Invalid credentials.")
+    if not user.is_active:
+        raise HTTPException(403, "This account has been disabled.")
+    if not getattr(user, "is_email_verified", False):
+        raise HTTPException(403, "Email not verified.")
     return _issue_tokens(user, request, response)
 
 
@@ -375,61 +402,51 @@ class OtpVerifyIn(BaseModel):
 @router.post("/otp/send")
 @limiter.limit("5/minute")
 async def otp_send(request: Request, req: OtpSendIn, background: BackgroundTasks):
-    """Send a 6-digit OTP to the user's email. Auto-creates account if new."""
+    """Send OTP to existing user's email for login."""
     email_norm = req.email.lower().strip()
 
-    # Generate OTP
+    user = user_store.get_user_by_email(email_norm)
+    if not user:
+        raise HTTPException(404, "No account found. Please register first.")
+
+    if not user.is_active:
+        raise HTTPException(403, "Account disabled.")
+
+    if not getattr(user, "is_email_verified", False):
+        raise HTTPException(403, "Email not verified. Please register and verify first.")
+
     otp = _generate_otp()
     try:
         _store_otp(email_norm, otp)
     except HTTPException:
         raise
 
-    # Send email in background
     background.add_task(_send_otp_email, email_norm, otp)
 
-    # Check if user exists — tell frontend whether it's login or register
-    user = user_store.get_user_by_email(email_norm)
-    is_new = user is None
-
-    logger.info("OTP sent to %s (new=%s)", email_norm, is_new)
-    return {"ok": True, "email": email_norm, "is_new": is_new}
+    logger.info("OTP sent to %s", email_norm)
+    return {"ok": True, "email": email_norm}
 
 
 @router.post("/otp/verify", response_model=TokenOut)
 @limiter.limit("10/minute")
-async def otp_verify(request: Request, req: OtpVerifyIn, response: Response, background: BackgroundTasks):
-    """Verify OTP and log in (or auto-register). Returns JWT tokens."""
+async def otp_verify(request: Request, req: OtpVerifyIn, response: Response):
+    """Verify OTP and log in existing user."""
     email_norm = req.email.lower().strip()
 
     if not _verify_otp(email_norm, req.otp):
         raise HTTPException(401, "Invalid or expired OTP.")
 
-    # OTP valid — consume it
     _consume_otp(email_norm)
 
-    # Find or create user
     user = user_store.get_user_by_email(email_norm)
     if not user:
-        # Auto-register with email as username
-        username = email_norm.split("@")[0]
-        # Ensure unique username
-        base = username
-        counter = 1
-        while user_store.get_user_by_username(username):
-            username = f"{base}{counter}"
-            counter += 1
+        raise HTTPException(401, "Account not found.")
 
-        user = await user_store.create_user(
-            email=email_norm,
-            password_hash=_pwd_hash(os.urandom(16).hex()),  # random password (OTP-only account)
-            username=username,
-            first_name=None,
-            last_name=None,
-            is_admin=False,
-        )
-        logger.info("Auto-registered OTP user: %s", email_norm)
-        background.add_task(_send_welcome_email_bg, email_norm, None)
+    if not user.is_active:
+        raise HTTPException(403, "Account disabled.")
+
+    if not getattr(user, "is_email_verified", False):
+        raise HTTPException(403, "Email not verified.")
 
     return _issue_tokens(user, request, response)
 
