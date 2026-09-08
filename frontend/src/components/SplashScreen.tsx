@@ -61,7 +61,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
 
       <div ref={textRef} className="text-center">
         <h1 className="text-3xl font-bold font-display text-[var(--text)] tracking-tight">
-          FinSight
+          TickerScope
         </h1>
       </div>
 

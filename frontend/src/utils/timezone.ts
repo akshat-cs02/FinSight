@@ -1,5 +1,5 @@
 /**
- * Timezone utilities for FinSight.
+ * Timezone utilities for TickerScope.
  *
  * All timestamps from the backend are stored as UTC.
  * These functions convert to the user's LOCAL browser timezone automatically —

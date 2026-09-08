@@ -137,7 +137,7 @@ interface Props {
 export default function TradingViewWidget({ symbol, tvSymbol: tvSymbolProp, height = 680, interval, compact = false }: Props) {
   const tvSymbol = tvSymbolProp || useMemo(() => toTVSymbol(symbol), [symbol])
 
-  const tfKey = `finsight_tf_${symbol.toUpperCase()}`
+  const tfKey = `tickerscope_tf_${symbol.toUpperCase()}`
   const [activeInterval, setActiveInterval] = useState<string>(interval || 'D')
   const [iframeLoaded, setIframeLoaded] = useState(false)
 

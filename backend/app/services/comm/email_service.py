@@ -38,7 +38,7 @@ class MessageSent:
 
 
 def _build_email_html(title: str, body_html: str, cta: Optional[tuple[str, str]] = None) -> str:
-    """Return the standard FinSight transactional-email body."""
+    """Return the standard TickerScope transactional-email body."""
     cta_section = ""
     if cta:
         label, url = cta
@@ -69,7 +69,7 @@ def _build_email_html(title: str, body_html: str, cta: Optional[tuple[str, str]]
         {cta_section}
         <tr><td style="font-size:11px;color:#64748b;padding-top:24px;border-top:1px solid #1e293b;
                        margin-top:24px">
-          FinSight &middot; AI-Powered Markets &middot; {_html.escape(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"))}
+          TickerScope &middot; AI-Powered Markets &middot; {_html.escape(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"))}
         </td></tr>
       </table>
     </td></tr>
@@ -97,7 +97,7 @@ def _send_resend(to: str, subject: str, html: str) -> MessageSent:
     api_key = os.environ.get("RESEND_API_KEY", "")
     if not api_key:
         return MessageSent(ok=False, provider="resend", error="RESEND_API_KEY not set")
-    sender = os.environ.get("FINSIGHT_FROM_EMAIL", "FinSight <onboarding@resend.dev>")
+    sender = os.environ.get("FINSIGHT_FROM_EMAIL", "TickerScope <onboarding@resend.dev>")
     body = json.dumps({
         "from":    sender,
         "to":      [to],
@@ -108,7 +108,7 @@ def _send_resend(to: str, subject: str, html: str) -> MessageSent:
         "https://api.resend.com/emails", data=body, method="POST",
         headers={"Authorization": f"Bearer {api_key}",
                  "Content-Type": "application/json",
-                 "User-Agent": "FinSight/1.0"},
+                 "User-Agent": "TickerScope/1.0"},
     )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
@@ -181,29 +181,29 @@ def render_template(name: str, context: dict) -> tuple[str, str, Optional[tuple[
     if name == "verify_email":
         url = context.get("verify_url", "")
         return (
-            "Verify your FinSight email",
+            "Verify your TickerScope email",
             f"Hey {_html.escape(context.get('first_name') or 'there')}, "
             "tap the button below to confirm your email - it expires in 24 hours.",
             ("Verify email", url),
         )
     if name == "welcome":
         return (
-            "Welcome to FinSight",
+            "Welcome to TickerScope",
             f"You are in, {_html.escape(context.get('first_name') or 'trader')}! "
             "Your dashboard is live with real-time markets, ICT signals and an "
             "AI ensemble built on top of Yahoo Finance data.",
-            ("Open dashboard", context.get("login_url", "https://finsight.app/dashboard")),
+            ("Open dashboard", context.get("login_url", "https://tickerscope.xyz/dashboard")),
         )
     if name == "password_reset":
         return (
-            "Reset your FinSight password",
+            "Reset your TickerScope password",
             "Someone (hopefully you) asked for a password reset. The link "
             "below is valid for 1 hour.",
             ("Reset password", context.get("reset_url", "")),
         )
     if name == "trade_alert":
         return (
-            f"[FinSight] {context.get('symbol', '')} {context.get('side', '')} signal",
+            f"[TickerScope] {context.get('symbol', '')} {context.get('side', '')} signal",
             f"<strong>{context.get('side','?')}</strong> on "
             f"<strong>{_html.escape(context.get('symbol',''))}</strong><br>"
             f"Entry: <code>{context.get('entry','')}</code> &nbsp; "
@@ -211,6 +211,6 @@ def render_template(name: str, context: dict) -> tuple[str, str, Optional[tuple[
             f"TP: <code>{context.get('tp','')}</code><br>"
             f"Kill-zone weight: {context.get('kz','')}x &middot; "
             f"Confidence: {context.get('confidence','')}%",
-            ("Open trade", context.get("trade_url", "https://finsight.app")),
+            ("Open trade", context.get("trade_url", "https://tickerscope.xyz")),
         )
     raise ValueError(f"unknown template {name}")

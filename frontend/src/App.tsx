@@ -69,8 +69,8 @@ function GlobalNavigateListener() {
       const path = (e as CustomEvent).detail
       if (typeof path === 'string') navigate(path)
     }
-    window.addEventListener('finsight:navigate', handler)
-    return () => window.removeEventListener('finsight:navigate', handler)
+    window.addEventListener('tickerscope:navigate', handler)
+    return () => window.removeEventListener('tickerscope:navigate', handler)
   }, [navigate])
   return null
 }
@@ -231,7 +231,7 @@ function Layout() {
             <StatsCounter />
           </Suspense>
         )}
-        {isDashboard && user?.email !== 'guest@finsight.app' && (
+        {isDashboard && user?.email !== 'guest@tickerscope.xyz' && (
           <Suspense fallback={null}>
             <CTASection />
           </Suspense>
@@ -330,10 +330,10 @@ function LandingRedirect() {
 /* ─── App ─── */
 export default function App() {
   const [splashDone, setSplashDone] = useState(false)
-  const firstVisit = useRef(sessionStorage.getItem('finsight_splash') !== 'true')
+  const firstVisit = useRef(sessionStorage.getItem('tickerscope_splash') !== 'true')
 
   const handleSplashFinish = () => {
-    sessionStorage.setItem('finsight_splash', 'true')
+    sessionStorage.setItem('tickerscope_splash', 'true')
     setSplashDone(true)
   }
 

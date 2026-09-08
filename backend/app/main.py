@@ -1,5 +1,5 @@
 """
-FinSight Backend — public API serving real market data, portfolio, news, indicators, reports.
+TickerScope Backend — public API serving real market data, portfolio, news, indicators, reports.
 """
 import asyncio
 import logging
@@ -48,7 +48,7 @@ _SECURITY_HEADERS = {
 }
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s - %(message)s")
-logger = logging.getLogger("finsight")
+logger = logging.getLogger("tickerscope")
 
 
 async def _keep_alive_loop():
@@ -80,7 +80,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="FinSight API",
+    title="TickerScope API",
     description="AI-Based Stock Market Analysis & Prediction Platform",
     version="1.0.0",
     docs_url="/api/docs",
@@ -151,7 +151,7 @@ def health():
     from app.services.market_data_service import get_warming_stats
     return {
         "status": "healthy",
-        "service": "FinSight API",
+        "service": "TickerScope API",
         "version": "1.0.0",
         "data_warming": get_warming_stats(),
     }
@@ -159,7 +159,7 @@ def health():
 
 @app.get("/")
 def root():
-    return {"name": "FinSight API", "docs": "/api/docs"}
+    return {"name": "TickerScope API", "docs": "/api/docs"}
 
 
 # Public real-data endpoints

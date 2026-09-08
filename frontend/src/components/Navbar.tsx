@@ -54,14 +54,14 @@ export default function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const linksRef = useRef<(HTMLAnchorElement | null)[]>([])
 
-  const isGuest = user?.email === 'guest@finsight.app' || user?.id === '0'
-  const isRealUser = !isGuest && user !== null && !!user?.email && user.email !== 'guest@finsight.app'
+  const isGuest = user?.email === 'guest@tickerscope.xyz' || user?.id === '0'
+  const isRealUser = !isGuest && user !== null && !!user?.email && user.email !== 'guest@tickerscope.xyz'
 
   const displayName = isRealUser
     ? [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username || user?.email?.split('@')[0] || 'User'
     : visitor?.guest_username || 'Guest'
 
-  const displayEmail = isRealUser ? user?.email : (visitor?.ip_address ? `${visitor.ip_address} · Guest` : 'guest@finsight.app')
+  const displayEmail = isRealUser ? user?.email : (visitor?.ip_address ? `${visitor.ip_address} · Guest` : 'guest@tickerscope.xyz')
 
   const isActive = (p: string) => location.pathname === p || location.pathname.startsWith(p + '/')
 
@@ -199,7 +199,7 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center font-bold text-sm text-black shadow-lg shadow-gold/20">
               FS
             </div>              <div className="hidden md:block leading-tight">
-              <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
+              <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">TickerScope</div>
               <div className="text-[9px] uppercase tracking-widest text-[var(--dim)] font-medium">Trade Smarter</div>
             </div>
           </Link>
@@ -413,7 +413,7 @@ export default function Navbar() {
               FS
             </div>
             <div className="leading-tight">
-              <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
+              <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">TickerScope</div>
               <div className="text-[8px] uppercase tracking-widest text-[var(--dim)] font-medium">Trade Smarter</div>
             </div>
           </Link>

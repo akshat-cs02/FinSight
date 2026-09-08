@@ -25,7 +25,7 @@ const footerLinks = [
     links: [
       { text: 'News', href: '/news' },
       { text: 'API Docs', href: '/api/docs' },
-      { text: 'Support', href: 'mailto:support@finsight.app' },
+      { text: 'Support', href: 'mailto:support@tickerscope.xyz' },
     ],
   },
 ]
@@ -49,7 +49,7 @@ export default function Footer() {
                 FS
               </div>
               <div>
-                <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">FinSight</div>
+                <div className="font-bold text-sm text-[var(--text)] font-display tracking-tight">TickerScope</div>
                 <div className="text-[10px] text-ink-400">Markets. Signals. Data.</div>
               </div>
             </div>
@@ -64,7 +64,7 @@ export default function Footer() {
               <a href="#" className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-gold/10 flex items-center justify-center text-ink-400 hover:text-gold transition-all">
                 <Twitter size={14} />
               </a>
-              <a href="mailto:support@finsight.app" className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-gold/10 flex items-center justify-center text-ink-400 hover:text-gold transition-all">
+              <a href="mailto:support@tickerscope.xyz" className="w-8 h-8 rounded-lg bg-white/[0.03] hover:bg-gold/10 flex items-center justify-center text-ink-400 hover:text-gold transition-all">
                 <Mail size={14} />
               </a>
             </div>
@@ -93,7 +93,7 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/[0.03]">
           <p className="text-xs text-[var(--faint)]">
-            © {new Date().getFullYear()} FinSight. All rights reserved.
+            © {new Date().getFullYear()} TickerScope. All rights reserved.
             <span className="hidden sm:inline mx-2">·</span>
             <span className="block sm:inline text-ink-500">
               Data provided by Yahoo Finance. Not financial advice.

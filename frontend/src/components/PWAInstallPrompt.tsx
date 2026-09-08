@@ -50,7 +50,7 @@ export default function PWAInstallPrompt() {
           <Download size={18} className="text-black" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white">Install FinSight</p>
+          <p className="text-sm font-semibold text-white">Install TickerScope</p>
           <p className="text-xs text-white/40">Add to your home screen for quick access</p>
         </div>
         <button

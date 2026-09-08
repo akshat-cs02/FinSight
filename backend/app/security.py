@@ -53,7 +53,7 @@ def _extract_token(request: Request, header_token: Optional[str]) -> Optional[st
     """Extract JWT from Authorization header, then fall back to httpOnly cookie."""
     if header_token:
         return header_token
-    return request.cookies.get("finsight_access")
+    return request.cookies.get("tickerscope_access")
 
 
 # ============ password hashing ============
@@ -130,7 +130,7 @@ def _guest_user() -> UserRecord:
     is `REQUIRE_AUTH=1` plus real JWTs."""
     return UserRecord(
         id="0",
-        email="guest@finsight.app",
+        email="guest@tickerscope.xyz",
         username="guest",
         first_name="Demo",
         subscription_tier="anonymous",

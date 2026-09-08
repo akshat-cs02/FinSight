@@ -1,5 +1,5 @@
 """
-XGBoost models for FinSight.
+XGBoost models for TickerScope.
 
   • build_xgb            — next-day close regressor (unchanged default so
                            predict_next_xgb / prediction_service keep working)

@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 
 const SITE_URL = 'https://fin-sight-blush.vercel.app'
-const SITE_NAME = 'FinSight'
+const SITE_NAME = 'TickerScope'
 const DEFAULT_IMAGE = `${SITE_URL}/logo-wordmark.svg`
 
 export interface SEOProps {

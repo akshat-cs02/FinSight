@@ -1,4 +1,4 @@
-## Installing FinSight locally
+## Installing TickerScope locally
 
 ### Backend
 

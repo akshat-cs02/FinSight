@@ -10,7 +10,7 @@
  *   const data = await requestCache('dashboard.trending.US', () => api.get(...), 60_000)
  */
 
-const LS_PREFIX = 'finsight_cache_'
+const LS_PREFIX = 'tickerscope_cache_'
 const store = new Map<string, { data: unknown; expiresAt: number }>()
 const inflight = new Map<string, Promise<unknown>>()
 

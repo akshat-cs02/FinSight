@@ -5,7 +5,7 @@ Acts as a drop-in for the existing SQLAlchemy session — any code that touches
 user data (auth, watchlist, portfolio, alerts, paper-trades) reads/writes via
 the `db` helper here.
 
-Why MongoDB for FinSight
+Why MongoDB for TickerScope
 ------------------------
 * Document model maps cleanly to user profile, watchlist items, paper-trades
   and signal alerts — no rigid schema migrations to run on every release.
@@ -72,7 +72,7 @@ def get_client():
             raise RuntimeError("MONGODB_URI / MONGO_URI not set")
         pm = _get_pymongo()
         # serverSelectionTimeoutMS=5 keeps startup fast even if Atlas is offline.
-        _client = pm.MongoClient(uri, serverSelectionTimeoutMS=5000, appname="finsight")
+        _client = pm.MongoClient(uri, serverSelectionTimeoutMS=5000, appname="tickerscope")
         # ping to surface credential / network issues early (logged, not fatal)
         try:
             _client.admin.command("ping")
@@ -83,8 +83,8 @@ def get_client():
 
 
 def get_db():
-    """Return the primary FinSight database handle."""
-    name = os.environ.get("MONGO_DB_NAME", "finsight")
+    """Return the primary TickerScope database handle."""
+    name = os.environ.get("MONGO_DB_NAME", "tickerscope")
     return get_client()[name]
 
 

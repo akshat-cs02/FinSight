@@ -650,7 +650,7 @@ all_results = []
 market_data = {}
 
 print("=" * 70)
-print("  FinSight ICT/SMC 5-Year Backtest  |  Jan 2021 – Jun 2026")
+print("  TickerScope ICT/SMC 5-Year Backtest  |  Jan 2021 – Jun 2026")
 print("  Risk: 1% per trade | Intraday (EOD exit) | Daily bars")
 print("=" * 70)
 

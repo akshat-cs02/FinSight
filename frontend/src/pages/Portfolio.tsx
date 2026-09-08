@@ -112,7 +112,7 @@ export default function PortfolioPage() {
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',
-          name: 'FinSight Portfolio',
+          name: 'TickerScope Portfolio',
           description: 'Track and manage your investment portfolio with real-time market data.',
         }}
       />

@@ -772,7 +772,7 @@ STRATEGIES = {
 
 all_results  = []
 print("="*78)
-print("  FINSIGHT ICT PRO BACKTEST  |  1H Bars + Kill Zones + HTF Bias")
+print("  TICKERSCOPE ICT PRO BACKTEST  |  1H Bars + Kill Zones + HTF Bias")
 print("  Symbols: 12 | Strategies: 4 | Risk: 1% | RR: 2.0 | EOD exit")
 print("="*78)
 

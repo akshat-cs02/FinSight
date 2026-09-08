@@ -38,10 +38,10 @@ api.interceptors.response.use(
           if (['/portfolio', '/predictions', '/admin'].some((p) => path.startsWith(p))) {
             let handled = false
             const onHandled = () => { handled = true }
-            window.addEventListener('finsight:navigate', onHandled, { once: true })
-            window.dispatchEvent(new CustomEvent('finsight:navigate', { detail: '/' }))
+            window.addEventListener('tickerscope:navigate', onHandled, { once: true })
+            window.dispatchEvent(new CustomEvent('tickerscope:navigate', { detail: '/' }))
             setTimeout(() => {
-              window.removeEventListener('finsight:navigate', onHandled)
+              window.removeEventListener('tickerscope:navigate', onHandled)
               if (!handled && window.location.pathname !== '/') {
                 window.location.href = '/'
               }
@@ -65,8 +65,8 @@ export { API_URL }
 
 // ─── Backend warm-up ping (fire-and-forget, once per session) ───
 export function warmUpBackend() {
-  if (typeof window !== 'undefined' && sessionStorage.getItem('finsight_warmed')) return
-  if (typeof window !== 'undefined') sessionStorage.setItem('finsight_warmed', '1')
+  if (typeof window !== 'undefined' && sessionStorage.getItem('tickerscope_warmed')) return
+  if (typeof window !== 'undefined') sessionStorage.setItem('tickerscope_warmed', '1')
   api.get('/market/status').catch(() => {})
 }
 

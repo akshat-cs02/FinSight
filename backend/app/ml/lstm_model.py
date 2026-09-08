@@ -54,7 +54,7 @@ def build_lstm(seq_len: int, n_features: int, lstm1: int = 128, lstm2: int = 64,
     x = Dense(32, activation="relu")(x)
     outputs = Dense(1)(x)
 
-    model = Model(inputs=inputs, outputs=outputs, name="finsight_lstm")
+    model = Model(inputs=inputs, outputs=outputs, name="tickerscope_lstm")
     model.compile(optimizer=Adam(learning_rate=lr), loss="mse", metrics=["mae"])
     return model
 
@@ -87,7 +87,7 @@ def build_lstm_multi_horizon(seq_len: int, n_features: int, lstm1: int = 128, ls
     long_ = Dense(1, name="long")(long_)
 
     model = Model(inputs=inputs, outputs=[intra, short, mid, long_],
-                  name="finsight_lstm_multi_horizon")
+                  name="tickerscope_lstm_multi_horizon")
     model.compile(
         optimizer=Adam(learning_rate=lr),
         loss="mse",
@@ -134,14 +134,14 @@ def build_lstm_advanced(seq_len: int, n_features: int, lstm1: int = 128, lstm2: 
     price = Dense(1, name="price")(head)
 
     if not multi_task:
-        model = Model(inputs=inputs, outputs=price, name="finsight_lstm_adv")
+        model = Model(inputs=inputs, outputs=price, name="tickerscope_lstm_adv")
         model.compile(optimizer=Adam(learning_rate=lr), loss="mse", metrics=["mae"])
         return model
 
     direction = Dense(1, activation="sigmoid", name="direction")(head)
     volatility = Dense(1, activation="softplus", name="volatility")(head)
     model = Model(inputs=inputs, outputs=[price, direction, volatility],
-                  name="finsight_lstm_multitask")
+                  name="tickerscope_lstm_multitask")
     model.compile(
         optimizer=Adam(learning_rate=lr),
         loss={"price": "mse", "direction": "binary_crossentropy", "volatility": "mse"},

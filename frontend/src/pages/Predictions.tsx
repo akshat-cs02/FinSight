@@ -151,7 +151,7 @@ export default function PredictionsPage() {
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',
-          name: 'FinSight AI Predictions',
+          name: 'TickerScope AI Predictions',
           description: 'AI-powered stock market predictions using LSTM and XGBoost models.',
         }}
       />

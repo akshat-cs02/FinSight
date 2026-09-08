@@ -495,7 +495,7 @@ def _tv_ws_history(tv_symbol: str, interval: str, rng: str) -> list[dict]:
                                       open_timeout=8, close_timeout=3, max_size=None)
 
     async def _run() -> list[dict]:
-        chart_sess = "cs_finsight01"
+        chart_sess = "cs_tickerscope01"
         async with _connect() as ws:
             await ws.recv()  # server hello
             await ws.send(_msg("set_auth_token", ["unauthorized_user_token"]))

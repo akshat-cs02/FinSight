@@ -35,7 +35,7 @@ export default function NewsPage() {
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
-          name: 'FinSight Financial News',
+          name: 'TickerScope Financial News',
           description: 'Latest financial news with AI-powered sentiment analysis.',
         }}
       />

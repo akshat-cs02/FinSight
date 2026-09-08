@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'FinSight — AI-Powered Markets',
-        short_name: 'FinSight',
+        name: 'TickerScope — AI-Powered Markets',
+        short_name: 'TickerScope',
         description: 'Real-time stock market analysis, AI predictions, ICT/SMC signals, and portfolio management.',
         theme_color: '#D4A853',
         background_color: '#0a0a0a',

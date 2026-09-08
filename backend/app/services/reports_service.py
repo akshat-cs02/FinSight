@@ -43,11 +43,11 @@ def _section_table(rows):
 def portfolio_pdf(db: Session, user_id: int = None) -> bytes:
     summary = ps.get_summary(db, user_id)
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, title="FinSight Portfolio Report")
+    doc = SimpleDocTemplate(buf, pagesize=A4, title="TickerScope Portfolio Report")
     s = _styles()
     story = []
 
-    story.append(Paragraph("FinSight – Portfolio Report", s["title"]))
+    story.append(Paragraph("TickerScope – Portfolio Report", s["title"]))
     story.append(Paragraph(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}", s["meta"]))
     story.append(Spacer(1, 0.5 * cm))
 
@@ -119,11 +119,11 @@ def stock_pdf(symbol: str) -> bytes:
         indicators = None
 
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, title=f"FinSight – {symbol}")
+    doc = SimpleDocTemplate(buf, pagesize=A4, title=f"TickerScope – {symbol}")
     s = _styles()
     story = []
 
-    story.append(Paragraph(f"FinSight – {symbol} Analysis", s["title"]))
+    story.append(Paragraph(f"TickerScope – {symbol} Analysis", s["title"]))
     story.append(Paragraph(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}", s["meta"]))
     story.append(Spacer(1, 0.4 * cm))
 

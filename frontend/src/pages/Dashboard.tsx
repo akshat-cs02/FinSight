@@ -298,7 +298,7 @@ export default function DashboardPage() {
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',
-          name: 'FinSight Dashboard',
+          name: 'TickerScope Dashboard',
           description: 'Live market data with ICT/SMC signals and AI predictions.',
         }}
       />

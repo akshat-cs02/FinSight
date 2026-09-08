@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FinSight — Trade Smarter</title>
+    <title>TickerScope — Trade Smarter</title>
     <meta
       name="description"
       content="ICT/SMC signals and AI predictions with entries, targets, and confidence — in plain numbers."
@@ -12,7 +12,7 @@
     <script>
       document.documentElement.className = "js";
       (function() {
-        var t = localStorage.getItem("finsight-theme");
+        var t = localStorage.getItem("tickerscope-theme");
         if (t === "light" || (!t && window.matchMedia("(prefers-color-scheme: light)").matches)) {
           document.documentElement.setAttribute("data-theme", "light");
         }
@@ -52,7 +52,7 @@
         padding: 0;
       }
       :root {
-        /* ── FinSight brand: warm gold · neutral dark/light ── */
+        /* ── TickerScope brand: warm gold · neutral dark/light ── */
         --bg: #0a0a0a;
         --panel: #141414;
         --raised: #1a1a1a;
@@ -2805,14 +2805,14 @@
       <div class="cur l" id="curL"></div>
       <div class="cur r" id="curR"></div>
       <div class="lock">
-        <div class="wm" id="preWm">FinSight</div>
+        <div class="wm" id="preWm">TickerScope</div>
         <div class="track"><div class="fill" id="preFill"></div></div>
       </div>
       <div class="pct" id="prePct">0%</div>
     </div>
     <header class="nav" id="nav">
       <div class="wrap nav-in">
-        <a href="#top" class="brand"><span class="mk">FS</span>FinSight</a>
+        <a href="#top" class="brand"><span class="mk">TS</span>TickerScope</a>
         <nav class="nav-links">
           <a href="#showcase">How it works</a><a href="#caps">Platform</a
           ><a href="#wins">Signals</a><a href="#stats">Performance</a>
@@ -2873,7 +2873,7 @@
               ><span class="ln stroke">before it moves.</span>
             </h1>
             <p class="hero-sub">
-              FinSight reads ICT/SMC market structure and pairs it with
+              TickerScope reads ICT/SMC market structure and pairs it with
               two ML models — then gives you the entry, target, and confidence.
               No jargon. Just numbers.
             </p>
@@ -3467,7 +3467,7 @@
     <footer>
       <div class="wrap foot-grid">
         <div class="foot-brand clip">
-          <a href="#top" class="brand"><span class="mk">FS</span>FinSight</a>
+          <a href="#top" class="brand"><span class="mk">TS</span>TickerScope</a>
           <div class="tag">Trade Smarter</div>
           <p>
             Live market data, ICT/SMC signals, and AI predictions
@@ -3490,7 +3490,7 @@
         </div>
       </div>
       <div class="wrap foot-bot clip">
-        <span>© 2026 FinSight · MIT License</span
+        <span>© 2026 TickerScope · MIT License</span
         ><span>Markets involve risk. Nothing here is financial advice.</span>
       </div>
     </footer>
@@ -3552,7 +3552,7 @@
           <div class="auth-form stg">
             <div class="head">
               <div class="k">Secure Access</div>
-              <h3 id="authTitle">Sign in to FinSight</h3>
+              <h3 id="authTitle">Sign in to TickerScope</h3>
             </div>
             <div class="tabs">
               <button class="tab on" data-tab="signin">Sign in</button
@@ -3792,7 +3792,7 @@
                 <rect x="3" y="6" width="8" height="7" rx="1" />
                 <path d="M5 6V4a2 2 0 014 0v2" /></svg
               ><span
-                >256-bit encryption. FinSight never asks for your password by
+                >256-bit encryption. TickerScope never asks for your password by
                 email or phone.</span
               >
             </div>
@@ -4796,7 +4796,7 @@
           p.classList.toggle("on", p.dataset.pane === id),
         );
         $("#authTitle").textContent = signin
-          ? "Sign in to FinSight"
+          ? "Sign in to TickerScope"
           : "Create your account";
         hideErr();
       }
@@ -4950,10 +4950,10 @@
         const isLight = html.getAttribute("data-theme") === "light";
         if (isLight) {
           html.removeAttribute("data-theme");
-          localStorage.setItem("finsight-theme", "dark");
+          localStorage.setItem("tickerscope-theme", "dark");
         } else {
           html.setAttribute("data-theme", "light");
-          localStorage.setItem("finsight-theme", "light");
+          localStorage.setItem("tickerscope-theme", "light");
         }
       }
       $("#themeToggle").addEventListener("click", toggleTheme);
@@ -5341,7 +5341,7 @@
       });
 
       function guest() {
-        sessionStorage.setItem('finsight_splash', 'true');
+        sessionStorage.setItem('tickerscope_splash', 'true');
         window.location.href = "/dashboard";
       }
       $$("[data-guest]").forEach((b) =>

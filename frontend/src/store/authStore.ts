@@ -37,7 +37,7 @@ interface AuthState {
 const GUEST_USER: User = {
   id: '0',
   username: 'Guest',
-  email: 'guest@finsight.app',
+  email: 'guest@tickerscope.xyz',
   first_name: 'Demo',
   last_name: null,
   is_admin: false,

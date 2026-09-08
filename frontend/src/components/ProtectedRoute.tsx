@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
       try {
         // Fast path: if user is already a real logged-in user, skip everything.
         const currentUser = useAuthStore.getState().user
-        if (currentUser && currentUser.id !== '0' && currentUser.email !== 'guest@finsight.app') {
+        if (currentUser && currentUser.id !== '0' && currentUser.email !== 'guest@tickerscope.xyz') {
           if (!cancelled) { setAuthenticated(true); setChecking(false) }
           return
         }

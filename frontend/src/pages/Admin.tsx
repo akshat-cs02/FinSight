@@ -456,12 +456,12 @@ export default function AdminPage() {
     <div ref={mainRef} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <SEO
         title="Admin Dashboard"
-        description="FinSight admin panel for managing users, ML models, and system performance."
+        description="TickerScope admin panel for managing users, ML models, and system performance."
         noindex
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',
-          name: 'FinSight Admin Dashboard',
+          name: 'TickerScope Admin Dashboard',
         }}
       />
       <div className="flex justify-between items-center">

@@ -1,4 +1,4 @@
-# FinSight
+# TickerScope
 
 > **Live**: [fin-sight-blush.vercel.app](https://fin-sight-blush.vercel.app)
 
@@ -30,8 +30,8 @@ Real-time market analysis + AI predictions. Fuses ICT/SMC structure with an LSTM
 ## Local dev
 
 ```bash
-git clone https://github.com/akshat-cs02/FinSight.git
-cd FinSight
+git clone https://github.com/akshat-cs02/TickerScope.git
+cd TickerScope
 
 # Backend
 cd backend
@@ -52,7 +52,7 @@ npm run dev               # opens on localhost:3000
 ## Project layout
 
 ```
-FinSight/
+TickerScope/
 ├── backend/app/
 │   ├── api/           route handlers
 │   ├── services/      market, signals, news logic

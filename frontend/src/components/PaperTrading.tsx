@@ -4,7 +4,7 @@ import api from '@/services/api'
 import { formatPrice } from '@/utils/currency'
 import { formatLocalDateTime } from '@/utils/timezone'
 
-const STORAGE_KEY = 'finsight_paper_portfolio'
+const STORAGE_KEY = 'tickerscope_paper_portfolio'
 const DEFAULT_CAPITAL = 10_000
 
 interface PaperTrade {

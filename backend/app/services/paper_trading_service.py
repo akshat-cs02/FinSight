@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import PaperAccount, PaperPosition, IntradaySignal
 
-logger = logging.getLogger("finsight.paper")
+logger = logging.getLogger("tickerscope.paper")
 
 # Config
 DEFAULT_BALANCE = 10000.0

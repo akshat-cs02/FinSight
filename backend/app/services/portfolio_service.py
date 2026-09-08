@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 def _ensure_default_user(db: Session) -> int:
     """Fallback when auth disabled or user not provided — used only for guest mode."""
-    user = db.query(User).filter(User.email == "demo@finsight.local").first()
+    user = db.query(User).filter(User.email == "demo@tickerscope.local").first()
     if not user:
         user = User(
             username="demo",
-            email="demo@finsight.local",
+            email="demo@tickerscope.local",
             hashed_password="disabled",
             first_name="Demo",
             last_name="User",

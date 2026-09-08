@@ -1,5 +1,5 @@
 """
-Configuration management for FinSight application
+Configuration management for TickerScope application
 """
 
 from typing import List
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
 
     # App Configuration
-    APP_NAME: str = "FinSight"
+    APP_NAME: str = "TickerScope"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
     # Opt INTO production explicitly (ENVIRONMENT=production). Local dev is the
@@ -30,9 +30,9 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
 
     # Database
-    # SQLite (default):   sqlite:///./data/finsight.db
-    # PostgreSQL:         postgresql://user:pass@host:5432/finsight
-    DATABASE_URL: str = "sqlite:///./data/finsight.db"
+    # SQLite (default):   sqlite:///./data/tickerscope.db
+    # PostgreSQL:         postgresql://user:pass@host:5432/tickerscope
+    DATABASE_URL: str = "sqlite:///./data/tickerscope.db"
 
     # JWT & Security
     SECRET_KEY: str = Field(default="your-secret-key-change-in-production")
@@ -69,8 +69,8 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
-    SENDER_EMAIL: str = "noreply@finsight.io"
-    SENDER_NAME: str = "FinSight Team"
+    SENDER_EMAIL: str = "noreply@tickerscope.xyz"
+    SENDER_NAME: str = "TickerScope Team"
 
     # API Keys
     YFINANCE_API_KEY: str = ""
@@ -108,7 +108,7 @@ class Settings(BaseSettings):
     MODEL_RETRAIN_INTERVAL: int = 604800
 
     # Admin
-    ADMIN_EMAIL: str = "admin@finsight.io"
+    ADMIN_EMAIL: str = "admin@tickerscope.xyz"
     ADMIN_PASSWORD: str = "admin123"
     ADMIN_API_KEY: str = "admin-api-key"
 

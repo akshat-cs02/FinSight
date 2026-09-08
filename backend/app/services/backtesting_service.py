@@ -1,5 +1,5 @@
 """
-Professional-grade ICT/SMC Backtesting Engine for FinSight.
+Professional-grade ICT/SMC Backtesting Engine for TickerScope.
 
 Strategies implemented (all based on ICT / Smart Money Concepts):
   1. BOS_FVG        — Break of Structure + Fair Value Gap (trend continuation)

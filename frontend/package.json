@@ -1,7 +1,7 @@
 {
-  "name": "finsight-frontend",
+  "name": "tickerscope-frontend",
   "version": "1.0.0",
-  "description": "FinSight - AI-Based Stock Market Analysis & Prediction Platform",
+  "description": "TickerScope - AI-Based Stock Market Analysis & Prediction Platform",
   "private": true,
   "type": "module",
   "scripts": {

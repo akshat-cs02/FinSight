@@ -1,4 +1,4 @@
-## FinSight
+## TickerScope
 
 **Live**: [fin-sight-blush.vercel.app](https://fin-sight-blush.vercel.app)
 

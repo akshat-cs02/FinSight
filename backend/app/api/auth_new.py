@@ -105,7 +105,7 @@ def _consume_otp(email: str) -> None:
 def _otp_email_html(otp: str) -> str:
     """Render OTP email body."""
     return (
-        f"Your FinSight login code is:<br><br>"
+        f"Your TickerScope login code is:<br><br>"
         f"<div style='font-size:32px;font-weight:700;letter-spacing:8px;color:#2563eb;"
         f"background:#1e293b;padding:16px 24px;border-radius:8px;text-align:center;"
         f"font-family:monospace'>{otp}</div><br>"
@@ -116,7 +116,7 @@ def _otp_email_html(otp: str) -> str:
 def _send_otp_email(email: str, otp: str) -> None:
     """Send OTP via email (background task)."""
     html = _otp_email_html(otp)
-    result = send_email(email, "Your FinSight Login Code", html)
+    result = send_email(email, "Your TickerScope Login Code", html)
     if result.ok:
         logger.info("OTP email sent to %s via %s (id=%s)", email, result.provider, result.message_id)
     else:
@@ -269,7 +269,7 @@ def _issue_tokens(user: UserRecord, request: Optional[Request], response: Option
     if response:
         is_prod = settings.is_production()
         response.set_cookie(
-            key="finsight_access",
+            key="tickerscope_access",
             value=access,
             httponly=True,
             secure=is_prod,
@@ -278,7 +278,7 @@ def _issue_tokens(user: UserRecord, request: Optional[Request], response: Option
             path="/",
         )
         response.set_cookie(
-            key="finsight_refresh",
+            key="tickerscope_refresh",
             value=refresh,
             httponly=True,
             secure=is_prod,
@@ -466,7 +466,7 @@ async def otp_verify(request: Request, req: OtpVerifyIn, response: Response):
 def refresh(request: Request, response: Response, token: Optional[str] = None):
     # Accept token from body param or httpOnly cookie
     if not token:
-        token = request.cookies.get("finsight_refresh")
+        token = request.cookies.get("tickerscope_refresh")
     if not token:
         raise HTTPException(401, "Missing refresh token.")
     try:
@@ -484,11 +484,11 @@ def refresh(request: Request, response: Response, token: Optional[str] = None):
     # Update httpOnly cookies
     is_prod = settings.is_production()
     response.set_cookie(
-        key="finsight_access", value=new_access, httponly=True, secure=is_prod,
+        key="tickerscope_access", value=new_access, httponly=True, secure=is_prod,
         samesite="lax", max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, path="/",
     )
     response.set_cookie(
-        key="finsight_refresh", value=new_refresh, httponly=True, secure=is_prod,
+        key="tickerscope_refresh", value=new_refresh, httponly=True, secure=is_prod,
         samesite="lax", max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400, path="/api/auth/refresh",
     )
 
@@ -574,7 +574,7 @@ async def me(request: Request):
     if creds.lower().startswith("bearer "):
         token = creds.split(" ", 1)[1]
     if not token:
-        token = request.cookies.get("finsight_access")
+        token = request.cookies.get("tickerscope_access")
     if not token:
         raise HTTPException(401, "Missing authentication token")
     payload = decode_token(token)
@@ -591,6 +591,6 @@ async def me(request: Request):
 @router.post("/logout")
 async def logout(response: Response):
     # Clear httpOnly cookies
-    response.delete_cookie("finsight_access", path="/")
-    response.delete_cookie("finsight_refresh", path="/api/auth/refresh")
+    response.delete_cookie("tickerscope_access", path="/")
+    response.delete_cookie("tickerscope_refresh", path="/api/auth/refresh")
     return {"ok": True}

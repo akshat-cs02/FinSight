@@ -1,7 +1,7 @@
 import sqlite3
-conn = sqlite3.connect('C:/Users/aksha/Downloads/FinSight/backend/data/finsight.db')
+conn = sqlite3.connect('C:/Users/aksha/Downloads/FinSight/backend/data/tickerscope.db')
 c = conn.cursor()
-c.execute("SELECT id, email, hashed_password FROM users WHERE email='finsight@gmail.com'")
+c.execute("SELECT id, email, hashed_password FROM users WHERE email='tickerscope@gmail.com'")
 row = c.fetchone()
 if row:
     print("ID:", row[0])

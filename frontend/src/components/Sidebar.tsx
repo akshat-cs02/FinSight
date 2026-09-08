@@ -148,7 +148,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {!collapsed && (
             <div className="leading-tight overflow-hidden">
               <div className="font-bold text-lg text-white tracking-tight font-display whitespace-nowrap">
-                FinSight
+                TickerScope
               </div>
               <div className="text-[10px] uppercase tracking-widest bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent font-medium">
                 AI-Powered
@@ -201,7 +201,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="p-4 border-t border-white/5 flex items-center justify-between flex-shrink-0">
         <div ref={versionRef} className="text-xs text-white/30 space-y-1">
           <p className="font-mono">v1.0.0</p>
-          <p>© 2026 FinSight</p>
+          <p>© 2026 TickerScope</p>
         </div>
         <button
           ref={collapseBtnRef}

@@ -260,7 +260,7 @@ export default function BacktestingPage() {
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',
-          name: 'FinSight ICT/SMC Backtesting',
+          name: 'TickerScope ICT/SMC Backtesting',
           description: 'Backtest ICT trading strategies with real market data.',
         }}
       />

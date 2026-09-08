@@ -1,4 +1,4 @@
-# FinSight — AI-Powered Stock Market Analysis
+# TickerScope — AI-Powered Stock Market Analysis
 # https://fin-sight-blush.vercel.app
 
 User-agent: *
