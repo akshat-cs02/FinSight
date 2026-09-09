@@ -43,7 +43,6 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
       *,
       *::before,
@@ -5613,64 +5612,23 @@
       /* ── Google OAuth Login ── */
       (function() {
         var GOOGLE_CLIENT_ID = "954109432469-npmnar16ni8rsq8gjqoah0b5jd2ppkrc.apps.googleusercontent.com";
-        var API_BASE = "https://api.tickerscope.xyz/api";
+        var REDIRECT_URI = "https://api.tickerscope.xyz/api/auth/google/callback";
 
-        function handleGoogleCredential(response) {
-          fetch(API_BASE + "/auth/google", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ credential: response.credential }),
-          })
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            if (data.access_token || data.user) {
-              window.location.href = "/app.html";
-            } else {
-              alert("Google login failed: " + (data.detail || "Unknown error"));
-            }
-          })
-          .catch(function(err) {
-            alert("Google login error: " + err.message);
-          });
-        }
-
-        /* Initialize Google Identity Services when ready */
-        function initGoogle() {
-          if (window.google && window.google.accounts && window.google.accounts.id) {
-            window.google.accounts.id.initialize({
-              client_id: GOOGLE_CLIENT_ID,
-              callback: handleGoogleCredential,
-              auto_select: false,
-            });
-          }
-        }
-
-        /* Wire up the Google SSO button */
+        /* Wire up the Google SSO button — redirect to Google OAuth */
         var googleBtn = document.getElementById("googleLoginBtn");
         if (googleBtn) {
           googleBtn.addEventListener("click", function() {
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-              window.google.accounts.id.prompt();
-            } else {
-              /* GIS not loaded yet — init and prompt */
-              initGoogle();
-              setTimeout(function() {
-                if (window.google && window.google.accounts && window.google.accounts.id) {
-                  window.google.accounts.id.prompt();
-                } else {
-                  alert("Google Sign-In is loading, please try again.");
-                }
-              }, 1500);
-            }
+            var scopes = "openid email profile";
+            var params = [
+              "client_id=" + GOOGLE_CLIENT_ID,
+              "redirect_uri=" + encodeURIComponent(REDIRECT_URI),
+              "response_type=code",
+              "scope=" + encodeURIComponent(scopes),
+              "prompt=select_account",
+              "state=" + encodeURIComponent(window.location.origin),
+            ].join("&");
+            window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?" + params;
           });
-        }
-
-        /* Init on load */
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", initGoogle);
-        } else {
-          initGoogle();
         }
       })();
     </script>

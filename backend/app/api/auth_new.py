@@ -672,3 +672,86 @@ async def google_login(req: GoogleAuthIn, request: Request, response: Response):
         logger.info("Auto-registered Google user: %s", email)
 
     return _issue_tokens(user, request, response)
+
+
+@router.get("/google/callback")
+async def google_callback(code: str = "", state: str = "", request: Request = None):
+    """OAuth callback — Google redirects here with auth code. Exchange for tokens, redirect to dashboard."""
+    from fastapi.responses import RedirectResponse
+    import httpx
+
+    frontend_base = state or "https://tickerscope.xyz"
+
+    if not code:
+        return RedirectResponse(url=f"{frontend_base}/app.html?error=no_code")
+
+    # Exchange auth code for tokens
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            token_resp = await client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": settings.GOOGLE_CLIENT_ID,
+                    "client_secret": os.environ.get("GOOGLE_CLIENT_SECRET", ""),
+                    "grant_type": "authorization_code",
+                    "redirect_uri": "https://api.tickerscope.xyz/api/auth/google/callback",
+                },
+            )
+            if token_resp.status_code != 200:
+                logger.error("Google token exchange failed: %s %s", token_resp.status_code, token_resp.text[:200])
+                return RedirectResponse(url=f"{frontend_base}/app.html?error=token_exchange_failed")
+            tokens = token_resp.json()
+    except Exception as exc:
+        logger.error("Google callback error: %s", exc)
+        return RedirectResponse(url=f"{frontend_base}/app.html?error=callback_exception")
+
+    id_token = tokens.get("id_token")
+    if not id_token:
+        return RedirectResponse(url=f"{frontend_base}/app.html?error=no_id_token")
+
+    # Verify the ID token
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            verify_resp = await client.get(
+                "https://oauth2.googleapis.com/tokeninfo",
+                params={"id_token": id_token},
+            )
+            if verify_resp.status_code != 200:
+                return RedirectResponse(url=f"{frontend_base}/app.html?error=invalid_id_token")
+            google_data = verify_resp.json()
+    except Exception as exc:
+        logger.error("Google ID token verification failed: %s", exc)
+        return RedirectResponse(url=f"{frontend_base}/app.html?error=verify_failed")
+
+    email = google_data.get("email", "").lower().strip()
+    if not email:
+        return RedirectResponse(url=f"{frontend_base}/app.html?error=no_email")
+
+    # Find or create user
+    user = user_store.get_user_by_email(email)
+
+    if not user:
+        first_name = google_data.get("given_name", "")
+        last_name = google_data.get("family_name", "")
+        username = email.split("@")[0]
+        base_username = username
+        counter = 1
+        while user_store.get_user_by_username(username):
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        user = await user_store.create_user(
+            email=email,
+            password_hash="",
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            is_admin=False,
+        )
+        user_store.mark_email_verified(email)
+        logger.info("Auto-registered Google user via callback: %s", email)
+
+    redirect_resp = RedirectResponse(url=f"{frontend_base}/app.html", status_code=302)
+    _issue_tokens(user, request, redirect_resp)
+    return redirect_resp
