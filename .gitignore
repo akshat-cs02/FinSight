@@ -48,3 +48,6 @@ models/trained/
 # API Keys
 secrets.json
 config.local.json
+
+check_paper*.py
+test_otp.py

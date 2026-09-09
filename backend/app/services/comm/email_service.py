@@ -130,12 +130,13 @@ def _send_smtp_fallback(to: str, subject: str, html: str) -> MessageSent:
     password = os.environ.get("SMTP_PASS", "").strip()
     host     = os.environ.get("SMTP_HOST", "").strip()
     port     = int(os.environ.get("SMTP_PORT", "587").strip())
-    logger.info("SMTP config: host=%s port=%s user=%s pass_len=%d", host, port, user, len(password))
+    sender   = os.environ.get("SENDER_EMAIL", "").strip() or os.environ.get("FINSIGHT_FROM_EMAIL", "").strip() or user
+    logger.info("SMTP config: host=%s port=%s user=%s sender=%s pass_len=%d", host, port, user, sender, len(password))
     if not (user and password and host):
         logger.warning("SMTP not configured: host=%r user=%r pass_set=%r", bool(host), bool(user), bool(password))
         return MessageSent(ok=False, provider="none", error="No provider configured")
     msg = MIMEMultipart("alternative")
-    msg["From"]    = user
+    msg["From"]    = f"TickerScope <{sender}>"
     msg["To"]      = to
     msg["Subject"] = subject
     msg.attach(MIMEText(html, "html"))
@@ -163,13 +164,8 @@ def send_email(to: str, subject: str, html_body: str, cta: Optional[tuple[str, s
             logger.info("Email sent via Resend to %s (id=%s)", to, r.message_id)
             return r
         logger.warning("Resend failed for %s: %s", to, r.error)
-    # Try SMTP (only works locally, Render blocks port 587)
-    if os.environ.get("SMTP_HOST") and os.environ.get("SMTP_USER") and os.environ.get("SMTP_PASS"):
-        sm = _send_smtp_fallback(to, subject, full_html)
-        if sm.ok:
-            logger.info("Email sent via SMTP to %s", to)
-            return sm
-        logger.warning("SMTP failed for %s: %s", to, sm.error)
+    # SMTP fallback disabled — always use Resend for consistent From address.
+    # Gmail SMTP overrides the From header and sends from the Gmail address.
     # Fallback to outbox
     fp = _save_outbox(to, subject, full_html)
     logger.warning("No email provider worked — OTP saved to outbox: %s", fp)
