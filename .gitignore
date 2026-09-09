@@ -51,3 +51,6 @@ config.local.json
 
 check_paper*.py
 test_otp.py
+test_login.py
+backend/check_db.py
+backend/fix_pass.py
