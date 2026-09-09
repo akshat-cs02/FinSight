@@ -19,7 +19,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt && \
-    pip install gunicorn==21.2.0 websockets
+    pip install gunicorn==21.2.0 websockets && \
+    pip install git+https://github.com/twopirllc/pandas-ta.git
 
 # =============== Runtime ===============
 FROM python:3.11-slim AS runtime
