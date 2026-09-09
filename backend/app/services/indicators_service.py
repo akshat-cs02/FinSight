@@ -1,11 +1,13 @@
 """
-Technical indicators via pandas-ta.
+Technical indicators via `ta` library.
 RSI, MACD, EMA, SMA, Bollinger Bands.
 """
 import logging
 import yfinance as yf
 import pandas as pd
-import pandas_ta as ta
+from ta.trend import SMAIndicator, EMAIndicator, MACD
+from ta.momentum import RSIIndicator
+from ta.volatility import BollingerBands, AverageTrueRange
 
 logger = logging.getLogger(__name__)
 
@@ -45,34 +47,28 @@ def calculate_indicators(symbol: str, period: str = "6mo") -> dict:
     low = df["Low"]
 
     # SMA
-    sma_20 = ta.sma(close, length=20)
-    sma_50 = ta.sma(close, length=50)
-    sma_200 = ta.sma(close, length=200) if len(close) >= 200 else None
+    sma_20 = SMAIndicator(close, window=20).sma_indicator()
+    sma_50 = SMAIndicator(close, window=50).sma_indicator()
+    sma_200 = SMAIndicator(close, window=200).sma_indicator() if len(close) >= 200 else None
 
     # EMA
-    ema_12 = ta.ema(close, length=12)
-    ema_26 = ta.ema(close, length=26)
+    ema_12 = EMAIndicator(close, window=12).ema_indicator()
+    ema_26 = EMAIndicator(close, window=26).ema_indicator()
 
     # RSI
-    rsi_14 = ta.rsi(close, length=14)
+    rsi_14 = RSIIndicator(close, window=14).rsi()
 
     # MACD
-    macd_df = ta.macd(close, fast=12, slow=26, signal=9)
-    macd_line = macd_df["MACD_12_26_9"] if macd_df is not None else None
-    macd_signal = macd_df["MACDs_12_26_9"] if macd_df is not None else None
-    macd_hist = macd_df["MACDh_12_26_9"] if macd_df is not None else None
+    macd_ind = MACD(close, window_slow=26, window_fast=12, window_sign=9)
+    macd_line = macd_ind.macd()
+    macd_signal = macd_ind.macd_signal()
+    macd_hist = macd_ind.macd_diff()
 
-    # Bollinger Bands (column suffix varies by pandas-ta version)
-    bbands = ta.bbands(close, length=20, std=2)
-    bb_upper = bb_middle = bb_lower = None
-    if bbands is not None:
-        for c in bbands.columns:
-            if c.startswith("BBU_"):
-                bb_upper = bbands[c]
-            elif c.startswith("BBM_"):
-                bb_middle = bbands[c]
-            elif c.startswith("BBL_"):
-                bb_lower = bbands[c]
+    # Bollinger Bands
+    bb = BollingerBands(close, window=20, window_dev=2)
+    bb_upper = bb.bollinger_hband()
+    bb_middle = bb.bollinger_mavg()
+    bb_lower = bb.bollinger_lband()
 
     current_price = float(close.iloc[-1])
     current_rsi = _safe_last(rsi_14)
@@ -81,10 +77,9 @@ def calculate_indicators(symbol: str, period: str = "6mo") -> dict:
     bb_lower_last = _safe_last(bb_lower) if bb_lower is not None else None
 
     # Use the same unified signal engine as the prediction service.
-    # We don't have an AI prediction here, so AI weight collapses to 0.
     try:
         from app.services.prediction_service import _unified_signal, _compute_levels
-        atr_series = ta.atr(high, low, close, length=14)
+        atr_series = AverageTrueRange(high, low, close, window=14).average_true_range()
         atr_last = float(atr_series.dropna().iloc[-1]) if atr_series is not None and not atr_series.dropna().empty else None
         signal, _, _ = _unified_signal(current_price, current_price, current_rsi,
                                        macd_hist_last, bb_upper_last, bb_lower_last)

@@ -18,7 +18,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install cython && \
     pip install -r requirements.txt && \
     pip install gunicorn==21.2.0 websockets
 

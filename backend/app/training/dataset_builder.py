@@ -8,7 +8,7 @@ Base features (all numeric, ready for scaling):
     Volatility: bb_upper, bb_middle, bb_lower, atr_14, volatility_20
     Strength:   trend_strength (close / sma_50)
 
-Extended features (appended after the base set — see EXTENDED_FEATURE_COLS):
+Extended features (appended after the base set -- see EXTENDED_FEATURE_COLS):
     VWAP, volume profile (POC/VAH/VAL), OBV, MFI, Stoch K/D, ADX, CCI,
     Williams %R, Ichimoku (Tenkan/Kijun/Senkou A/B), Supertrend, PSAR,
     Keltner (upper/mid/lower), ATR trailing stop, prev-day H/L/C, session H/L,
@@ -25,15 +25,18 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
-import pandas_ta as ta
 import yfinance as yf
+from ta.trend import SMAIndicator, EMAIndicator, MACD, ADXIndicator, CCIIndicator, IchimokuIndicator, PSARIndicator
+from ta.momentum import RSIIndicator, WilliamsRIndicator, StochasticOscillator
+from ta.volatility import BollingerBands, AverageTrueRange, KeltnerChannel
+from ta.volume import OnBalanceVolumeIndicator, MoneyFlowIndexIndicator
 
 logger = logging.getLogger(__name__)
 
 SUPPORTED_SYMBOLS = ["AAPL", "MSFT", "TSLA", "GOOGL", "RELIANCE.NS", "TCS.NS", "BTC-USD"]
 PERIOD_MAP = {"1y": "1y", "3y": "3y", "5y": "5y"}
 
-# ── Base feature set (unchanged order — backwards compatible) ─────────────────
+# -- Base feature set (unchanged order -- backwards compatible) ----------------
 FEATURE_COLS = [
     "open", "high", "low", "close", "volume", "daily_return",
     "sma_20", "sma_50", "ema_20", "ema_50",
@@ -42,7 +45,7 @@ FEATURE_COLS = [
     "atr_14", "volatility_20", "trend_strength",
 ]
 
-# ── Extended feature set (the 15 new groups + regime + correlation) ───────────
+# -- Extended feature set (the 15 new groups + regime + correlation) ----------
 EXTENDED_FEATURE_COLS = FEATURE_COLS + [
     "vwap",
     "vp_poc", "vp_vah", "vp_val",
@@ -69,13 +72,9 @@ def fetch_ohlcv(symbol: str, period: str = "3y") -> pd.DataFrame:
     """Fetch historical OHLCV via yfinance."""
     if period not in PERIOD_MAP:
         period = "3y"
-    # Map spot/TradingView tickers (XAUUSD=X, USOIL, …) to a symbol that
-    # actually returns data (futures proxy for spot metals/oil).
     from app.services.market_data_service import resolve_symbol
     from app.services import tradingview_service as tv
     yf_symbol = resolve_symbol(symbol)
-    # Route through the TradingView service (TV-first when enabled, yfinance
-    # fallback) — returns a yfinance-shaped DataFrame.
     df = tv.get_ohlcv_df(yf_symbol, period=PERIOD_MAP[period], interval="1d")
     if df.empty:
         raise ValueError(f"No data returned for {symbol}")
@@ -86,99 +85,80 @@ def fetch_ohlcv(symbol: str, period: str = "3y") -> pd.DataFrame:
     return df
 
 
-def _bb_columns(bb: pd.DataFrame) -> Tuple[pd.Series, pd.Series, pd.Series]:
-    upper = middle = lower = None
-    for c in bb.columns:
-        if c.startswith("BBU_"):
-            upper = bb[c]
-        elif c.startswith("BBM_"):
-            middle = bb[c]
-        elif c.startswith("BBL_"):
-            lower = bb[c]
-    return upper, middle, lower
-
-
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add all engineered indicator features in-place and return cleaned DF."""
     df = df.copy()
 
     df["daily_return"] = df["close"].pct_change()
 
-    df["sma_20"] = ta.sma(df["close"], length=20)
-    df["sma_50"] = ta.sma(df["close"], length=50)
-    df["ema_20"] = ta.ema(df["close"], length=20)
-    df["ema_50"] = ta.ema(df["close"], length=50)
+    df["sma_20"] = SMAIndicator(df["close"], window=20).sma_indicator()
+    df["sma_50"] = SMAIndicator(df["close"], window=50).sma_indicator()
+    df["ema_20"] = EMAIndicator(df["close"], window=20).ema_indicator()
+    df["ema_50"] = EMAIndicator(df["close"], window=50).ema_indicator()
 
-    df["rsi_14"] = ta.rsi(df["close"], length=14)
+    df["rsi_14"] = RSIIndicator(df["close"], window=14).rsi()
 
-    macd = ta.macd(df["close"], fast=12, slow=26, signal=9)
-    df["macd"] = macd["MACD_12_26_9"]
-    df["macd_signal"] = macd["MACDs_12_26_9"]
-    df["macd_hist"] = macd["MACDh_12_26_9"]
+    macd_ind = MACD(df["close"], window_slow=26, window_fast=12, window_sign=9)
+    df["macd"] = macd_ind.macd()
+    df["macd_signal"] = macd_ind.macd_signal()
+    df["macd_hist"] = macd_ind.macd_diff()
 
-    bb = ta.bbands(df["close"], length=20, std=2)
-    upper, middle, lower = _bb_columns(bb)
-    df["bb_upper"], df["bb_middle"], df["bb_lower"] = upper, middle, lower
+    bb = BollingerBands(df["close"], window=20, window_dev=2)
+    df["bb_upper"] = bb.bollinger_hband()
+    df["bb_middle"] = bb.bollinger_mavg()
+    df["bb_lower"] = bb.bollinger_lband()
 
-    df["atr_14"] = ta.atr(df["high"], df["low"], df["close"], length=14)
+    df["atr_14"] = AverageTrueRange(df["high"], df["low"], df["close"], window=14).average_true_range()
     df["volatility_20"] = df["daily_return"].rolling(20).std()
     df["trend_strength"] = df["close"] / df["sma_50"]
 
     return df
 
 
-# ── Helpers for the extended feature set ──────────────────────────────────────
-def _first_col(frame, prefix: str):
-    """First column of a pandas_ta result frame whose name starts with prefix."""
-    if frame is None:
-        return None
-    if isinstance(frame, pd.Series):
-        return frame
-    for c in frame.columns:
-        if c.startswith(prefix):
-            return frame[c]
-    return frame.iloc[:, 0] if frame.shape[1] else None
+# -- Helpers for the extended feature set ------------------------------------
+def _supertrend(high: pd.Series, low: pd.Series, close: pd.Series,
+                length: int = 10, multiplier: float = 3.0) -> Tuple[pd.Series, pd.Series]:
+    """Manual Supertrend implementation (not in `ta` library)."""
+    hl2 = (high + low) / 2
+    atr = AverageTrueRange(high, low, close, window=length).average_true_range()
+    upper = hl2 + multiplier * atr
+    lower = hl2 - multiplier * atr
 
+    n = len(close)
+    st = np.full(n, np.nan)
+    direction = np.full(n, np.nan)  # 1 = up, -1 = down
 
-def _volume_profile(df: pd.DataFrame, window: int = 20, bins: int = 24):
-    """
-    Rolling Volume-Profile POC / VAH / VAL over the last `window` sessions.
-    POC = price bin with the most volume; VA = 70% of volume around POC.
-    """
-    n = len(df)
-    poc = np.full(n, np.nan)
-    vah = np.full(n, np.nan)
-    val = np.full(n, np.nan)
-    highs, lows, closes, vols = (df["high"].values, df["low"].values,
-                                 df["close"].values, df["volume"].values)
-    for i in range(window, n):
-        lo, hi = lows[i - window:i].min(), highs[i - window:i].max()
-        if not np.isfinite(lo) or not np.isfinite(hi) or hi <= lo:
+    prev_st = 0.0
+    prev_dir = -1
+
+    for i in range(length, n):
+        if np.isnan(upper.iloc[i]) or np.isnan(lower.iloc[i]):
             continue
-        edges = np.linspace(lo, hi, bins + 1)
-        centers = (edges[:-1] + edges[1:]) / 2
-        hist = np.zeros(bins)
-        idx = np.clip(np.digitize(closes[i - window:i], edges) - 1, 0, bins - 1)
-        for k, b in enumerate(idx):
-            hist[b] += vols[i - window + k]
-        if hist.sum() <= 0:
-            continue
-        poc_bin = int(hist.argmax())
-        poc[i] = centers[poc_bin]
-        # Value area: expand outward from POC until ≥70% of volume captured.
-        target = hist.sum() * 0.70
-        lo_b = hi_b = poc_bin
-        captured = hist[poc_bin]
-        while captured < target and (lo_b > 0 or hi_b < bins - 1):
-            down = hist[lo_b - 1] if lo_b > 0 else -1
-            up = hist[hi_b + 1] if hi_b < bins - 1 else -1
-            if up >= down:
-                hi_b += 1; captured += max(up, 0)
-            else:
-                lo_b -= 1; captured += max(down, 0)
-        vah[i] = centers[hi_b]
-        val[i] = centers[lo_b]
-    return poc, vah, val
+        # Final bands adjust based on previous supertrend
+        fu = upper.iloc[i]
+        fl = lower.iloc[i]
+        if not np.isnan(prev_st):
+            if prev_dir == 1 and prev_st > lower.iloc[i]:
+                fl = prev_st
+            if prev_dir == -1 and prev_st < upper.iloc[i]:
+                fu = prev_st
+
+        if close.iloc[i] > fu:
+            cur_st = fl
+            cur_dir = 1
+        elif close.iloc[i] < fl:
+            cur_st = fu
+            cur_dir = -1
+        else:
+            cur_st = prev_st if prev_st != 0 else fl
+            cur_dir = prev_dir if prev_dir != -1 else -1
+
+        st[i] = cur_st
+        direction[i] = cur_dir
+        prev_st = cur_st
+        prev_dir = cur_dir
+
+    return pd.Series(st, index=close.index), pd.Series(direction, index=close.index)
 
 
 def engineer_extended_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -186,78 +166,103 @@ def engineer_extended_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     high, low, close, vol = df["high"], df["low"], df["close"], df["volume"]
 
-    # 1. VWAP (cumulative typical-price × volume / cumulative volume)
+    # 1. VWAP
     tp = (high + low + close) / 3
     df["vwap"] = (tp * vol).cumsum() / vol.cumsum().replace(0, np.nan)
 
     # 2. Volume Profile (POC / VAH / VAL over last 20 sessions)
-    poc, vah, val = _volume_profile(df, window=20)
+    n = len(df)
+    poc = np.full(n, np.nan)
+    vah = np.full(n, np.nan)
+    val = np.full(n, np.nan)
+    highs, lows, closes, vols = (high.values, low.values, close.values, vol.values)
+    for i in range(20, n):
+        lo, hi = lows[i - 20:i].min(), highs[i - 20:i].max()
+        if not np.isfinite(lo) or not np.isfinite(hi) or hi <= lo:
+            continue
+        edges = np.linspace(lo, hi, 25)
+        centers = (edges[:-1] + edges[1:]) / 2
+        hist = np.zeros(24)
+        idx = np.clip(np.digitize(closes[i - 20:i], edges) - 1, 0, 23)
+        for k, b in enumerate(idx):
+            hist[b] += vols[i - 20 + k]
+        if hist.sum() <= 0:
+            continue
+        poc_bin = int(hist.argmax())
+        poc[i] = centers[poc_bin]
+        target = hist.sum() * 0.70
+        lo_b = hi_b = poc_bin
+        captured = hist[poc_bin]
+        while captured < target and (lo_b > 0 or hi_b < 23):
+            down = hist[lo_b - 1] if lo_b > 0 else -1
+            up = hist[hi_b + 1] if hi_b < 23 else -1
+            if up >= down:
+                hi_b += 1; captured += max(up, 0)
+            else:
+                lo_b -= 1; captured += max(down, 0)
+        vah[i] = centers[hi_b]
+        val[i] = centers[lo_b]
     df["vp_poc"], df["vp_vah"], df["vp_val"] = poc, vah, val
 
     # 3. OBV
-    df["obv"] = ta.obv(close, vol)
+    df["obv"] = OnBalanceVolumeIndicator(close, vol).on_balance_volume()
 
     # 4. MFI
-    df["mfi_14"] = ta.mfi(high, low, close, vol, length=14)
+    df["mfi_14"] = MoneyFlowIndexIndicator(high, low, close, vol, window=14).money_flow_index()
 
     # 5. Stochastic K / D
-    stoch = ta.stoch(high, low, close, k=14, d=3)
-    df["stoch_k"] = _first_col(stoch, "STOCHk")
-    df["stoch_d"] = _first_col(stoch, "STOCHd")
+    stoch = StochasticOscillator(high, low, close, window=14, smooth_window=3)
+    df["stoch_k"] = stoch.stoch()
+    df["stoch_d"] = stoch.stoch_signal()
 
     # 6. ADX
-    adx = ta.adx(high, low, close, length=14)
-    df["adx_14"] = _first_col(adx, "ADX")
+    adx_ind = ADXIndicator(high, low, close, window=14)
+    df["adx_14"] = adx_ind.adx()
 
     # 7. CCI
-    df["cci_20"] = ta.cci(high, low, close, length=20)
+    df["cci_20"] = CCIIndicator(high, low, close, window=20).cci()
 
     # 8. Williams %R
-    df["willr_14"] = ta.willr(high, low, close, length=14)
+    df["willr_14"] = WilliamsRIndicator(high, low, close, lbp=14).williams_r()
 
     # 9. Ichimoku Cloud
     try:
-        ich, _ = ta.ichimoku(high, low, close)
-        df["ichimoku_tenkan"] = _first_col(ich, "ITS")
-        df["ichimoku_kijun"] = _first_col(ich, "IKS")
-        df["ichimoku_senkou_a"] = _first_col(ich, "ISA")
-        df["ichimoku_senkou_b"] = _first_col(ich, "ISB")
+        ich = IchimokuIndicator(high, low, close, window1=9, window2=26, window3=52)
+        df["ichimoku_tenkan"] = ich.ichimoku_conversion_line()
+        df["ichimoku_kijun"] = ich.ichimoku_base_line()
+        df["ichimoku_senkou_a"] = ich.ichimoku_a()
+        df["ichimoku_senkou_b"] = ich.ichimoku_b()
     except Exception:
         for c in ("ichimoku_tenkan", "ichimoku_kijun", "ichimoku_senkou_a", "ichimoku_senkou_b"):
             df[c] = np.nan
 
-    # 10. Supertrend
+    # 10. Supertrend (manual implementation)
     try:
-        st = ta.supertrend(high, low, close, length=10, multiplier=3.0)
-        df["supertrend"] = _first_col(st, "SUPERT_")
-        df["supertrend_dir"] = _first_col(st, "SUPERTd_")
+        st_val, st_dir = _supertrend(high, low, close, length=10, multiplier=3.0)
+        df["supertrend"] = st_val
+        df["supertrend_dir"] = st_dir
     except Exception:
         df["supertrend"] = np.nan
         df["supertrend_dir"] = np.nan
 
     # 11. Parabolic SAR
     try:
-        psar = ta.psar(high, low, close)
-        long_ = _first_col(psar, "PSARl")
-        short_ = _first_col(psar, "PSARs")
-        df["psar"] = long_.combine_first(short_) if long_ is not None and short_ is not None else _first_col(psar, "PSAR")
+        psar_ind = PSARIndicator(high, low, close)
+        df["psar"] = psar_ind.psar()
     except Exception:
         df["psar"] = np.nan
 
-    # 12. Keltner Channels (pandas_ta names them KCUe/KCBe/KCLe)
+    # 12. Keltner Channels
     try:
-        kc = ta.kc(high, low, close, length=20, scalar=2.0)
-        up = _first_col(kc, "KCU")
-        mid = _first_col(kc, "KCB")
-        lo = _first_col(kc, "KCL")
-        df["kc_upper"] = up if up is not None else np.nan
-        df["kc_middle"] = mid if mid is not None else np.nan
-        df["kc_lower"] = lo if lo is not None else np.nan
+        kc = KeltnerChannel(high, low, close, window=20, window_atr=10, multiplier=2.0)
+        df["kc_upper"] = kc.keltner_channel_hband()
+        df["kc_middle"] = kc.keltner_channel_mband()
+        df["kc_lower"] = kc.keltner_channel_lband()
     except Exception:
         df["kc_upper"] = df["kc_middle"] = df["kc_lower"] = np.nan
 
-    # 13. ATR trailing stop (chandelier-style: close − 3·ATR)
-    atr = df["atr_14"] if "atr_14" in df else ta.atr(high, low, close, length=14)
+    # 13. ATR trailing stop (chandelier-style: close - 3*ATR)
+    atr = df["atr_14"] if "atr_14" in df else AverageTrueRange(high, low, close, window=14).average_true_range()
     df["atr_trailing_stop"] = close - 3.0 * atr
 
     # 14. Previous day High / Low / Close
@@ -265,12 +270,11 @@ def engineer_extended_features(df: pd.DataFrame) -> pd.DataFrame:
     df["prev_low"] = low.shift(1)
     df["prev_close"] = close.shift(1)
 
-    # 15. Session High/Low — on daily bars, a 4-bar rolling window (~"last 4h"
-    #     proxy for daily data; on intraday data this is the true 4-hour window).
+    # 15. Session High/Low
     df["session_high"] = high.rolling(4, min_periods=1).max()
     df["session_low"] = low.rolling(4, min_periods=1).min()
 
-    # ── Market regime (one-hot): trending / ranging / volatile ────────────────
+    # -- Market regime (one-hot) --
     adx_v = df["adx_14"]
     atr_200 = atr.rolling(200, min_periods=20).mean()
     volatile = atr > 1.5 * atr_200
@@ -305,22 +309,14 @@ def clean_dataset(df: pd.DataFrame, drop: bool = True) -> pd.DataFrame:
     Nan policy: forward-fill then back-fill (preserves rows that indicator
     warm-up would otherwise delete). `drop=True` still drops any residual NaNs
     at the very start where even bfill can't help.
-
-    CRITICAL: columns that are 100% NaN (e.g. VWAP / volume-profile on forex
-    or index tickers where Yahoo reports volume=0) are dropped BEFORE ffill —
-    otherwise bfill can't fill them and final dropna() would delete every row
-    of the dataset, making prediction impossible for those symbols.
     """
     df = df[~df.index.duplicated(keep="last")]
     if "daily_return" in df.columns:
         q1, q3 = df["daily_return"].quantile([0.01, 0.99])
         df["daily_return"] = df["daily_return"].clip(lower=q1, upper=q3)
-    # Drop fully-NaN columns first — ffill/bfill can't rescue them, and they
-    # would otherwise poison every row when dropna() runs at the end.
     all_nan_cols = df.columns[df.isna().all()].tolist()
     if all_nan_cols:
         df = df.drop(columns=all_nan_cols)
-    # forward-fill then back-fill instead of dropping every warm-up row
     df = df.ffill().bfill()
     if drop:
         df = df.dropna()
@@ -329,7 +325,7 @@ def clean_dataset(df: pd.DataFrame, drop: bool = True) -> pd.DataFrame:
 
 def build_dataset(symbol: str, period: str = "3y", extended: bool = True) -> pd.DataFrame:
     """
-    Full pipeline: fetch → engineer → (extended features) → clean.
+    Full pipeline: fetch -> engineer -> (extended features) -> clean.
 
     `extended=True` (default) adds the 15 new feature groups + regime +
     correlation. Pass `extended=False` for the original 20-column set.
@@ -340,18 +336,15 @@ def build_dataset(symbol: str, period: str = "3y", extended: bool = True) -> pd.
         feat = engineer_extended_features(feat)
         feat["index_corr_20"] = _index_correlation(feat, symbol, window=20)
     cleaned = clean_dataset(feat)
-    logger.info(f"[{symbol}] dataset: {len(cleaned)} rows × {len(cleaned.columns)} cols")
+    logger.info(f"[{symbol}] dataset: {len(cleaned)} rows x {len(cleaned.columns)} cols")
     return cleaned
 
 
 def build_xy_supervised(df: pd.DataFrame, horizon: int = 1,
                         feature_cols: list | None = None) -> Tuple[np.ndarray, np.ndarray, list]:
     """
-    For XGBoost: each row → next-day close.
+    For XGBoost: each row -> next-day close.
     X = feature row(t), y = close(t + horizon).
-
-    `feature_cols` defaults to the base FEATURE_COLS; pass EXTENDED_FEATURE_COLS
-    (intersected with df.columns) to train on the full feature set.
     """
     cols = [c for c in (feature_cols or FEATURE_COLS) if c in df.columns]
     features = df[cols].copy()
@@ -364,9 +357,7 @@ def build_xy_supervised(df: pd.DataFrame, horizon: int = 1,
 
 def build_sequences(arr: np.ndarray, target_arr: np.ndarray, seq_len: int = 60) -> Tuple[np.ndarray, np.ndarray]:
     """
-    For LSTM: rolling window of seq_len timesteps → predict next target value.
-    arr: shape (T, n_features) — feature matrix (already scaled).
-    target_arr: shape (T,) — target series (already scaled or raw, your choice).
+    For LSTM: rolling window of seq_len timesteps -> predict next target value.
     """
     X, y = [], []
     for i in range(len(arr) - seq_len):
