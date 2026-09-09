@@ -1,6 +1,6 @@
 # TickerScope
 
-> **Live**: [fin-sight-blush.vercel.app](https://fin-sight-blush.vercel.app)
+> **Live**: [tickerscope](https://www.tickerscope.xyz)
 
 Real-time market analysis + AI predictions. Fuses ICT/SMC structure with an LSTM+XGBoost ensemble — entry, target, and confidence in plain numbers.
 
