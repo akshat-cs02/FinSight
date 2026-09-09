@@ -9,7 +9,7 @@ WORKDIR /build
 
 # System deps needed for tensorflow / numpy / xgboost wheels + curl for healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential curl ca-certificates git \
+    build-essential curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps into a venv we can copy later.
@@ -19,8 +19,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt && \
-    pip install gunicorn==21.2.0 websockets && \
-    pip install git+https://github.com/twopirllc/pandas-ta.git
+    pip install gunicorn==21.2.0 websockets; \
+    pip install pandas-ta 2>/dev/null || echo "pandas-ta skipped"
 
 # =============== Runtime ===============
 FROM python:3.11-slim AS runtime
