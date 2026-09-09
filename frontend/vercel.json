@@ -8,7 +8,6 @@
   "rewrites": [
     { "source": "/login", "destination": "/index.html" },
     { "source": "/register", "destination": "/index.html" },
-    { "source": "/api/(.*)", "destination": "https://tickerscope.xyz/api/$1" },
     { "source": "/dashboard(.*)", "destination": "/app.html" },
     { "source": "/stocks(.*)", "destination": "/app.html" },
     { "source": "/predictions(.*)", "destination": "/app.html" },
