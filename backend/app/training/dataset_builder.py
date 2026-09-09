@@ -29,7 +29,7 @@ import yfinance as yf
 from ta.trend import SMAIndicator, EMAIndicator, MACD, ADXIndicator, CCIIndicator, IchimokuIndicator, PSARIndicator
 from ta.momentum import RSIIndicator, WilliamsRIndicator, StochasticOscillator
 from ta.volatility import BollingerBands, AverageTrueRange, KeltnerChannel
-from ta.volume import OnBalanceVolumeIndicator, MoneyFlowIndexIndicator
+from ta.volume import OnBalanceVolumeIndicator, MFIIndicator
 
 logger = logging.getLogger(__name__)
 
@@ -208,7 +208,7 @@ def engineer_extended_features(df: pd.DataFrame) -> pd.DataFrame:
     df["obv"] = OnBalanceVolumeIndicator(close, vol).on_balance_volume()
 
     # 4. MFI
-    df["mfi_14"] = MoneyFlowIndexIndicator(high, low, close, vol, window=14).money_flow_index()
+    df["mfi_14"] = MFIIndicator(high, low, close, vol, window=14).money_flow_index()
 
     # 5. Stochastic K / D
     stoch = StochasticOscillator(high, low, close, window=14, smooth_window=3)
