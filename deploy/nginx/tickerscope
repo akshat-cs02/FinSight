@@ -1,0 +1,86 @@
+# TickerScope Nginx Config
+# Place at: /etc/nginx/sites-available/tickerscope
+
+# Rate limiting zone
+limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
+
+# HTTP → HTTPS redirect
+server {
+    listen 80;
+    listen [::]:80;
+    server_name tickerscope.xyz www.tickerscope.xyz;
+    return 301 https://$server_name$request_uri;
+}
+
+# Main HTTPS server
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name tickerscope.xyz www.tickerscope.xyz;
+
+    # SSL (managed by Certbot)
+    ssl_certificate /etc/letsencrypt/live/tickerscope.xyz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tickerscope.xyz/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    # Security headers
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    # Gzip
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml image/svg+xml;
+    gzip_min_length 256;
+
+    # ── Static frontend ──
+    root /var/www/tickerscope;
+    index index.html;
+
+    # Landing page
+    location = / {
+        try_files /landing.html =404;
+    }
+
+    # API proxy → backend
+    location /api/ {
+        limit_req zone=api burst=20 nodelay;
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+
+    # WebSocket proxy
+    location /ws/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 86400;
+    }
+
+    # SPA routes → app.html
+    location ~ ^/(dashboard|stocks|predictions|portfolio|news|admin|backtesting|login|register) {
+        try_files /app.html =404;
+    }
+
+    # Static assets with long cache
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Default: serve static files
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
