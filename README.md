@@ -112,7 +112,5 @@ feature engineering (SMA, EMA, RSI, MACD, volume, ...)
 ---
 
 ## Notes
-
-- Render free tier spins down after inactivity — first request after a gap takes ~30s to wake up.
 - Guest mode uses a local guest user — full features available without signing up.
 - All API auth uses httpOnly cookies (no localStorage tokens).
