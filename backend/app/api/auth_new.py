@@ -54,6 +54,17 @@ OTP_EXPIRY_SECONDS = 300   # 5 minutes
 OTP_MAX_ATTEMPTS = 5       # max wrong attempts per OTP
 OTP_RATE_LIMIT = 3         # max OTPs sent per email per 10 minutes
 OTP_RATE_WINDOW = 600      # 10 minutes
+_OTP_LAST_CLEANUP = [0.0]  # mutable ref for closure
+
+def _cleanup_otp_store():
+    """Remove expired OTP entries to prevent memory leak. Runs at most once per 60s."""
+    now = time.time()
+    if now - _OTP_LAST_CLEANUP[0] < 60:
+        return
+    _OTP_LAST_CLEANUP[0] = now
+    expired = [k for k, v in _otp_store.items() if now > v.get("expires_at", 0)]
+    for k in expired:
+        _otp_store.pop(k, None)
 
 
 def _generate_otp() -> str:
@@ -63,6 +74,7 @@ def _generate_otp() -> str:
 
 def _store_otp(email: str, otp: str) -> None:
     """Store OTP with expiry. Rate-limited."""
+    _cleanup_otp_store()
     now = time.time()
     with _otp_lock:
         entry = _otp_store.get(email)

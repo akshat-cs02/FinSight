@@ -27,6 +27,7 @@ from sqlalchemy.orm import Session
 from app.database import IntradaySignal, WatchlistItem, SessionLocal
 from app.services.backtesting_service import get_live_signal, _atr, _rsi, _ema, _fetch_ohlcv
 from app.services.market_data_service import resolve_symbol
+from app.utils.bounded_cache import BoundedCache
 
 logger = logging.getLogger(__name__)
 
@@ -1222,8 +1223,7 @@ def get_breakout_candidates(db: Session, watchlist_symbols: list[str] | None = N
 # Master score = Σ(weight_i × score_i) × 100  →  range [-100, +100]
 # Labels: ≥55 STRONG_BUY | ≥20 BUY | ≤-20 SELL | ≤-55 STRONG_SELL | else NEUTRAL
 
-_consensus_cache: dict[str, tuple[dict, float]] = {}
-CONSENSUS_CACHE_TTL: float = 300.0  # 5 minutes
+_consensus_cache = BoundedCache(max_size=256, ttl=300.0)
 
 # Weights rebalanced to lean on the enhanced ICT engine + a liquidity layer.
 CONSENSUS_WEIGHTS: dict[str, float] = {
@@ -1276,10 +1276,9 @@ def get_consensus_signal(symbol: str) -> dict:
     Subsequent calls within the TTL window are instant.
     """
     sym = symbol.upper()
-    now = time.monotonic()
     hit = _consensus_cache.get(sym)
-    if hit and (now - hit[1]) < CONSENSUS_CACHE_TTL:
-        return hit[0]
+    if hit is not None:
+        return hit
 
     # ── 1. ICT Intraday (40%) ─ instant from background cache ────────────────
     ict_sig, ict_conf = "NEUTRAL", 0.0
@@ -1437,7 +1436,7 @@ def get_consensus_signal(symbol: str) -> dict:
         "components":        components,
         "computed_at":       datetime.now(timezone.utc).isoformat() + "Z",
     }
-    _consensus_cache[sym] = (result, now)
+    _consensus_cache.set(sym, result)
     return result
 
 
@@ -1450,8 +1449,7 @@ def get_consensus_signal(symbol: str) -> dict:
 #   long     → long-term stock signal  (5y weekly + deep fundamentals + 200w EMA)
 # ══════════════════════════════════════════════════════════════════════════════
 
-_horizon_cache: dict[str, tuple[dict, float]] = {}
-HORIZON_CACHE_TTL: float = 180.0  # 3 minutes
+_horizon_cache = BoundedCache(max_size=256, ttl=180.0)
 
 # Consensus blend across horizons (per spec): intraday 35 / short 25 / mid 25 / long 15
 HORIZON_WEIGHTS: dict[str, float] = {
@@ -1575,10 +1573,9 @@ def get_multi_horizon_prediction(symbol: str) -> dict:
     Cached HORIZON_CACHE_TTL (3 min); first call per symbol may be slow.
     """
     sym = symbol.upper()
-    now = time.monotonic()
     hit = _horizon_cache.get(sym)
-    if hit and (now - hit[1]) < HORIZON_CACHE_TTL:
-        return hit[0]
+    if hit is not None:
+        return hit
 
     from app.services.market_data_service import get_stock_quote
     try:
@@ -1665,7 +1662,7 @@ def get_multi_horizon_prediction(symbol: str) -> dict:
         "regime": regime,
         "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
     }
-    _horizon_cache[sym] = (result, now)
+    _horizon_cache.set(sym, result)
     return result
 
 

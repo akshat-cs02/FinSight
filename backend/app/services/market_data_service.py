@@ -17,9 +17,9 @@ import pandas as pd
 # ─── Shared thread pool for parallel market data fetches ─────────────────────
 _mds_executor = ThreadPoolExecutor(max_workers=10, thread_name_prefix="mds_worker")
 
-# ─── Quote price cache (10 s TTL) ────────────────────────────────────────────
-_price_cache: dict[str, tuple[dict, float]] = {}
-PRICE_CACHE_TTL: float = 10.0  # seconds
+# ─── Quote price cache (10 s TTL, max 512 entries) ───────────────────────────
+from app.utils.bounded_cache import BoundedCache
+_price_cache = BoundedCache(max_size=512, ttl=10.0)
 
 # ─── Trending stocks cache (30 s TTL, keyed per market) ──────────────────────
 _trending_cache: dict[str, tuple[list[dict], float]] = {}
@@ -306,12 +306,11 @@ def prefetch_quotes(symbols: list[str]) -> None:
         from app.services import tradingview_service as tv
         resolved = {resolve_symbol(s): s for s in symbols}
         batch = tv.get_quotes_batch_sync(list(resolved.keys()))
-        now = time.monotonic()
         for yf_sym, orig in resolved.items():
             q = batch.get(yf_sym.upper())
             result = _tv_quote_to_result(orig, yf_sym, q)
             if result is not None:
-                _price_cache[yf_sym] = (result, now)
+                _price_cache.set(yf_sym, result)
     except Exception as e:
         logger.warning("prefetch_quotes failed: %s", e)
 
@@ -323,8 +322,8 @@ def get_stock_quote(symbol: str) -> dict:
     """
     yf_symbol = resolve_symbol(symbol)
     cached = _price_cache.get(yf_symbol)
-    if cached and (time.monotonic() - cached[1]) < PRICE_CACHE_TTL:
-        return cached[0]
+    if cached is not None:
+        return cached
 
     # ── TradingView first ─────────────────────────────────────────────────────
     try:
@@ -332,7 +331,7 @@ def get_stock_quote(symbol: str) -> dict:
         q = tv.get_realtime_quote_sync(yf_symbol)
         result = _tv_quote_to_result(symbol, yf_symbol, q)
         if result is not None:
-            _price_cache[yf_symbol] = (result, time.monotonic())
+            _price_cache.set(yf_symbol, result)
             return result
     except Exception as e:
         logger.warning("TradingView quote failed for %s: %s — yfinance fallback", symbol, e)
@@ -399,7 +398,7 @@ def get_stock_quote(symbol: str) -> dict:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "source": "yfinance",
     }
-    _price_cache[yf_symbol] = (result, time.monotonic())
+    _price_cache.set(yf_symbol, result)
     return result
 
 
@@ -773,7 +772,7 @@ def _warm_one_tick() -> None:
             q = batch.get(yf_sym.upper())
             result = _tv_quote_to_result(orig, yf_sym, q)
             if result is not None:
-                _price_cache[yf_sym] = (result, now)
+                _price_cache.set(yf_sym, result)
                 hits += 1
         _warming_total_fetches += len(symbols)
         _warming_successes += hits

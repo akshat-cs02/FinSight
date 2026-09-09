@@ -53,30 +53,36 @@ logger = logging.getLogger("tickerscope")
 
 async def _keep_alive_loop():
     """Self-ping /health every 5 seconds to prevent Render free-tier sleep."""
-    import os
     base = os.environ.get("FINSIGHT_PUBLIC_URL", "http://127.0.0.1:8000")
     url = f"{base.rstrip('/')}/health"
-    while True:
-        await asyncio.sleep(5)
-        try:
-            async with httpx.AsyncClient(timeout=10) as client:
+    async with httpx.AsyncClient(timeout=10) as client:
+        while True:
+            await asyncio.sleep(5)
+            try:
                 r = await client.get(url)
                 logger.debug("Keep-alive ping %s -> %s", url, r.status_code)
-        except Exception as exc:
-            logger.warning("Keep-alive ping failed: %s", exc)
+            except Exception as exc:
+                logger.warning("Keep-alive ping failed: %s", exc)
 
+
+_bg_tasks: list[asyncio.Task] = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
     logger.info("DB initialized")
-    asyncio.create_task(background_signals_loop())
+    _bg_tasks.append(asyncio.create_task(background_signals_loop()))
     logger.info("Background signal refresh loop started")
-    asyncio.create_task(_keep_alive_loop())
+    _bg_tasks.append(asyncio.create_task(_keep_alive_loop()))
     logger.info("Keep-alive loop started (every 5s)")
-    asyncio.create_task(background_data_warming_loop())
+    _bg_tasks.append(asyncio.create_task(background_data_warming_loop()))
     logger.info("Background data warming loop started (every 5s)")
     yield
+    # Graceful shutdown: cancel all background tasks
+    for t in _bg_tasks:
+        t.cancel()
+    await asyncio.gather(*_bg_tasks, return_exceptions=True)
+    logger.info("Background tasks stopped")
 
 
 app = FastAPI(

@@ -17,8 +17,9 @@ from app.ml.backtesting import run_ml_backtest
 
 logger = logging.getLogger(__name__)
 
-_cache: dict[str, tuple[dict, float]] = {}
-CACHE_TTL = 3600.0
+from app.utils.bounded_cache import BoundedCache
+
+_cache = BoundedCache(max_size=128, ttl=3600.0)
 
 
 def _cache_key(symbol: str, period: str, windows: int) -> str:
@@ -28,8 +29,8 @@ def _cache_key(symbol: str, period: str, windows: int) -> str:
 def get_cached_backtest(symbol: str, period: str, windows: int) -> Optional[dict]:
     key = _cache_key(symbol, period, windows)
     entry = _cache.get(key)
-    if entry and (time.monotonic() - entry[1]) < CACHE_TTL:
-        result = dict(entry[0])
+    if entry is not None:
+        result = dict(entry)
         result["cached"] = True
         return result
     return None
@@ -37,7 +38,7 @@ def get_cached_backtest(symbol: str, period: str, windows: int) -> Optional[dict
 
 def set_cached_backtest(symbol: str, period: str, windows: int, result: dict):
     key = _cache_key(symbol, period, windows)
-    _cache[key] = (result, time.monotonic())
+    _cache.set(key, result)
 
 
 def run_backtest_ml(
