@@ -2,6 +2,10 @@ import { create } from 'zustand'
 import api from '@/services/api'
 import { pingVisitor, fetchVisitor, getStoredGuestUsername } from '@/services/visitorService'
 
+function getStoredToken(): string | null {
+  try { return localStorage.getItem('tickerscope_token') } catch { return null }
+}
+
 export interface User {
   id: string
   username: string
@@ -54,11 +58,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   visitor: null,
 
   bootstrap: async () => {
-    // Try to recover session from httpOnly cookie via /me endpoint
+    // Try to recover session from stored JWT or httpOnly cookie via /me endpoint
+    const storedToken = getStoredToken()
     try {
       const { data } = await api.get('/auth/me')
       if (data && data.id) {
-        set({ user: data as User, token: 'cookie', initialized: true })
+        set({ user: data as User, token: storedToken || 'cookie', initialized: true })
       } else {
         set({ user: GUEST_USER, initialized: true })
       }
@@ -117,11 +122,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, password: string) => {
     set({ loading: true })
     try {
-      // Backend sets httpOnly cookies on success; we still get tokens + user in body
-      // for backward compat, but the cookie is the authoritative auth mechanism.
+      // Backend sets httpOnly cookies on success; we also get the JWT in body
+      // for cross-origin fallback (sent via Authorization header).
       const { data } = await api.post('/auth/login', { email, password })
       const user = (data.user || GUEST_USER) as User
-      set({ user, token: 'cookie', loading: false, initialized: true })
+      // Store JWT for Authorization header fallback (cross-origin cookie issues)
+      if (data.access_token) {
+        try { localStorage.setItem('tickerscope_token', data.access_token) } catch {}
+      }
+      set({ user, token: data.access_token || 'cookie', loading: false, initialized: true })
       return user
     } catch (err) {
       set({ loading: false })
@@ -134,7 +143,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await api.post('/auth/register', formData)
       const user = (data.user || GUEST_USER) as User
-      set({ user, token: 'cookie', loading: false, initialized: true })
+      if (data.access_token) {
+        try { localStorage.setItem('tickerscope_token', data.access_token) } catch {}
+      }
+      set({ user, token: data.access_token || 'cookie', loading: false, initialized: true })
     } catch (err) {
       set({ loading: false })
       throw err
@@ -146,7 +158,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await api.post('/auth/google', { credential })
       const user = (data.user || GUEST_USER) as User
-      set({ user, token: 'cookie', loading: false, initialized: true })
+      if (data.access_token) {
+        try { localStorage.setItem('tickerscope_token', data.access_token) } catch {}
+      }
+      set({ user, token: data.access_token || 'cookie', loading: false, initialized: true })
       return user
     } catch (err) {
       set({ loading: false })
@@ -160,6 +175,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {
       // Even if server call fails, clear local state
     }
+    try { localStorage.removeItem('tickerscope_token') } catch {}
     sessionStorage.removeItem('tickerscope_from_landing')
     set({ user: GUEST_USER, token: null })
   },
@@ -168,10 +184,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await api.post('/auth/refresh')
       if (data && data.access_token) {
+        try { localStorage.setItem('tickerscope_token', data.access_token) } catch {}
         // Cookie was updated server-side; re-fetch user
         const meRes = await api.get('/auth/me')
         if (meRes.data && meRes.data.id) {
-          set({ user: meRes.data as User, token: 'cookie' })
+          set({ user: meRes.data as User, token: data.access_token })
         }
         return true
       }

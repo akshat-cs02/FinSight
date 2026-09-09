@@ -109,8 +109,9 @@ def place_paper_trade(db: Session, user_id: str, signal: IntradaySignal) -> Pape
 
 
 def auto_trade_all_users(db: Session, signal: IntradaySignal):
-    """Place paper trades for all users with paper accounts."""
-    accounts = db.query(PaperAccount).all()
+    """Place paper trades for all authenticated users with paper accounts.
+    Skips guest (id=0) — guests should not accumulate shared trades."""
+    accounts = db.query(PaperAccount).filter(PaperAccount.user_id != "0").all()
     for acct in accounts:
         try:
             place_paper_trade(db, acct.user_id, signal)

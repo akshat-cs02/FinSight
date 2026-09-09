@@ -7,17 +7,30 @@ function getCsrfToken(): string {
   return match ? match[1] : ''
 }
 
+function getStoredToken(): string | null {
+  try {
+    return localStorage.getItem('tickerscope_token')
+  } catch {
+    return null
+  }
+}
+
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   timeout: 15000, // 15s timeout
   withCredentials: true,
 })
 
-// Attach CSRF token on state-changing requests
+// Attach CSRF token + auth token on requests
 api.interceptors.request.use((config) => {
   const method = (config.method || 'get').toLowerCase()
   if (!['get', 'head', 'options'].includes(method)) {
     config.headers['X-CSRF-Token'] = getCsrfToken()
+  }
+  // Send JWT in Authorization header as fallback for cross-origin cookie issues
+  const token = getStoredToken()
+  if (token && token !== 'cookie' && !config.headers['Authorization']) {
+    config.headers['Authorization'] = `Bearer ${token}`
   }
   return config
 })
