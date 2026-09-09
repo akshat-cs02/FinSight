@@ -20,7 +20,7 @@
         if (p === "/login" || p === "/register") {
           document.documentElement.classList.add("auth-only");
           // Fire warm-up ping immediately so backend is awake by the time user fills the form
-          fetch("/api/market/status").catch(function(){});
+          fetch("https://api.tickerscope.xyz/api/market/status").catch(function(){});
         }
       })();
     </script>
@@ -4467,7 +4467,7 @@
       async function buildWins() {
         let items = null;
         try {
-          const r = await fetch("/api/signals/activity?limit=30");
+          const r = await fetch("https://api.tickerscope.xyz/api/signals/activity?limit=30");
           if (r.ok) {
             const data = await r.json();
             const hits = data.resolved.filter((s) => s.outcome === "TP_HIT");
@@ -4509,7 +4509,7 @@
       }
       async function fetchStats() {
         try {
-          const r = await fetch("/api/signals/performance?days=90");
+          const r = await fetch("https://api.tickerscope.xyz/api/signals/performance?days=90");
           if (!r.ok) return;
           const data = await r.json();
           const wrEl = document.querySelector('#stats [data-stat="win-rate"]');
@@ -5125,7 +5125,7 @@
           try {
             const ctrl = new AbortController();
             const t = setTimeout(() => ctrl.abort(), 45000);
-            const r = await fetch("/api/auth/login", {
+            const r = await fetch("https://api.tickerscope.xyz/api/auth/login", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email, password: pw }),
@@ -5151,7 +5151,7 @@
           try {
             const ctrl = new AbortController();
             const t = setTimeout(() => ctrl.abort(), 45000);
-            const r = await fetch("/api/auth/otp/send", {
+            const r = await fetch("https://api.tickerscope.xyz/api/auth/otp/send", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email }),
@@ -5182,7 +5182,7 @@
         try {
           const ctrl = new AbortController();
           const t = setTimeout(() => ctrl.abort(), 45000);
-          const r = await fetch("/api/auth/otp/verify", {
+          const r = await fetch("https://api.tickerscope.xyz/api/auth/otp/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, otp }),
@@ -5219,7 +5219,7 @@
         if (!email) return showErr("Enter your email first.");
         hideErr();
         try {
-          await fetch("/api/auth/otp/send", {
+          await fetch("https://api.tickerscope.xyz/api/auth/otp/send", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
@@ -5285,7 +5285,7 @@
           try {
             const ctrl = new AbortController();
             const t = setTimeout(() => ctrl.abort(), 45000);
-            const r = await fetch("/api/auth/register", {
+            const r = await fetch("https://api.tickerscope.xyz/api/auth/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email, password: pw, first_name: name }),
@@ -5313,7 +5313,7 @@
             timerEl.textContent = "Resend in " + s + "s";
             const iv = setInterval(() => { s--; if (s <= 0) { clearInterval(iv); timerEl.textContent = ""; resendBtn.style.display = ""; } else timerEl.textContent = "Resend in " + s + "s"; }, 1000);
             resendBtn.onclick = async () => {
-              await fetch("/api/auth/otp/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }), credentials: "include" });
+              await fetch("https://api.tickerscope.xyz/api/auth/otp/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }), credentials: "include" });
               s = 60; resendBtn.style.display = "none"; timerEl.textContent = "Resend in 60s";
               $("#caOtpBoxes").querySelectorAll(".otp-digit").forEach(b => { b.value = ""; });
               document.querySelector("#caOtpBoxes .otp-digit").focus();
@@ -5333,7 +5333,7 @@
         try {
           const ctrl = new AbortController();
           const t = setTimeout(() => ctrl.abort(), 45000);
-          const r = await fetch("/api/auth/register/verify", {
+          const r = await fetch("https://api.tickerscope.xyz/api/auth/register/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, otp }),
@@ -5594,7 +5594,7 @@
 
       /* ── Check auth state and update nav ── */
       (function() {
-        var api = "https://finsight-backend-mnn6.onrender.com/api";
+        var api = "https://api.tickerscope.xyz/api";
         fetch(api + "/auth/me", { credentials: "include" })
           .then(function(r) { return r.ok ? r.json() : null; })
           .then(function(user) {
