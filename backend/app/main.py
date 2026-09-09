@@ -119,7 +119,9 @@ _CSRF_EXEMPT_PATHS = {"/health", "/api/docs", "/api/redoc", "/api/openapi.json",
     "/api/auth/login", "/api/auth/register", "/api/auth/register/verify", "/api/auth/refresh",
     "/api/auth/forgot-password", "/api/auth/reset-password", "/api/auth/otp/send", "/api/auth/otp/verify",
     "/auth/login", "/auth/register", "/auth/register/verify", "/auth/refresh",
-    "/auth/forgot-password", "/auth/reset-password", "/auth/otp/send", "/auth/otp/verify"}
+    "/auth/forgot-password", "/auth/reset-password", "/auth/otp/send", "/auth/otp/verify",
+    "/api/admin/models/retrain", "/admin/models/retrain",
+    "/api/admin/models/retrain/all", "/admin/models/retrain/all"}
 
 @app.middleware("http")
 async def csrf_protection(request: Request, call_next):
@@ -136,7 +138,7 @@ async def csrf_protection(request: Request, call_next):
         token = secrets.token_hex(32)
         response.set_cookie(
             key="csrf_token", value=token,
-            httponly=False, secure=True, samesite="lax", max_age=86400, path="/",
+            httponly=False, secure=True, samesite="none", max_age=86400, path="/",
         )
     return response
 

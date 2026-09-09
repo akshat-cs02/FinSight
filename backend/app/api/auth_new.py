@@ -285,7 +285,7 @@ def _issue_tokens(user: UserRecord, request: Optional[Request], response: Option
             value=access,
             httponly=True,
             secure=is_prod,
-            samesite="lax",
+            samesite="none",
             max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             path="/",
         )
@@ -294,7 +294,7 @@ def _issue_tokens(user: UserRecord, request: Optional[Request], response: Option
             value=refresh,
             httponly=True,
             secure=is_prod,
-            samesite="lax",
+            samesite="none",
             max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
             path="/api/auth/refresh",
         )
@@ -497,11 +497,11 @@ def refresh(request: Request, response: Response, token: Optional[str] = None):
     is_prod = settings.is_production()
     response.set_cookie(
         key="tickerscope_access", value=new_access, httponly=True, secure=is_prod,
-        samesite="lax", max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, path="/",
+        samesite="none", max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, path="/",
     )
     response.set_cookie(
         key="tickerscope_refresh", value=new_refresh, httponly=True, secure=is_prod,
-        samesite="lax", max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400, path="/api/auth/refresh",
+        samesite="none", max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400, path="/api/auth/refresh",
     )
 
     return TokenOut(
