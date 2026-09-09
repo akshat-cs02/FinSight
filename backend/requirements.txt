@@ -25,6 +25,7 @@ scikit-learn
 scipy
 joblib
 yfinance
+pandas-ta
 
 # Gradient boosting
 xgboost
