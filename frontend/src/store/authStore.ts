@@ -28,6 +28,7 @@ interface AuthState {
   visitor: VisitorInfo | null
   login: (email: string, password: string) => Promise<User>
   register: (data: { username: string; email: string; password: string; admin_key?: string }) => Promise<void>
+  googleLogin: (credential: string) => Promise<User>
   logout: () => void
   bootstrap: () => Promise<void>
   refresh: () => Promise<boolean>
@@ -134,6 +135,19 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data } = await api.post('/auth/register', formData)
       const user = (data.user || GUEST_USER) as User
       set({ user, token: 'cookie', loading: false, initialized: true })
+    } catch (err) {
+      set({ loading: false })
+      throw err
+    }
+  },
+
+  googleLogin: async (credential: string) => {
+    set({ loading: true })
+    try {
+      const { data } = await api.post('/auth/google', { credential })
+      const user = (data.user || GUEST_USER) as User
+      set({ user, token: 'cookie', loading: false, initialized: true })
+      return user
     } catch (err) {
       set({ loading: false })
       throw err

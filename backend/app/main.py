@@ -120,6 +120,7 @@ _CSRF_EXEMPT_PATHS = {"/health", "/api/docs", "/api/redoc", "/api/openapi.json",
     "/api/auth/forgot-password", "/api/auth/reset-password", "/api/auth/otp/send", "/api/auth/otp/verify",
     "/auth/login", "/auth/register", "/auth/register/verify", "/auth/refresh",
     "/auth/forgot-password", "/auth/reset-password", "/auth/otp/send", "/auth/otp/verify",
+    "/api/auth/google", "/auth/google",
     "/api/admin/models/retrain", "/admin/models/retrain",
     "/api/admin/models/retrain/all", "/admin/models/retrain/all"}
 

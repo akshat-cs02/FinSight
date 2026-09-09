@@ -387,7 +387,7 @@ async def _make_user_if_enabled():
 @limiter.limit("5/minute")
 async def login(req: LoginIn, request: Request, response: Response):
     user = user_store.get_user_by_email(req.email.lower().strip())
-    if not user or not pwd_context.verify(req.password[:72], user.hashed_password):
+    if not user or not user.hashed_password or not pwd_context.verify(req.password[:72], user.hashed_password):
         raise HTTPException(401, "Invalid email or password.")
     if not user.is_active:
         raise HTTPException(403, "This account has been disabled. Please contact support.")
@@ -402,7 +402,7 @@ async def login_form(request: Request, response: Response, form: OAuth2PasswordR
     user = user_store.get_user_by_email(form.username.lower().strip())
     if (not user) and _USERNAME_RE.match(form.username):
         user = user_store.get_user_by_username(form.username.strip())
-    if not user or not pwd_context.verify(form.password[:72], user.hashed_password):
+    if not user or not user.hashed_password or not pwd_context.verify(form.password[:72], user.hashed_password):
         raise HTTPException(401, "Invalid credentials.")
     if not user.is_active:
         raise HTTPException(403, "This account has been disabled.")
@@ -606,3 +606,69 @@ async def logout(response: Response):
     response.delete_cookie("tickerscope_access", path="/")
     response.delete_cookie("tickerscope_refresh", path="/api/auth/refresh")
     return {"ok": True}
+
+
+# ============ Google OAuth ============
+class GoogleAuthIn(BaseModel):
+    credential: str  # Google ID token
+
+
+@router.post("/google", response_model=TokenOut)
+@limiter.limit("10/minute")
+async def google_login(req: GoogleAuthIn, request: Request, response: Response):
+    """Login or register via Google Identity Services ID token."""
+    import httpx
+
+    # Verify the ID token with Google
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                "https://oauth2.googleapis.com/tokeninfo",
+                params={"id_token": req.credential},
+            )
+            if resp.status_code != 200:
+                raise HTTPException(401, "Invalid Google token.")
+            google_data = resp.json()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Google token verification failed: %s", exc)
+        raise HTTPException(502, "Failed to verify Google token.")
+
+    # Validate audience
+    expected_aud = settings.GOOGLE_CLIENT_ID
+    if expected_aud and google_data.get("aud") != expected_aud:
+        raise HTTPException(401, "Google token audience mismatch.")
+
+    email = google_data.get("email", "").lower().strip()
+    if not email:
+        raise HTTPException(400, "Google account has no email.")
+
+    # Check if user exists
+    user = user_store.get_user_by_email(email)
+
+    if not user:
+        # Auto-register: create new account
+        first_name = google_data.get("given_name", "")
+        last_name = google_data.get("family_name", "")
+        username = email.split("@")[0]
+        # Ensure username is unique
+        base_username = username
+        counter = 1
+        while user_store.get_user_by_username(username):
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        user = await user_store.create_user(
+            email=email,
+            password_hash="",  # No password for Google accounts
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            is_admin=False,
+        )
+        # Mark email as verified (Google already verified it)
+        user_store.mark_email_verified(email)
+        logger.info("Auto-registered Google user: %s", email)
+
+    return _issue_tokens(user, request, response)

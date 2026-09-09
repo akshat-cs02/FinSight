@@ -40,4 +40,8 @@ export const authService = {
 
   otpVerify: (email: string, otp: string) =>
     api.post<TokenResponse>('/auth/otp/verify', { email, otp }).then((r) => r.data),
+
+  // Google OAuth
+  googleLogin: (credential: string) =>
+    api.post<TokenResponse>('/auth/google', { credential }).then((r) => r.data),
 }

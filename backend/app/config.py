@@ -114,6 +114,9 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str = "admin123"
     ADMIN_API_KEY: str = "admin-api-key"
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = ""
+
     # Timezone
     TIMEZONE: str = "UTC"
 
