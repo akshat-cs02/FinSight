@@ -13,7 +13,7 @@ Real-time market analysis + AI predictions. Fuses ICT/SMC structure with an LSTM
 | **Dashboard** | `/dashboard` — live signals, portfolio, predictions |
 | **Sign in / Register** | `/login` or `/register` — auth panel on the landing page |
 | **Guest access** | Click "Continue as guest" — no account needed |
-| **API docs** | `finsight-backend-mnn6.onrender.com/api/docs` |
+
 
 ---
 
@@ -30,8 +30,8 @@ Real-time market analysis + AI predictions. Fuses ICT/SMC structure with an LSTM
 ## Local dev
 
 ```bash
-git clone https://github.com/akshat-cs02/TickerScope.git
-cd TickerScope
+git clone https://github.com/akshat-cs02/FinSight.git
+cd FinSight
 
 # Backend
 cd backend
@@ -52,7 +52,7 @@ npm run dev               # opens on localhost:3000
 ## Project layout
 
 ```
-TickerScope/
+FinSight/
 ├── backend/app/
 │   ├── api/           route handlers
 │   ├── services/      market, signals, news logic
