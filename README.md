@@ -1,4 +1,4 @@
-# TickerScope
+# FinSight
 
 > **Live**: [tickerscope](https://www.tickerscope.xyz)
 
