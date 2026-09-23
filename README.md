@@ -2,7 +2,7 @@
 
 > **Live**: [tickerscope](https://www.tickerscope.xyz)
 
-Real-time market analysis + AI predictions. Fuses ICT/SMC structure with an LSTM+XGBoost ensemble — entry, target, and confidence in plain numbers.
+Real-time market analysis + AI predictions. Fuses ICT/SMC structure with an LSTM+XGBoost ensemble entry, target, and confidence in plain numbers.
 
 ---
 
@@ -10,8 +10,8 @@ Real-time market analysis + AI predictions. Fuses ICT/SMC structure with an LSTM
 
 | What | Link |
 |------|------|
-| **Dashboard** | `/dashboard` — live signals, portfolio, predictions |
-| **Sign in / Register** | `/login` or `/register` — auth panel on the landing page |
+| **Dashboard** | `/dashboard`  live signals, portfolio, predictions |
+| **Sign in / Register** | `/login` or `/register`  auth panel on the landing page |
 | **Guest access** | Click "Continue as guest" — no account needed |
 
 
