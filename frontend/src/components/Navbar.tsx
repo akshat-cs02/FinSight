@@ -191,7 +191,7 @@ export default function Navbar() {
       {/* ─── DESKTOP NAVBAR (lg+) ─── */}
       <header
         ref={navRef}
-        className="fixed top-0 inset-x-0 z-50 bg-[var(--panel)]/80 backdrop-blur-xl border-b border-[var(--border)]"
+        className="fixed top-0 inset-x-0 z-50 bg-[var(--panel)] backdrop-blur-xl border-b border-[var(--border)]"
       >
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 h-16 flex items-center gap-2 sm:gap-4">
           {/* Logo */}
@@ -305,7 +305,7 @@ export default function Navbar() {
         <div className="relative">
           <div
             ref={userMenuRef}
-            className="absolute right-4 top-1 mt-1 w-72 bg-[var(--panel)]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-[var(--border)] z-50 overflow-hidden"
+            className="absolute right-4 top-1 mt-1 w-72 bg-[var(--panel)] backdrop-blur-xl rounded-xl shadow-2xl border border-[var(--border)] z-50 overflow-hidden"
             style={{ display: 'none' }}
           >
               {/* Profile header */}
