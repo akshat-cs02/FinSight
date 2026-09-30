@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import {
   BarChart2, TrendingUp, TrendingDown, RefreshCw, Trophy, Shield, Zap,
-  ChevronDown, ChevronUp, Info
+  ChevronDown, ChevronUp, Info, MoveRight, Landmark, Waves, Target, CandlestickChart
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine,
@@ -134,15 +135,15 @@ const QUICK_SYMBOLS: { sym: string; label?: string; group: string }[] = [
   { sym: 'CL=F',        label: 'Oil',      group: 'Commod' },
 ]
 
-const STRATEGIES: { key: string; label: string; desc: string; icon: string }[] = [
-  { key: 'BOS_FVG',        label: 'BOS + FVG',          icon: '📐', desc: 'Break of Structure + Fair Value Gap. Enters on trend continuation after structure break with imbalance confirmation.' },
-  { key: 'CHOCH_FVG',      label: 'CHoCH + FVG',        icon: '🔄', desc: 'Change of Character + FVG. Reversal entry when market structure shifts direction with an imbalance present.' },
-  { key: 'MSS_OrderBlock', label: 'MSS + Order Block',  icon: '🏛️', desc: 'Market Structure Shift + Order Block. Highest-confidence setup: EMA-200 trend + last institutional candle before move.' },
-  { key: 'LiqSweep_FVG',  label: 'Liq. Sweep + FVG',   icon: '🌊', desc: 'Liquidity Sweep + FVG. Classic ICT stop-hunt: price wicks beyond recent high/low then reverses with FVG confirmation.' },
-  { key: 'SR_Bounce',      label: 'S/R Bounce',         icon: '📊', desc: 'Support & Resistance levels from swing highs/lows. Enters on price touch+rejection of key structural levels.' },
-  { key: 'RSI_OTE',        label: 'RSI + OTE',          icon: '🎯', desc: 'RSI in Optimal Trade Entry zone (62-79% Fibonacci retracement). Institutional retracement entry model.' },
-  { key: 'PriceAction',    label: 'Price Action',       icon: '🕯️', desc: 'Candlestick patterns: Bullish/Bearish Engulfing, Hammer, Shooting Star. Confirmed by EMA-50 trend bias.' },
-  { key: 'MA_FVG',         label: 'MA Cross + FVG',     icon: '📈', desc: 'EMA 21/55 crossover with Fair Value Gap confirmation. Trend-following with institutional momentum filter.' },
+const STRATEGIES: { key: string; label: string; desc: string; icon: LucideIcon }[] = [
+  { key: 'BOS_FVG',        label: 'BOS + FVG',          icon: MoveRight, desc: 'Break of Structure + Fair Value Gap. Enters on trend continuation after structure break with imbalance confirmation.' },
+  { key: 'CHOCH_FVG',      label: 'CHoCH + FVG',        icon: RefreshCw, desc: 'Change of Character + FVG. Reversal entry when market structure shifts direction with an imbalance present.' },
+  { key: 'MSS_OrderBlock', label: 'MSS + Order Block',  icon: Landmark, desc: 'Market Structure Shift + Order Block. Highest-confidence setup: EMA-200 trend + last institutional candle before move.' },
+  { key: 'LiqSweep_FVG',  label: 'Liq. Sweep + FVG',    icon: Waves, desc: 'Liquidity Sweep + FVG. Classic ICT stop-hunt: price wicks beyond recent high/low then reverses with FVG confirmation.' },
+  { key: 'SR_Bounce',      label: 'S/R Bounce',         icon: BarChart2, desc: 'Support & Resistance levels from swing highs/lows. Enters on price touch+rejection of key structural levels.' },
+  { key: 'RSI_OTE',        label: 'RSI + OTE',          icon: Target, desc: 'RSI in Optimal Trade Entry zone (62-79% Fibonacci retracement). Institutional retracement entry model.' },
+  { key: 'PriceAction',    label: 'Price Action',       icon: CandlestickChart, desc: 'Candlestick patterns: Bullish/Bearish Engulfing, Hammer, Shooting Star. Confirmed by EMA-50 trend bias.' },
+  { key: 'MA_FVG',         label: 'MA Cross + FVG',     icon: TrendingUp, desc: 'EMA 21/55 crossover with Fair Value Gap confirmation. Trend-following with institutional momentum filter.' },
 ]
 
 // ─── Small Components ─────────────────────────────────────────────────────────
@@ -428,7 +429,7 @@ export default function BacktestingPage() {
                       : 'bg-gray-700 border-gray-600 text-ink-300 hover:bg-gray-600'
                   }`}
                 >
-                  <div className="text-base mb-1">{s.icon}</div>
+                  <div className="text-base mb-1">{(() => { const Icon = s.icon; return <Icon size={16} /> })()}</div>
                   <div className="text-xs font-semibold">{s.label}
                     <StrategyTooltip desc={s.desc} />
                   </div>
@@ -501,13 +502,11 @@ export default function BacktestingPage() {
                       {/* Strategy name + icon */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm">
-                            {STRATEGIES.find(s => s.key === item.strategy)?.icon || '📊'}
-                          </span>
+                          <span>{(() => { const Icon = STRATEGIES.find(s => s.key === item.strategy)?.icon; return Icon ? <Icon className="text-ink-300" size={16} /> : <BarChart2 size={16} /> })()}</span>
                           <span className="font-semibold text-ink-50 text-sm">
                             {STRATEGIES.find(s => s.key === item.strategy)?.label || item.strategy}
                           </span>
-                          {isWinner && <span className="text-gold text-xs">👑 Best</span>}
+                          {isWinner && <span className="text-gold text-xs flex items-center gap-1"><Trophy size={12} /> Best</span>}
                         </div>
                       </div>
 
@@ -698,7 +697,7 @@ export default function BacktestingPage() {
                         : i === 1 ? 'bg-gray-400/10 border-gray-400/50 text-ink-300'
                         : 'bg-orange-600/10 border-orange-600/50 text-orange-300'
                       }`}>
-                        <span className="font-bold">{['🥇','🥈','🥉'][i]}</span>
+                        <span className="font-bold">{['1st', '2nd', '3rd'][i]}</span>
                         <span className="text-sm font-semibold">
                           {STRATEGIES.find(x => x.key === s)?.label || s}
                         </span>
@@ -731,7 +730,7 @@ export default function BacktestingPage() {
                           }`}>{r.rank}</div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span>{strat?.icon || '📊'}</span>
+                              <span className="text-ink-300">{(() => { const Icon = strat?.icon; return Icon ? <Icon size={15} /> : <BarChart2 size={15} /> })()}</span>
                               <span className="font-semibold text-ink-50 text-sm">{strat?.label || r.strategy}</span>
                               {isTop && <span className="text-emerald-400 text-xs px-1.5 py-0.5 bg-emerald-400/10 rounded">Top Strategy</span>}
                             </div>
@@ -826,7 +825,7 @@ export default function BacktestingPage() {
                             <td className="py-2 px-2 font-bold text-ink-50">{pb.symbol}</td>
                             <td className="py-2 px-2 text-ink-500">{pb.asset_class}</td>
                             <td className="py-2 px-2 text-gold">
-                              {STRATEGIES.find(s => s.key === pb.best_strategy)?.icon || '📊'}{' '}
+                              {(() => { const Icon = STRATEGIES.find(s => s.key === pb.best_strategy)?.icon; return Icon ? <Icon size={15} /> : <BarChart2 size={15} /> })()}{' '}
                               {STRATEGIES.find(s => s.key === pb.best_strategy)?.label || pb.best_strategy}
                             </td>
                             <td className={`py-2 px-2 text-right ${pb.sharpe >= 1 ? 'text-emerald-400' : pb.sharpe >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>

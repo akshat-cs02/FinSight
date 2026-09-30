@@ -455,7 +455,7 @@ export default function DashboardPage() {
       {/* ── Market Indices ── */}
       <Lift><div ref={scrollAnimRefs.indices as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-3 sm:p-5">
         <div className="section-rule mb-5 text-[var(--text)]">Market Indices</div>
-        {errors.indices && <div className="text-rose-400 text-sm">⚠ {errors.indices}</div>}
+        {errors.indices && <div className="text-rose-400 text-sm">Error loading indices: {errors.indices}</div>}
         {indices === null && !errors.indices && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
             {[1,2,3,4].map((i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
@@ -481,7 +481,7 @@ export default function DashboardPage() {
         <div className="section-rule mb-5 text-[var(--text)]">
           Trending {market === 'ALL' ? 'Markets' : MARKET_LABELS[market]}
         </div>
-        {errors.trending && <div className="text-rose-400 text-sm">⚠ {errors.trending}</div>}
+        {errors.trending && <div className="text-rose-400 text-sm">Error loading trending: {errors.trending}</div>}
         {trending === null && !errors.trending && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {[1,2,3,4].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}
@@ -502,7 +502,7 @@ export default function DashboardPage() {
       <div ref={scrollAnimRefs.gainersLosers as React.RefObject<HTMLDivElement>} className="scroll-reveal grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4">
         <Lift className="card-accent card-surface2 p-3 sm:p-5">
           <div className="section-rule mb-3 sm:mb-5 text-[var(--text)]">Top Gainers{gainers && gainers.length > 0 ? ` (${gainers.length})` : ''}</div>
-          {errors.gainers && <div className="text-rose-400 text-sm">⚠ {errors.gainers}</div>}
+          {errors.gainers && <div className="text-rose-400 text-sm">Error loading gainers: {errors.gainers}</div>}
           {gainers === null && !errors.gainers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
           )}
@@ -515,7 +515,7 @@ export default function DashboardPage() {
         </Lift>
         <Lift className="card-accent card-surface2 p-3 sm:p-5">
           <div className="section-rule mb-3 sm:mb-5 text-[var(--text)]">Top Losers{losers && losers.length > 0 ? ` (${losers.length})` : ''}</div>
-          {errors.losers && <div className="text-rose-400 text-sm">⚠ {errors.losers}</div>}
+          {errors.losers && <div className="text-rose-400 text-sm">Error loading losers: {errors.losers}</div>}
           {losers === null && !errors.losers && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[1,2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}</div>
           )}
@@ -535,7 +535,7 @@ export default function DashboardPage() {
       {/* ── News ── */}
       <Lift><div ref={scrollAnimRefs.news as React.RefObject<HTMLDivElement>} className="scroll-reveal card-accent card-surface2 p-3 sm:p-5">
         <div className="section-rule mb-3 sm:mb-5 text-[var(--text)]">Latest Financial News</div>
-        {errors.news && <div className="text-rose-400 text-sm">⚠ {errors.news}</div>}
+        {errors.news && <div className="text-rose-400 text-sm">Error loading news: {errors.news}</div>}
         {news === null && !errors.news && (
           <div className="space-y-3">{[1,2,3].map((i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>
         )}

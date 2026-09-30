@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { TrendingUp, TrendingDown, Minus, RefreshCw, Shield } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, RefreshCw, Shield, MoveRight, Landmark, Waves, BarChart2, Target, CandlestickChart } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import api from '@/services/api'
 import { formatPrice } from '@/utils/currency'
 import { formatLocalTime } from '@/utils/timezone'
@@ -24,15 +25,15 @@ interface LiveSignalsResponse {
   source: string
 }
 
-const STRATEGY_LABELS: Record<string, { label: string; icon: string }> = {
-  BOS_FVG:        { label: 'BOS + FVG',         icon: '📐' },
-  CHOCH_FVG:      { label: 'CHoCH + FVG',        icon: '🔄' },
-  MSS_OrderBlock: { label: 'MSS + Order Block',  icon: '🏛️' },
-  LiqSweep_FVG:   { label: 'Liq. Sweep + FVG',  icon: '🌊' },
-  SR_Bounce:      { label: 'S/R Bounce',         icon: '📊' },
-  RSI_OTE:        { label: 'RSI + OTE',          icon: '🎯' },
-  PriceAction:    { label: 'Price Action',       icon: '🕯️' },
-  MA_FVG:         { label: 'MA Cross + FVG',     icon: '📈' },
+const STRATEGY_LABELS: Record<string, { label: string; icon: LucideIcon }> = {
+  BOS_FVG:        { label: 'BOS + FVG',         icon: MoveRight },
+  CHOCH_FVG:      { label: 'CHoCH + FVG',       icon: RefreshCw },
+  MSS_OrderBlock: { label: 'MSS + Order Block', icon: Landmark },
+  LiqSweep_FVG:   { label: 'Liq. Sweep + FVG',  icon: Waves },
+  SR_Bounce:      { label: 'S/R Bounce',        icon: BarChart2 },
+  RSI_OTE:        { label: 'RSI + OTE',         icon: Target },
+  PriceAction:    { label: 'Price Action',      icon: CandlestickChart },
+  MA_FVG:         { label: 'MA Cross + FVG',    icon: TrendingUp },
 }
 
 interface TradeSelection {
@@ -111,7 +112,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
       {data && data.signals.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
           {data.signals.map((sig) => {
-            const meta = STRATEGY_LABELS[sig.strategy] || { label: sig.strategy, icon: '📊' }
+            const meta = STRATEGY_LABELS[sig.strategy] || { label: sig.strategy, icon: BarChart2 }
             const isLong = sig.signal === 'BUY'
             const isShort = sig.signal === 'SELL'
             const isHold = sig.signal === 'HOLD'
@@ -124,7 +125,7 @@ export default function ICTSignals({ symbol, currency = 'USD', onTrade }: Props)
                    className={`border rounded-xl p-4 ${signalBg(sig.signal)}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <div className="text-sm text-gray-400">{meta.icon} {meta.label}</div>
+                    <div className="text-sm text-gray-400 flex items-center gap-1.5">{(() => { const Icon = meta.icon; return <Icon size={14} /> })()} {meta.label}</div>
                     <div className={`text-2xl font-bold mt-1 flex items-center gap-1 ${signalColor(sig.signal)}`}>
                       {isLong  && <TrendingUp size={20} />}
                       {isShort && <TrendingDown size={20} />}

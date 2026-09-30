@@ -10,11 +10,11 @@ export const MARKET_SYMBOLS: Record<Exclude<MarketKey, 'ALL'>, string[]> = {
 }
 
 export const MARKET_FLAGS: Record<MarketKey, string> = {
-  ALL: '🌐', US: '🇺🇸', INDIA: '🇮🇳', CRYPTO: '₿', FOREX: '💱', COMMODITIES: '🏗️',
+  ALL: 'ALL', US: 'US', INDIA: 'IN', CRYPTO: '₿', FOREX: 'FX', COMMODITIES: 'CMD',
 }
 
 export const MARKET_LABELS: Record<MarketKey, string> = {
-  ALL: '🌐 All', US: '🇺🇸 US', INDIA: '🇮🇳 India', CRYPTO: '₿ Crypto', FOREX: '💱 Forex', COMMODITIES: '🏗️ Commodities',
+  ALL: 'All', US: 'US', INDIA: 'India', CRYPTO: 'Crypto', FOREX: 'Forex', COMMODITIES: 'Commodities',
 }
 
 export const MARKET_ORDER: MarketKey[] = ['ALL', 'US', 'INDIA', 'CRYPTO', 'FOREX', 'COMMODITIES']

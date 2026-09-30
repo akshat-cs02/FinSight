@@ -14,12 +14,6 @@ const IMPACT_DOTS: Record<string, string> = {
   Low:    'bg-gray-500',
 }
 
-const COUNTRY_FLAGS: Record<string, string> = {
-  USD: '🇺🇸', EUR: '🇪🇺', GBP: '🇬🇧', JPY: '🇯🇵',
-  CAD: '🇨🇦', AUD: '🇦🇺', NZD: '🇳🇿', CHF: '🇨🇭',
-  CNY: '🇨🇳', INR: '🇮🇳',
-}
-
 function formatEventDate(isoStr: string): string {
   try {
     const d = new Date(isoStr)
@@ -163,7 +157,7 @@ export default function ForexCalendar() {
                     : 'border-[var(--border)] bg-[var(--raised)] text-[var(--dim)] hover:bg-[var(--surface-3)]'
                 }`}
               >
-                {imp === 'High' ? '🔴 High' : imp === 'Medium' ? '🟠 Med' : imp === 'Low' ? '⚪ Low' : 'All'}
+                {imp === 'High' ? 'High' : imp === 'Medium' ? 'Med' : imp === 'Low' ? 'Low' : 'All'}
               </button>
             ))}
           </div>
@@ -197,7 +191,7 @@ export default function ForexCalendar() {
                     <div className="flex-1">
                       <span className="text-[var(--text)] text-sm font-medium">{ev.title}</span>
                       <span className="ml-2 text-xs font-bold text-blue-400">
-                        {COUNTRY_FLAGS[ev.country] || ''} {ev.country}
+                        <span className="px-1.5 py-0.5 rounded border border-[var(--border)] bg-[var(--raised)] text-xs font-semibold text-[var(--ink-100)]">{ev.country}</span>
                       </span>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded border flex-shrink-0 ${IMPACT_COLORS[ev.impact] || ''}`}>

@@ -533,11 +533,11 @@ export default function AdminPage() {
                   return (
                     <tr key={m.symbol} className="border-b border-ink-700">
                       <td className="py-2 px-2 text-ink-100 font-medium">{m.symbol}</td>
-                      <td className="py-2 px-2 text-center">{m.lstm.trained ? '✅' : '—'}</td>
+                      <td className="py-2 px-2 text-center">{m.lstm.trained ? <span className="text-emerald-400">Yes</span> : <span className="text-ink-500">No</span>}</td>
                       <td className="py-2 px-2 text-right text-ink-300">{lm?.rmse?.toFixed(2) ?? '-'}</td>
                       <td className="py-2 px-2 text-right text-ink-300">{lm?.r2_score?.toFixed(3) ?? '-'}</td>
                       <td className="py-2 px-2 text-right text-ink-300">{lm?.mape?.toFixed(2) ?? '-'}%</td>
-                      <td className="py-2 px-2 text-center">{m.xgb.trained ? '✅' : '—'}</td>
+                      <td className="py-2 px-2 text-center">{m.xgb.trained ? <span className="text-emerald-400">Yes</span> : <span className="text-ink-500">No</span>}</td>
                       <td className="py-2 px-2 text-right text-ink-300">{xm?.rmse?.toFixed(2) ?? '-'}</td>
                       <td className="py-2 px-2 text-right text-ink-300">{xm?.r2_score?.toFixed(3) ?? '-'}</td>
                       <td className="py-2 px-2 text-right text-xs text-ink-500">

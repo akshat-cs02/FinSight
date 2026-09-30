@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { Search, X, Globe, DollarSign, IndianRupee, Bitcoin, ArrowLeftRight, Euro, Package } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import gsap from 'gsap'
 import { stockService, SearchResult } from '@/services/stockService'
 
 type Market = 'all' | 'us' | 'india' | 'crypto' | 'forex' | 'europe' | 'commodities'
 
-const MARKET_LABELS: { id: Market; label: string; flag: string }[] = [
-  { id: 'all',         label: 'All',         flag: '🌐' },
-  { id: 'us',          label: 'US',          flag: '🇺🇸' },
-  { id: 'india',       label: 'India',       flag: '🇮🇳' },
-  { id: 'crypto',      label: 'Crypto',      flag: '₿'  },
-  { id: 'forex',       label: 'Forex',       flag: '💱' },
-  { id: 'europe',      label: 'Europe',      flag: '🇪🇺' },
-  { id: 'commodities', label: 'Commodities', flag: '🏗️' },
+const MARKET_LABELS: { id: Market; label: string; icon: LucideIcon }[] = [
+  { id: 'all',         label: 'All',         icon: Globe },
+  { id: 'us',          label: 'US',          icon: DollarSign },
+  { id: 'india',       label: 'India',       icon: IndianRupee },
+  { id: 'crypto',      label: 'Crypto',      icon: Bitcoin },
+  { id: 'forex',       label: 'Forex',       icon: ArrowLeftRight },
+  { id: 'europe',      label: 'Europe',      icon: Euro },
+  { id: 'commodities', label: 'Commodities', icon: Package },
 ]
 
 const MARKET_SUGGESTIONS: Record<Market, { symbol: string; name: string; type?: string }[]> = {
@@ -297,7 +298,7 @@ export default function SearchBar() {
                     : 'text-[var(--dim)] hover:text-[var(--text)] border border-transparent hover:border-[var(--border)]'
                 }`}
               >
-                {m.flag} {m.label}
+                {(() => { const Icon = m.icon; return <Icon size={13} className="inline opacity-70" /> })()} {m.label}
               </button>
             ))}
             {/* Close button */}
@@ -344,7 +345,7 @@ export default function SearchBar() {
                         : 'text-[var(--dim)] hover:text-[var(--text)]'
                     }`}
                   >
-                    {m.flag} {m.label}
+                    {(() => { const Icon = m.icon; return <Icon size={13} className="inline opacity-70" /> })()} {m.label}
                   </button>
                 ))}
               </div>

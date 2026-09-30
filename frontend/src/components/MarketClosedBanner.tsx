@@ -101,7 +101,7 @@ export default function MarketClosedBanner({ marketName, isOpen, nextOpen, nextO
             <PartyPopper className="text-emerald-300 animate-bounce" size={26} />
           </div>
           <div>
-            <h3 className="text-xl font-extrabold text-emerald-300">🎉 {marketName} market is open now!</h3>
+            <h3 className="text-xl font-extrabold text-emerald-300">{marketName} market is open now!</h3>
             <p className="text-sm text-emerald-200/70">Live trading has resumed — signals are active.</p>
           </div>
         </div>
