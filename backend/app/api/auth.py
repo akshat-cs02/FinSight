@@ -53,12 +53,12 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_user)
 
-        logger.info(f"✅ New user registered: {new_user.email}")
+        logger.info(f"New user registered: {new_user.email}")
         return UserResponse.from_orm(new_user)
 
     except Exception as e:
         db.rollback()
-        logger.error(f"❌ Registration failed: {str(e)}")
+        logger.error(f"Registration failed: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Registration failed"
@@ -91,7 +91,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     )
     refresh_token = create_refresh_token(data={"sub": user.id})
 
-    logger.info(f"✅ User logged in: {user.email}")
+    logger.info(f"User logged in: {user.email}")
 
     return TokenResponse(
         access_token=access_token,
@@ -104,7 +104,7 @@ async def logout(current_user: User = Depends(get_current_user)):
     """
     User logout endpoint
     """
-    logger.info(f"✅ User logged out: {current_user.email}")
+    logger.info(f"User logged out: {current_user.email}")
     return {"message": "Successfully logged out"}
 
 @router.post("/refresh", response_model=TokenResponse)

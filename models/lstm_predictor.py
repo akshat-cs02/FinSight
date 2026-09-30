@@ -44,7 +44,7 @@ class LSTMPredictor:
             metrics=['mae']
         )
 
-        logger.info(f"✅ LSTM model built with input shape: {input_shape}")
+        logger.info(f"LSTM model built with input shape: {input_shape}")
         return self.model
 
     def prepare_data(self, data, target_column='Close'):
@@ -78,7 +78,7 @@ class LSTMPredictor:
             shuffle=True
         )
 
-        logger.info(f"✅ Model training completed: {epochs} epochs")
+        logger.info(f"Model training completed: {epochs} epochs")
         return self.history
 
     def evaluate(self, X_test, y_test):
@@ -134,7 +134,7 @@ class LSTMPredictor:
         # Inverse scale
         predictions_inverse = self.scaler.inverse_transform(np.array(predictions).reshape(-1, 1))
 
-        logger.info(f"✅ Prediction complete: {days_ahead} days")
+        logger.info(f"Prediction complete: {days_ahead} days")
         return predictions_inverse.flatten()
 
     def save_model(self, filepath):
@@ -146,7 +146,7 @@ class LSTMPredictor:
         try:
             self.model.save(f"{filepath}.h5")
             joblib.dump(self.scaler, f"{filepath}_scaler.pkl")
-            logger.info(f"✅ Model saved to {filepath}")
+            logger.info(f"Model saved to {filepath}")
             return True
         except Exception as e:
             logger.error(f"Failed to save model: {str(e)}")
@@ -158,7 +158,7 @@ class LSTMPredictor:
             from tensorflow.keras.models import load_model
             self.model = load_model(f"{filepath}.h5")
             self.scaler = joblib.load(f"{filepath}_scaler.pkl")
-            logger.info(f"✅ Model loaded from {filepath}")
+            logger.info(f"Model loaded from {filepath}")
             return True
         except Exception as e:
             logger.error(f"Failed to load model: {str(e)}")

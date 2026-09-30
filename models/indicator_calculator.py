@@ -124,7 +124,7 @@ class IndicatorCalculator:
             indicators['support'] = support.values
             indicators['resistance'] = resistance.values
 
-            logger.info("✅ All technical indicators calculated")
+            logger.info("All technical indicators calculated")
             return indicators
 
         except Exception as e:

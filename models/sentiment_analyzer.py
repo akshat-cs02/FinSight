@@ -158,11 +158,11 @@ class SentimentAnalyzer:
         return colors.get(sentiment, '#6b7280')
 
     @staticmethod
-    def get_sentiment_emoji(sentiment: str) -> str:
-        """Get emoji for sentiment"""
-        emojis = {
-            'POSITIVE': '📈',
-            'NEGATIVE': '📉',
-            'NEUTRAL': '➡️'
+    def get_sentiment_marker(sentiment: str) -> str:
+        """Get directional marker for sentiment"""
+        markers = {
+            'POSITIVE': '▲',
+            'NEGATIVE': '▼',
+            'NEUTRAL': '■'
         }
-        return emojis.get(sentiment, '❓')
+        return markers.get(sentiment, '?')

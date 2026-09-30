@@ -171,7 +171,7 @@ class Settings(BaseSettings):
                 + "\n  - ".join(problems)
             )
         for p in problems:
-            logger.warning("⚠ INSECURE CONFIG (dev only): %s", p)
+            logger.warning("INSECURE CONFIG (dev only): %s", p)
 
 # Create settings instance
 settings = Settings()
