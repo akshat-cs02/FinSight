@@ -200,7 +200,6 @@ export default function Navbar() {
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-2">
             {allNavItems.map((item, idx) => {
-              const Icon = item.icon
               const active = isActive(item.path)
               return (
                 <Link
@@ -208,13 +207,12 @@ export default function Navbar() {
                   ref={(el) => { linksRef.current[idx] = el }}
                   to={item.path}
                   onMouseEnter={() => prefetchRoute(item.path)}
-                  className={`desktop-nav-link relative flex items-center gap-3 px-6 py-2.5 rounded-xl text-base font-display font-semibold transition-all duration-300 whitespace-nowrap ${
+                  className={`desktop-nav-link relative px-5 py-2.5 rounded-xl text-base font-display font-semibold transition-all duration-300 whitespace-nowrap ${
                     active
                       ? 'text-gold bg-gold/10 shadow-sm shadow-gold/5'
                       : 'text-white/60 hover:text-white/90 hover:bg-white/[0.04]'
                   }`}
                 >
-                  <Icon size={20} className={`transition-all duration-300 ${active ? 'text-gold' : ''}`} />
                   <span className="transition-all duration-300 tracking-wider">{item.label}</span>
                   {active && <span className="absolute -bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-gold" />}
                 </Link>
@@ -432,20 +430,18 @@ export default function Navbar() {
         {/* Drawer nav links */}
         <nav className="p-3 space-y-1">
           {allNavItems.map((item) => {
-            const Icon = item.icon
             const active = isActive(item.path)
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={handleNavClick}
-                className={`drawer-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                className={`drawer-link flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                   active
                     ? 'bg-gold/10 text-gold border border-gold/20'
                     : 'text-white/50 hover:text-white/80 hover:bg-white/[0.03]'
                 }`}
               >
-                <Icon size={18} className={active ? 'text-gold' : ''} />
                 <span>{item.label}</span>
               </Link>
             )

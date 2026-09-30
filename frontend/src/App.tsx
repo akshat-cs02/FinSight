@@ -28,8 +28,6 @@ const NewsPage = lazy(() => import('@/pages/News'))
 const PredictionsPage = lazy(() => import('@/pages/Predictions'))
 const AdminPage = lazy(() => import('@/pages/Admin'))
 const BacktestingPage = lazy(() => import('@/pages/Backtesting'))
-const StatsCounter = lazy(() => import('@/components/StatsCounter'))
-const CTASection = lazy(() => import('@/components/CTASection'))
 const Footer = lazy(() => import('@/components/Footer'))
 // Login/Register handled by static landing.html — no React SPA routes needed
 
@@ -226,16 +224,6 @@ function Layout() {
           </AnimatePresence>
         </main>
 
-        {isDashboard && (
-          <Suspense fallback={null}>
-            <StatsCounter />
-          </Suspense>
-        )}
-        {isDashboard && user?.email !== 'guest@tickerscope.xyz' && (
-          <Suspense fallback={null}>
-            <CTASection />
-          </Suspense>
-        )}
         <Suspense fallback={null}>
           <Footer />
         </Suspense>
