@@ -8,12 +8,6 @@ const IMPACT_COLORS: Record<string, string> = {
   Low:    'bg-gray-500/20 text-gray-400 border-gray-600',
 }
 
-const IMPACT_DOTS: Record<string, string> = {
-  High:   'bg-red-500',
-  Medium: 'bg-orange-400',
-  Low:    'bg-gray-500',
-}
-
 function formatEventDate(isoStr: string): string {
   try {
     const d = new Date(isoStr)
@@ -183,10 +177,8 @@ export default function ForexCalendar() {
                   ? 'bg-red-500/5 border-red-500/20 hover:bg-red-500/10'
                   : 'bg-[var(--raised)] border-[var(--border)] hover:bg-[var(--surface-3)]'
               }`}>
-                {/* Impact dot */}
-                <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${IMPACT_DOTS[ev.impact] || 'bg-gray-500'}`} />
-
-                <div className="flex-1 min-w-0">
+                {/* Impact pill */}
+              <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1">
                       <span className="text-[var(--text)] text-sm font-medium">{ev.title}</span>

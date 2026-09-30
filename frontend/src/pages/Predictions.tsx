@@ -122,14 +122,6 @@ export default function PredictionsPage() {
     }
   }, [])
 
-  // GSAP: SignalBadge pulse animation
-  useEffect(() => {
-    const badges = document.querySelectorAll('.signal-badge-pulse')
-    badges.forEach((badge) => {
-      gsap.to(badge, { scale: 1.05, duration: 1.5, ease: 'sine.inOut', yoyo: true, repeat: -1 })
-    })
-  }, [history])
-
   // GSAP: ScrollTrigger for model section and history
   useEffect(() => {
     const sections = [modelRef.current, historyRef.current].filter(Boolean)
@@ -294,8 +286,8 @@ export default function PredictionsPage() {
                     </td>
                     <td className="text-right font-mono tabular-nums text-[var(--dim)]">{h.confidence.toFixed(0)}%</td>
                     <td className="text-center">
-                      <span className="signal-badge-pulse inline-block">
-                        <SignalBadge signal={h.signal} size="sm" />
+<span className="inline-block">
+  <SignalBadge signal={h.signal} size="sm" />
                       </span>
                     </td>
                   </tr>

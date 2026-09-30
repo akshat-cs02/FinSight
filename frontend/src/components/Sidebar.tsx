@@ -47,19 +47,6 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + '/')
 
-  // Logo float animation
-  useEffect(() => {
-    const logo = logoRef.current
-    if (!logo) return
-    gsap.to(logo, {
-      y: -3,
-      duration: 3,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-    })
-  }, [])
-
   // Nav items stagger entrance on mount
   useEffect(() => {
     const items = navItemsRef.current.filter(Boolean) as HTMLAnchorElement[]

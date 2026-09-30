@@ -320,7 +320,7 @@ export default function DashboardPage() {
                   ? 'bg-[var(--surface-3)] text-[var(--text)] shadow-sm'
                   : 'text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--raised)]'
               }`}>
-              {k !== 'ALL' && <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-green-400 animate-pulse' : 'bg-[var(--faint)]'}`} />}
+              {k !== 'ALL' && <span className={`status-dot ${isOpen ? 'live' : 'offline'}`} />}
               {MARKET_LABELS[k]}
             </button>
           )
@@ -395,7 +395,7 @@ export default function DashboardPage() {
                 {open.map((m) => (
                   <div key={m.name} className="flex items-center justify-between">
                     <span className="flex items-center gap-2 text-sm text-[var(--dim)]">
-                      <span className="pulse-dot live" />{m.name}
+                      <span className="status-dot live" />{m.name}
                     </span>
                     <span className="text-[10px] font-semibold text-green-400">LIVE</span>
                   </div>

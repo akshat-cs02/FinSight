@@ -111,13 +111,6 @@ export default function Navbar() {
     }
   }, [drawerOpen])
 
-  // GSAP: notification bell pulse
-  useEffect(() => {
-    const dot = bellDotRef.current
-    if (!dot) return
-    gsap.to(dot, { scale: 1.3, duration: 1.2, ease: 'sine.inOut', yoyo: true, repeat: -1 })
-  }, [])
-
   // GSAP: user menu open/close
   useEffect(() => {
     const menu = userMenuRef.current
@@ -223,7 +216,7 @@ export default function Navbar() {
                 >
                   <Icon size={20} className={`transition-all duration-300 ${active ? 'text-gold' : ''}`} />
                   <span className="transition-all duration-300 tracking-wider">{item.label}</span>
-                  {active && <span className="absolute -bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-gold animate-pulse shadow-sm shadow-gold/50" />}
+                  {active && <span className="absolute -bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-gold" />}
                 </Link>
               )
             })}
