@@ -22,7 +22,7 @@ from app.rate_limit import limiter
 from app.api import (
     stocks, market_new, portfolio_new, news_new, reports, prediction,
     auth_new, admin_new, ws, forex, backtesting, signals, watchlist, platform, visitor,
-    backtest_ml, paper_trading,
+    backtest_ml, paper_trading, broker,
 )
 from app.services.signal_service import background_signals_loop, resolve_signal_outcomes
 from app.services.market_data_service import background_data_warming_loop
@@ -71,6 +71,14 @@ _bg_tasks: list[asyncio.Task] = []
 async def lifespan(app: FastAPI):
     init_db()
     logger.info("DB initialized")
+    # Seed default TickerScope -> MT5 symbol mappings for the broker gateway.
+    from app.database import SessionLocal
+    from app.services.broker_service import seed_symbol_mappings
+    _seed_db = SessionLocal()
+    try:
+        seed_symbol_mappings(_seed_db)
+    finally:
+        _seed_db.close()
     _bg_tasks.append(asyncio.create_task(background_signals_loop()))
     logger.info("Background signal refresh loop started")
     _bg_tasks.append(asyncio.create_task(_keep_alive_loop()))
@@ -194,3 +202,4 @@ app.include_router(platform.router, prefix='/api/platform', tags=['Platform'])
 app.include_router(visitor.router, prefix='/api/visitor', tags=['Visitor'])
 app.include_router(backtest_ml.router, prefix='/api/backtest', tags=['ML Backtesting'])
 app.include_router(paper_trading.router, prefix="/api/paper", tags=["Paper Trading"])
+app.include_router(broker.router, prefix="/api/broker", tags=["Broker / MT5"])

@@ -307,6 +307,73 @@ class PaperPosition(Base):
     notes       = Column(String(500), nullable=True)
 
 
+class BrokerAccount(Base):
+    """MT5 / broker connection for live auto-trading. Gateway authenticates
+    by API token (hash stored here); the plain token is shown once on connect."""
+    __tablename__ = "broker_accounts"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    user_id         = Column(String(100), index=True, nullable=False)
+    name            = Column(String(100), default="MT5 Account")
+    platform        = Column(String(20), default="MT5")
+    account_login   = Column(String(60), nullable=True)
+    server          = Column(String(120), nullable=True)
+    mode            = Column(String(20), default="DRY_RUN")        # DRY_RUN / LIVE
+    armed           = Column(Boolean, default=False)               # gateway may execute
+    status          = Column(String(20), default="DISCONNECTED")   # DISCONNECTED/CONNECTED/ERROR
+    api_token_hash  = Column(String(128), unique=True, index=True, nullable=False)
+    default_lot     = Column(Float, default=0.1)                   # base lot per signal
+    max_lot         = Column(Float, default=0.5)                   # hard cap per order
+    max_positions   = Column(Integer, default=5)
+    daily_loss_limit = Column(Float, default=10.0)                 # % equity stop
+    allowlist       = Column(JSON, default=list)                   # symbols; [] or ["ALL"] == all
+    last_heartbeat  = Column(DateTime, nullable=True)
+    gateway_ip      = Column(String(64), nullable=True)
+    created_at      = Column(DateTime, default=_utcnow)
+    updated_at      = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+    __table_args__ = (UniqueConstraint("user_id", "name"),)
+
+
+class BrokerOrder(Base):
+    """Execution record between TickerScope signals and the MT5 gateway."""
+    __tablename__ = "broker_orders"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    user_id           = Column(String(100), index=True, nullable=False)
+    broker_account_id = Column(Integer, index=True, nullable=False)
+    signal_id         = Column(Integer, index=True, nullable=True)
+    symbol            = Column(String(30), index=True, nullable=False)   # tickerscope symbol
+    mt5_symbol        = Column(String(40), nullable=True)                # resolved MT5 symbol
+    direction         = Column(String(4), nullable=False)                # BUY / SELL
+    lot               = Column(Float, default=0.0)
+    entry             = Column(Float, nullable=True)
+    sl                = Column(Float, nullable=True)
+    tp                = Column(Float, nullable=True)
+    status            = Column(String(20), default="PENDING", index=True)  # PENDING/PLACED/REJECTED/FILLED/CLOSED/CANCELLED
+    mt5_ticket        = Column(String(40), index=True, nullable=True)
+    fill_price        = Column(Float, nullable=True)
+    close_price       = Column(Float, nullable=True)
+    pnl               = Column(Float, nullable=True)
+    error             = Column(String(500), nullable=True)
+    created_at        = Column(DateTime, default=_utcnow)
+    updated_at        = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+    # One live order per (account, signal) — prevents duplicate executions.
+    __table_args__ = (UniqueConstraint("broker_account_id", "signal_id"),)
+
+
+class BrokerSymbolMap(Base):
+    """TickerScope symbol -> MT5 broker symbol mapping."""
+    __tablename__ = "broker_symbol_maps"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    symbol     = Column(String(30), unique=True, index=True, nullable=False)
+    mt5_symbol = Column(String(40), nullable=False)
+    enabled    = Column(Boolean, default=True)
+    note       = Column(String(120), nullable=True)
+
+
 def _auto_migrate():
     """Add missing columns to existing tables (safe to re-run)."""
     with engine.connect() as conn:
