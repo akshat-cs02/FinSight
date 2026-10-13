@@ -312,6 +312,12 @@ def _process_symbol(sym: str, kill_zone: str) -> dict | None:
             auto_trade_all_users(db, row)
         except Exception as exc:
             logger.warning("Paper trading auto-trade failed for signal %s: %s", sym, exc)
+        # Create MT5 execution orders for armed broker accounts (live auto-trading)
+        try:
+            from app.services.broker_service import create_broker_orders_for_signal
+            create_broker_orders_for_signal(db, row)
+        except Exception as exc:
+            logger.warning("Broker order creation failed for signal %s: %s", sym, exc)
         return _signal_row_to_dict(row)
     except Exception as exc:
         logger.warning("Signal worker failed for %s: %s", sym, exc)
@@ -515,20 +521,36 @@ def resolve_signal_outcomes(db: Session) -> int:
                     effective_sl = sig.entry  # SL moves to breakeven
 
                 # ── Check TP/SL with effective levels ────────────────────────
+                # First-touch wins: credit whichever boundary was reached first
+                # in candle order. The old TP-first check credited a win even
+                # when SL got hit before TP (both any() scans were true) —
+                # inflating the TP_HIT count.
+                tp_idx = None
+                sl_idx = None
                 if sig.signal == "BUY":
-                    hit_tp = any(h >= sig.tp for h in highs)
-                    hit_sl = any(l <= effective_sl for l in lows)
+                    for i, (h, l) in enumerate(zip(highs, lows)):
+                        if tp_idx is None and h >= sig.tp:
+                            tp_idx = i
+                        if sl_idx is None and l <= effective_sl:
+                            sl_idx = i
+                        if tp_idx is not None and sl_idx is not None:
+                            break
                 else:
-                    hit_tp = any(l <= sig.tp for l in lows)
-                    hit_sl = any(h >= effective_sl for h in highs)
+                    for i, (h, l) in enumerate(zip(highs, lows)):
+                        if tp_idx is None and l <= sig.tp:
+                            tp_idx = i
+                        if sl_idx is None and h >= effective_sl:
+                            sl_idx = i
+                        if tp_idx is not None and sl_idx is not None:
+                            break
 
-                if hit_tp:
+                if tp_idx is not None and (sl_idx is None or tp_idx < sl_idx):
                     sig.outcome    = "TP_HIT"
                     sig.outcome_at = now
                     rr = abs(sig.tp - sig.entry) / risk if risk > 0 else 2.0
                     sig.pnl_r = round(rr, 2)
                     updated  += 1
-                elif hit_sl:
+                elif sl_idx is not None:
                     sig.outcome    = "SL_HIT"
                     sig.outcome_at = now
                     # If SL was moved to breakeven, this is a 0R exit (not -1R)
